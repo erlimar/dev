@@ -29,9 +29,9 @@ set INSTALL_JS_URL=https://github.com/e5r/dev/raw/%BRANCH%/install.js
 
 goto :main
 
-REM //
-REM // Show error message
-REM //
+::
+:: Show error message
+::
 :show_error
     echo --------------------------------------------------------------------------------
     echo  ERROR!    %ERROR_MSG%%ERROR_MSG_L1%
@@ -54,9 +54,9 @@ REM //
     
     exit /b
 
-REM //
-REM // Verify installation
-REM //
+::
+:: Verify installation
+::
 :verify_installation
     if not exist %DEV_HOME% exit /b 1
     if not exist %DEV_BIN% exit /b 2
@@ -64,9 +64,9 @@ REM //
     
     exit /b 0
 
-REM //
-REM // Download file with CURL tool
-REM //
+::
+:: Download file with CURL tool
+::
 :download_curl
     echo Downloading %1 with CURL...
     echo   To %2
@@ -74,9 +74,9 @@ REM //
         2>nul >nul
     exit /b %ERRORLEVEL%
 
-REM //
-REM // Download file with WGet tool
-REM //
+::
+:: Download file with WGet tool
+::
 :download_wget
     echo Downloading %1 with WGet...
     echo   To %2
@@ -84,9 +84,9 @@ REM //
         2>nul >nul
     exit /b %ERRORLEVEL%
 
-REM //
-REM // Download file with PowerShell tool
-REM //
+::
+:: Download file with PowerShell tool
+::
 :download_powershell
     echo Downloading %1 with PowerShell...
     echo   To %2
@@ -95,35 +95,35 @@ REM //
         2>nul >nul
     exit /b %ERRORLEVEL%
 
-REM //
-REM // Main entry point 
-REM //
+::
+:: Main entry point 
+::
 :main
-    REM // Verify NODE installed
+    :: Verify NODE installed
     where node 2>nul >nul
     if %ERRORLEVEL% == 0 (
         set PROGRAM_NODE=1
     )
 
-    REM // Verify CURL installed
+    :: Verify CURL installed
     where curl 2>nul >nul
     if %ERRORLEVEL% == 0 (
         set PROGRAM_CURL=1
     )
     
-    REM // Verify WGET installed
+    :: Verify WGET installed
     where wget 2>nul >nul
     if %ERRORLEVEL% == 0 (
         set PROGRAM_WGET=1
     )
     
-    REM // Verify POWERSHELL installed
+    :: Verify POWERSHELL installed
     where powershell 2>nul >nul
     if %ERRORLEVEL% == 0 (
         set PROGRAM_POWERSHELL=1
     )
     
-    REM // Set download mechanism.
+    :: Set download mechanism.
     if defined PROGRAM_CURL set DOWNLOAD=download_curl && goto :install
     if defined PROGRAM_WGET set DOWNLOAD=download_wget && goto :install
     if defined PROGRAM_POWERSHELL set DOWNLOAD=download_powershell && goto :install
@@ -136,23 +136,23 @@ REM //
         goto :end
     )
 
-REM //
-REM // Start installation
-REM //
+::
+:: Start installation
+::
 :install
     call :verify_installation
     if "%ERRORLEVEL%" == "0" goto :success
     
     echo Installing E5R Tools for Development Team...
     
-    REM // Create directory structure
+    :: Create directory structure
     if exist %DEV_HOME% call rmdir /S /Q %DEV_HOME%
     
     call mkdir %DEV_HOME%
     call mkdir %DEV_BIN%
     call mkdir %DEV_TOOLS%
     
-    REM // Download NodeJS
+    :: Download NodeJS
     call :%DOWNLOAD% %NODE_URL% %BIN_JSENGINE%
     if not exist %BIN_JSENGINE% (
         set ERROR_MSG=Could not download NodeJS.
@@ -160,7 +160,7 @@ REM //
         goto :end
     )
     
-    REM // Download install.js
+    :: Download install.js
     call :%DOWNLOAD% %INSTALL_JS_URL% %BIN_JSINSTALL%
     if not exist %BIN_JSINSTALL% (
         set ERROR_MSG=Could not download install.js file.
@@ -168,7 +168,7 @@ REM //
         goto :end
     )
     
-    REM // Run node install.js
+    :: Run node install.js
     call %BIN_JSENGINE% %BIN_JSINSTALL% %*
     set ERROR_LEVEL=%ERRORLEVEL%
     if "ERROR_LEVEL" neq "0" (
@@ -192,9 +192,9 @@ REM //
     echo   (_____---____----_____) 
     echo.
 
-REM //
-REM // Script finish
-REM //
+::
+:: Script finish
+::
 :end
     endlocal
     exit /b %ERROR_LEVEL%
