@@ -25,13 +25,17 @@ set BIN_JSENGINE=%DEV_BIN%\jsengine.exe
 set BIN_JSINSTALL=%DEV_BIN%\install.js
 set DEV_TOOLS=%DEV_HOME%\tools
 set NODE_URL=https://nodejs.org/dist/latest-v5.x/win-%ARCH%/node.exe
-set INSTALL_JS_URL=https://github.com/e5r/dev/raw/%BRANCH%/install.js
+set INSTALL_JS_URL=https://raw.githubusercontent.com/e5r/dev/%BRANCH%/install.js
 
 goto :main
 
-::
+:: --------------------------------------------------------------------------------
 :: Show error message
 ::
+:: Require %ERROR_MSG% or %ERROR_MSG_L1% for messages only one line, and/or
+::         %ERROR_MSG_L2% for thow lines messages, and/or
+::         %ERROR_MSG_L3% for tree lines
+:: --------------------------------------------------------------------------------
 :show_error
     echo --------------------------------------------------------------------------------
     echo  ERROR!    %ERROR_MSG%%ERROR_MSG_L1%
@@ -54,9 +58,15 @@ goto :main
     
     exit /b
 
-::
+:: --------------------------------------------------------------------------------
 :: Verify installation
 ::
+:: @return Set ERRORLEVEL to
+::     - 0  If installed
+::     - 1  If %DEV_HOME% not exists
+::     - 2  If %DEV_BIN% not exists
+::     - 3  If %DEV_TOOLS% not exists
+:: --------------------------------------------------------------------------------
 :verify_installation
     if not exist %DEV_HOME% exit /b 1
     if not exist %DEV_BIN% exit /b 2
@@ -64,9 +74,13 @@ goto :main
     
     exit /b 0
 
-::
+:: --------------------------------------------------------------------------------
 :: Download file with CURL tool
 ::
+:: @param %1 URL
+:: @param %2 File path
+:: @return Set ERRORLEVEL with CURL exit code 
+:: --------------------------------------------------------------------------------
 :download_curl
     echo Downloading %1 with CURL...
     echo   To %2
@@ -74,9 +88,13 @@ goto :main
         2>nul >nul
     exit /b %ERRORLEVEL%
 
-::
+:: --------------------------------------------------------------------------------
 :: Download file with WGet tool
 ::
+:: @param %1 URL
+:: @param %2 File path
+:: @return Set ERRORLEVEL with WGet exit code 
+:: --------------------------------------------------------------------------------
 :download_wget
     echo Downloading %1 with WGet...
     echo   To %2
@@ -84,9 +102,13 @@ goto :main
         2>nul >nul
     exit /b %ERRORLEVEL%
 
-::
+:: --------------------------------------------------------------------------------
 :: Download file with PowerShell tool
 ::
+:: @param %1 URL
+:: @param %2 File path
+:: @return Set ERRORLEVEL with PowerShell exit code 
+:: --------------------------------------------------------------------------------
 :download_powershell
     echo Downloading %1 with PowerShell...
     echo   To %2
@@ -95,9 +117,9 @@ goto :main
         2>nul >nul
     exit /b %ERRORLEVEL%
 
-::
+:: --------------------------------------------------------------------------------
 :: Main entry point 
-::
+:: --------------------------------------------------------------------------------
 :main
     :: Verify NODE installed
     where node 2>nul >nul
@@ -136,9 +158,9 @@ goto :main
         goto :end
     )
 
-::
+:: --------------------------------------------------------------------------------
 :: Start installation
-::
+:: --------------------------------------------------------------------------------
 :install
     call :verify_installation
     if "%ERRORLEVEL%" == "0" goto :success
@@ -176,7 +198,10 @@ goto :main
         call :show_error
         goto :end
     )
-    
+
+:: --------------------------------------------------------------------------------
+:: Show success ASCII Art message
+:: --------------------------------------------------------------------------------
 :success
     echo.
     echo             __________________________________________
@@ -192,9 +217,9 @@ goto :main
     echo   (_____---____----_____) 
     echo.
 
-::
+:: --------------------------------------------------------------------------------
 :: Script finish
-::
+:: --------------------------------------------------------------------------------
 :end
     endlocal
     exit /b %ERROR_LEVEL%
