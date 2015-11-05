@@ -193,7 +193,7 @@ goto :main
     :: Run node install.js
     call %BIN_JSENGINE% %BIN_JSINSTALL% %*
     set ERROR_LEVEL=%ERRORLEVEL%
-    if "ERROR_LEVEL" neq "0" (
+    if "%ERROR_LEVEL%" neq "0" (
         set ERROR_MSG=Error running install.js script file.
         call :show_error
         goto :end
@@ -214,7 +214,10 @@ goto :main
     echo  \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     echo   ___________/\___________
     echo  (  All rights reserved.  )
-    echo   (_____---____----_____) 
+    echo   (_____---____----_____)
+    echo.
+    echo.
+    echo  Usage: dev help 
     echo.
 
 :: --------------------------------------------------------------------------------
