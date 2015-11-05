@@ -65,7 +65,7 @@ REM //
     exit /b 0
 
 REM //
-REM // Download file with CURL
+REM // Download file with CURL tool
 REM //
 :download_curl
     echo Downloading %1 with CURL...
@@ -73,14 +73,20 @@ REM //
     call curl -G %1 -o %2 -s ^
         2>nul >nul
     exit /b %ERRORLEVEL%
-    
+
+REM //
+REM // Download file with WGet tool
+REM //
 :download_wget
     echo Downloading %1 with WGet...
     echo   To %2
     call wget -nv -q --no-check-certificate -o %2 %1 ^
         2>nul >nul
     exit /b %ERRORLEVEL%
-    
+
+REM //
+REM // Download file with PowerShell tool
+REM //
 :download_powershell
     echo Downloading %1 with PowerShell...
     echo   To %2
