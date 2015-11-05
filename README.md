@@ -8,7 +8,7 @@ E5R Tools for Development Team.
 Copy and paste the text on you command prompt.
 
 ```
-C:\> TODO
+@powershell -NoProfile -ExecutionPolicy unrestricted -Command "&{$wc=New-Object System.Net.WebClient;$wc.Proxy=[System.Net.WebRequest]::DefaultWebProxy;$wc.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;Invoke-Expression ($wc.DownloadString('https://raw.githubusercontent.com/e5r/dev/develop/install.cmd'))}"
 ```
 
 ## Install on Unix
