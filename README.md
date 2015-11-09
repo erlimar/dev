@@ -27,7 +27,7 @@ $> dev <command> [options]
 
 ### command
 
-Any of the [file list](dist).
+Any of the [file list](dist/tools).
 
 ### options
 
