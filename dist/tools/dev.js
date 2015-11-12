@@ -139,6 +139,8 @@ class DevTool {
     
     /**
      * Built-in Functions Setter
+     * 
+     * @param {Builtin} BuiltinType - Class Built-in
      */
     set builtin(BuiltinType) {
         if (typeof (BuiltinType) != 'function') {
@@ -169,10 +171,19 @@ class DevTool {
  * @TODO: Move to `src/install.js`
  */
 class Install extends Builtin {
+    
+    /**
+     * Name os Built-in command
+     */
     get name() {
         return 'install';
     }
 
+    /**
+     * Run the Built-in command
+     * 
+     * @param {Array} args - Argument list
+     */
     run(args) {
         _debug('Install built-in is running...');
         
@@ -209,6 +220,7 @@ class Install extends Builtin {
     }
 }
 
+// Instantiate and run the E5R Tools for Development Team process
 new DevTool([
     Install
 ]);
