@@ -23,16 +23,10 @@ const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
  * Builtin base class
  * 
  * @TODO: Move to `src/builtin.js`
+ * @TODO: Rename to `DevCom` => `src/devcom.js`
  */
 class Builtin {
 
-    /**
-     * Name of the Built-in
-     */
-    get name() {
-        throw new Error('Built-in [name] not implemented.');
-    }
-    
     /**
      * Run the builtin command
      * 
@@ -147,19 +141,39 @@ class DevTool {
             throw new Error('Invalid Built-in type');
         }
 
-        let instance = new BuiltinType;
+        let instance = new BuiltinType,
+            name = BuiltinType.name.toLowerCase();
 
         if (!(instance instanceof Builtin)) {
             throw new Error('Invalid Built-in type inheritance.');
         }
-
-        if (this._builtin.hasOwnProperty(instance.name)) {
-            throw new Error('Built-in Function [' + instance.name + '] already exists.');
+        
+        if (this._builtin.hasOwnProperty(name)) {
+            throw new Error('Built-in Function [' + name + '] already exists.');
         }
 
-        Object.defineProperty(this._builtin, instance.name, {
+        Object.defineProperty(this._builtin, name, {
             value: instance
         })
+    }
+}
+
+/**
+ * Built-in `help` command
+ * 
+ * Show help information for tool and commands
+ * 
+ * @TODO: Move to `src/help.js`
+ */
+class Help extends Builtin {
+    
+    /**
+     * Run the `help` built-in command
+     * 
+     * @param {Array} args - Argument list
+     */
+    run(args) {
+        _debug('Help built-in is running...'); 
     }
 }
 
@@ -173,14 +187,7 @@ class DevTool {
 class Install extends Builtin {
     
     /**
-     * Name os Built-in command
-     */
-    get name() {
-        return 'install';
-    }
-
-    /**
-     * Run the Built-in command
+     * Run the `install` built-in command
      * 
      * @param {Array} args - Argument list
      */
@@ -222,6 +229,7 @@ class Install extends Builtin {
 
 // Instantiate and run the E5R Tools for Development Team process
 new DevTool([
+    Help,
     Install
 ]);
 
