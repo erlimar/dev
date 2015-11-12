@@ -5,35 +5,88 @@
 
 /* @TODO: Use Gulp to build system */
 
-let util = require('util'),
-    path = require('path'),
-
-    _print = console.log,
-    _verbose = console.info,
-    _debug = console.log,
-    _warning = console.warn,
-    _error = console.error;
-
 const TOOL_TITLE = 'E5R Tools for Development Team';
 const TOOL_VERSION = '0.1.0-alpha';
 const TOOL_COPYRIGHT = 'Copyright (c) E5R Development Team. All rights reserved.';
 const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
 
-/**
- * Builtin base class
- * 
- * @TODO: Move to `src/builtin.js`
- * @TODO: Rename to `DevCom` => `src/devcom.js`
- */
-class Builtin {
+class Logger {
+    get verbose() {
+        return console.info;
+    }
+    
+    get debug() {
+        if(!this._debug) {
+            this._debug = require('util').debuglog('E5RDEV');
+        }
+        return this._debug;
+    }
+    get warning() {
+        return console.warn;
+    }
+    get error() {
+        return console.error;
+    }
+}
 
+/**
+ * Library for Dev
+ */
+let lib = new class DevLib {
+
+    constructor() {
+        this._path = require('path');
+        this._logger = new Logger();
+    }
+    
     /**
-     * Run the builtin command
-     * 
-     * @param {Array} args - Arguments of command
+     * Alias to `require('path')`
      */
-    run(args) {
-        throw new Error('Built-in [run()] not implemented.');
+    get path() {
+        return this._path;
+    }
+    
+    /**
+     * Print formated messages on console
+     */
+    get printf() {
+        return console.log;
+    }
+    
+    /**
+     * Logger message
+     */
+    get logger() {
+        return this._logger;
+    }
+    
+    /**
+     * Alias for `Error`
+     */
+    get Error() {
+        return Error;
+    }
+    
+    /**
+     * DevCom base class
+     * 
+     * @TODO: Move to `src/devcom.js`
+     */
+    get DevCom() {
+        if(!this._DevComType_) {
+            this._DevComType_ = class DevCom {
+                /**
+                * Run the builtin command
+                * 
+                * @param {Array} args - Arguments of command
+                */
+                run(args) {
+                    throw new lib.Error('Built-in [run()] not implemented.');
+                }
+            }
+        }
+        
+        return  this._DevComType_;
     }
 }
 
@@ -50,12 +103,12 @@ class DevTool {
      * @param {Array} builtins - List of built-in functions
      */
     constructor(builtins) {
-        if (!util.isArray(builtins)) {
-            throw new Error('Invalid @param builtins. Must be an array builtins.');
+        if (!Array.isArray(builtins)) {
+            throw new lib.Error('Invalid @param builtins. Must be an array builtins.');
         }
 
         this._args = process.argv.slice(2);
-        this._name = path.parse(__filename).name;
+        this._name = lib.path.parse(__filename).name;
         this._cmd = (this._args.shift() || '').toLowerCase();
         this._builtin = new Object;
 
@@ -67,23 +120,23 @@ class DevTool {
      * Show usage text
      */
     usage() {
-        _print('%s v%s', TOOL_TITLE, TOOL_VERSION);
-        _print('%s', TOOL_COPYRIGHT);
-        _print();
-        _print('Usage: %s [devcom] [options]', this._name);
-        _print();
-        _print('DevCom:');
+        lib.printf('%s v%s', TOOL_TITLE, TOOL_VERSION);
+        lib.printf('%s', TOOL_COPYRIGHT);
+        lib.printf();
+        lib.printf('Usage: %s [devcom] [options]', this._name);
+        lib.printf();
+        lib.printf('DevCom:');
 
         let devcomNames = Object.getOwnPropertyNames(this._builtin);
         for (let d in devcomNames) {
             let devcom = this._builtin[devcomNames[d]];
-            _print('  %s', devcom.name);
+            lib.printf('  %s', devcom.getType().name.toLowerCase());
         }
 
-        _print('  %s', '???');
-        _print();
-        _print('Options:');
-        _print('  ???');
+        lib.printf('  %s', '???');
+        lib.printf();
+        lib.printf('Options:');
+        lib.printf('  ???');
     }
     
     /**
@@ -118,7 +171,7 @@ class DevTool {
         let devcom = this.builtin[this._cmd];
 
         if (!devcom) {
-            throw new Error('DEVCOM [' + this._cmd + '] not found!');
+            throw new lib.Error('DEVCOM [' + this._cmd + '] not found!');
         }
 
         devcom.run(this._args);
@@ -138,20 +191,26 @@ class DevTool {
      */
     set builtin(BuiltinType) {
         if (typeof (BuiltinType) != 'function') {
-            throw new Error('Invalid Built-in type');
+            throw new lib.Error('Invalid Built-in type');
         }
 
         let instance = new BuiltinType,
             name = BuiltinType.name.toLowerCase();
 
-        if (!(instance instanceof Builtin)) {
-            throw new Error('Invalid Built-in type inheritance.');
+        if (!(instance instanceof lib.DevCom)) {
+            throw new lib.Error('Invalid Built-in type inheritance.');
         }
         
         if (this._builtin.hasOwnProperty(name)) {
-            throw new Error('Built-in Function [' + name + '] already exists.');
+            throw new lib.Error('Built-in Function [' + name + '] already exists.');
         }
-
+        
+        Object.defineProperty(instance, 'getType', {
+            value: function() {
+                return BuiltinType
+            }
+        })
+        
         Object.defineProperty(this._builtin, name, {
             value: instance
         })
@@ -159,32 +218,32 @@ class DevTool {
 }
 
 /**
- * Built-in `help` command
+ * DevCom `help` command
  * 
  * Show help information for tool and commands
  * 
  * @TODO: Move to `src/help.js`
  */
-class Help extends Builtin {
+class Help extends lib.DevCom {
     
     /**
-     * Run the `help` built-in command
+     * Run the `help` built-in devcom
      * 
      * @param {Array} args - Argument list
      */
     run(args) {
-        _debug('Help built-in is running...'); 
+        lib.logger.debug('Help built-in devcom is running...'); 
     }
 }
 
 /**
- * Built-in `setup` command
+ * Devcom `setup` command
  * 
  * Setup the E5R Development Tool on the user home
  * 
  * @TODO: Move to `src/setup.js`
  */
-class Setup extends Builtin {
+class Setup extends lib.DevCom {
     
     /**
      * Run the `setup` built-in command
@@ -192,7 +251,7 @@ class Setup extends Builtin {
      * @param {Array} args - Argument list
      */
     run(args) {
-        _debug('Set-up built-in is running...');
+        lib.logger.debug('Set-up built-in devcom is running...');
         
         // 1> Download de url://dist/registry.json para %HOME%\.dev\registry.json
         //   Este arquivo contém os URL's com plugins (DEVCOM - Development Command),
@@ -227,11 +286,19 @@ class Setup extends Builtin {
     }
 }
 
-// Instantiate and run the E5R Tools for Development Team process
-new DevTool([
-    Help,
-    Setup
-]);
+if(!module.parent && module.filename === __filename) {
+    lib.logger.debug('Running DEV command...');
+    // Instantiate and run the E5R Tools for Development Team process
+    new DevTool([
+        Help,
+        Setup
+    ]);
+}else{
+    lib.logger.debug('Required DEV command...');
+    module.exports = lib;
+}
+
+
 
 /* 
 
