@@ -10,20 +10,37 @@ const TOOL_VERSION = '0.1.0-alpha';
 const TOOL_COPYRIGHT = 'Copyright (c) E5R Development Team. All rights reserved.';
 const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
 
+/**
+ * Logger dispatcher
+ */
 class Logger {
+    
+    /**
+     * Print verbosed messages
+     */
     get verbose() {
         return console.info;
     }
     
+    /**
+     * Print messages if environment variable NODE_DEBUG=E5RDEV
+     */
     get debug() {
         if(!this._debug) {
             this._debug = require('util').debuglog('E5RDEV');
         }
         return this._debug;
     }
+    /**
+     * Print warning messages
+     */
     get warning() {
         return console.warn;
     }
+    
+    /**
+     * Print error messages
+     */
     get error() {
         return console.error;
     }
@@ -32,7 +49,7 @@ class Logger {
 /**
  * Library for Dev
  */
-let lib = new class DevLib {
+let lib = new class DevToolLib {
 
     constructor() {
         this._path = require('path');
@@ -91,11 +108,11 @@ let lib = new class DevLib {
 }
 
 /**
- * E5R Development Tool
+ * E5R Development Tool command line
  * 
  * @TODO: Move to `src/devtool.js`
  */
-class DevTool {
+class DevToolCommandLine {
     
     /**
      * @constructor
@@ -289,7 +306,7 @@ class Setup extends lib.DevCom {
 if(!module.parent && module.filename === __filename) {
     lib.logger.debug('Running DEV command...');
     // Instantiate and run the E5R Tools for Development Team process
-    new DevTool([
+    new DevToolCommandLine([
         Help,
         Setup
     ]);
