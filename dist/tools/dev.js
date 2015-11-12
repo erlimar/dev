@@ -8,6 +8,9 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 const TOOL_VERSION = '0.1.0-alpha';
 const TOOL_COPYRIGHT = 'Copyright (c) E5R Development Team. All rights reserved.';
+const TOOL_DEVFOLDER = '.dev';
+const TOOL_DEFAULT_REGISTRY = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/';
+const TOOL_REGISTRY_FILE = 'registry.json';
 const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
 
 /**
@@ -52,8 +55,34 @@ class Logger {
 let lib = new class DevToolLib {
 
     constructor() {
+        this._os = require('os');
         this._path = require('path');
+        this._fs = require('fs');
+        this._url = require('url');
+        this._http = require('http');
+        this._https = require('https');
+        this._childProcess = require('child_process');
         this._logger = new Logger();
+    }
+    
+    /**
+     * Tool folder map
+     */
+    get home() {
+        let root = lib.path.resolve(lib.os.homedir(), TOOL_DEVFOLDER);
+        return {
+            root: root,
+            tools: lib.path.join(root, 'tools'),
+            bin: lib.path.join(root, 'bin'),
+            lib: lib.path.join(root, 'lib')
+        }
+    }
+    
+    /**
+     * Alias to `require('os')`
+     */
+    get os() {
+       return this._os; 
     }
     
     /**
@@ -63,6 +92,41 @@ let lib = new class DevToolLib {
         return this._path;
     }
     
+    /**
+     * Alias to `require('fs')`
+     */
+    get fs() {
+        return this._fs;
+    }
+    
+    /**
+     * Alias to `require('url')`
+     */
+    get url() {
+        return this._url;
+    }
+
+    /**
+     * Alias to `require('http')`
+     */
+    get http() {
+        return this._http;
+    }
+    
+    /**
+     * Alias to `require('https')`
+     */
+    get https() {
+        return this._https;
+    }
+    
+    /**
+     * Alias to `require('child_process')`
+     */
+    get childProcess() {
+        return this._childProcess;
+    }
+
     /**
      * Print formated messages on console
      */
@@ -95,15 +159,92 @@ let lib = new class DevToolLib {
                 /**
                 * Run the builtin command
                 * 
+                * @param {DevToolCommandLine} toolInstance - Instance of DevToolCommandLine
                 * @param {Array} args - Arguments of command
                 */
-                run(args) {
+                run(toolInstance, args) {
                     throw new lib.Error('Built-in [run()] not implemented.');
                 }
             }
         }
         
         return  this._DevComType_;
+    }
+    
+    /**
+     * Download a web file
+     * 
+     * @param {string} url - Url for download
+     * @param {string} path - Path to save file
+     * 
+     * @return {bool} `true` if success
+     */
+    download(url, path) {
+        lib.logger.verbose('Downloading "' + url + '"...');
+        let urlOptions = lib.url.parse(url),
+            protocol = urlOptions.protocol.split(':')[0],
+            wget = lib[protocol].request;
+        
+        // @TODO: Backup a file
+        
+        let file = lib.fs.createWriteStream(path);
+
+        let req = wget(urlOptions, function(res) {
+            if(res.statusCode !== 200){
+                if(lib.fs.existsSync(path)){
+                    lib.fs.unlink(path);
+                    // callback
+                }
+                throw new lib.Error('Response status code: ' + res.statusCode + ' ' + res.statusMessage);
+            }
+            res.pipe(file);
+        });
+        
+        file.on('finish', function(){
+            lib.logger.debug('Download successfuly!');
+            file.close(/* callback */);
+        });
+        
+        req.on('error', function(error){
+            if(lib.fs.existsSync(path)){
+                lib.fs.unlink(path);
+                // callback
+            }
+            throw new lib.Error('Download error:', error);
+        });
+        
+        // @TODO: Add timeout.
+        // req.setTimeout(12000, function () {
+        //     req.abort();
+        // });
+        
+        req.end();
+    }
+    
+    downloadSync(url, path) {
+        let jsEngine = process.execPath,
+            jsEngineArgv = process.execArgv,
+            jsScript = module.filename,
+            exec = this.childProcess.spawnSync;
+        
+        //lib.logger.debug('downloadSync:', process);
+              
+        let child = exec(jsEngine, jsEngineArgv.concat([
+                jsScript,
+                'wget',
+                url,
+                path
+            ]));
+            
+        lib.printf(child.output[2].toString());
+        
+        if(child.status !== 0) {
+            lib.logger.error('======');
+            lib.logger.error('Error: Failed of exec shell command');
+            lib.logger.error('  PID:', child.pid);
+            lib.logger.error('  CMD:', child.args.join(' '));
+            lib.logger.error('======');
+        }
     }
 }
 
@@ -123,37 +264,61 @@ class DevToolCommandLine {
         if (!Array.isArray(builtins)) {
             throw new lib.Error('Invalid @param builtins. Must be an array builtins.');
         }
+        
+        let self = this;
 
-        this._args = process.argv.slice(2);
-        this._name = lib.path.parse(__filename).name;
-        this._cmd = (this._args.shift() || '').toLowerCase();
-        this._builtin = new Object;
-
-        this.registry(builtins);
-        this.run();
+        self._args = process.argv.slice(2);
+        self._name = lib.path.parse(__filename).name;
+        self._cmd = (this._args.shift() || '').toLowerCase();
+        self._builtin = new Object;
+        
+        self.registry(builtins)
+            .then(self.run)
+            .catch(function(error){
+                lib.logger.error(error);
+                self.exit(error.code || 1);
+            });
+    }
+    
+    /**
+     * Name of the Dev Tool Command Line program
+     */
+    get name() {
+        return this._name;
     }
     
     /**
      * Show usage text
      */
     usage() {
-        lib.printf('%s v%s', TOOL_TITLE, TOOL_VERSION);
-        lib.printf('%s', TOOL_COPYRIGHT);
-        lib.printf();
-        lib.printf('Usage: %s [devcom] [options]', this._name);
-        lib.printf();
-        lib.printf('DevCom:');
-
+        lib.printf([
+            '%s v%s',
+            '%s',
+            '',
+            'Usage: %s [devcom] [options]',
+            '',
+            'DevCom:']
+            .join(lib.os.EOL),
+            
+            TOOL_TITLE, TOOL_VERSION,
+            TOOL_COPYRIGHT,
+            this.name
+        );
+        
+        
         let devcomNames = Object.getOwnPropertyNames(this._builtin);
         for (let d in devcomNames) {
             let devcom = this._builtin[devcomNames[d]];
             lib.printf('  %s', devcom.getType().name.toLowerCase());
         }
 
-        lib.printf('  %s', '???');
-        lib.printf();
-        lib.printf('Options:');
-        lib.printf('  ???');
+        lib.printf([
+            '  ???',
+            '',
+            'Options:',
+            '  ???']
+            .join(lib.os.EOL)
+        );
     }
     
     /**
@@ -171,27 +336,35 @@ class DevToolCommandLine {
      * @param {Array} builtins - List of built-in functions
      */
     registry(builtins) {
-        for (let b in builtins) {
-            this.builtin = builtins[b];
-        }
+        let self = this;
+        return new Promise(function (resolve, reject) {
+            try {
+                for (let b in builtins) {
+                    self.builtin = builtins[b];
+                }
+                resolve(self);
+            } catch (error) {
+                reject(error);
+            }
+        });
     }
     
     /**
      * Run the tool
      */
-    run() {
-        if (!this._cmd) {
-            this.usage();
-            this.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
+    run(self) {
+        if (!self._cmd) {
+            self.usage();
+            self.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
         }
 
-        let devcom = this.builtin[this._cmd];
+        let devcom = self.builtin[self._cmd];
 
         if (!devcom) {
-            throw new lib.Error('DEVCOM [' + this._cmd + '] not found!');
+            throw new lib.Error('DEVCOM [' + self._cmd + '] not found!');
         }
 
-        devcom.run(this._args);
+        return devcom.run(self, self._args);
     }
     
     /**
@@ -246,10 +419,48 @@ class Help extends lib.DevCom {
     /**
      * Run the `help` built-in devcom
      * 
+     * @param {DevToolCommandLine} toolInstance - Instance of DevToolCommandLine
      * @param {Array} args - Argument list
      */
-    run(args) {
+    run(toolInstance, args) {
         lib.logger.debug('Help built-in devcom is running...'); 
+    }
+}
+
+/**
+ * DevCom `wget` command
+ * 
+ * Download a web file
+ * 
+ * @TODO: Move to `src/wget.js`
+ */
+class WGet extends lib.DevCom {
+    
+    /**
+     * Run the `wget` built-in devcom
+     * 
+     * @param {DevToolCommandLine} toolInstance - Instance of DevToolCommandLine
+     * @param {Array} args - Argument list
+     */
+    run(toolInstance, args) {
+        if(args.length !== 2) {
+            let lines = [
+                'WGet usage: ' + toolInstance.name + ' wget [url] [path]',
+                '  url    URL of the web file',
+                '  path   Path to save web file local'
+            ];
+            
+            throw new lib.Error(lines.join(lib.os.EOL));
+        } 
+        
+        let url = lib.url.parse(args[0]),
+            path = lib.path.resolve(args[1]);
+        
+        if(!url.protocol) {
+            throw new lib.Error('Invalid URL: ' + args[0]);
+        }
+
+        lib.download(url.href, path);
     }
 }
 
@@ -265,10 +476,31 @@ class Setup extends lib.DevCom {
     /**
      * Run the `setup` built-in command
      * 
+     * @param {DevToolCommandLine} toolInstance - Instance of DevToolCommandLine
      * @param {Array} args - Argument list
      */
-    run(args) {
+    run(toolInstance, args) {
         lib.logger.debug('Set-up built-in devcom is running...');
+        
+        // mkdir %home%/.dev
+        if (!lib.fs.existsSync(lib.home.root)) {
+            lib.fs.mkdirSync(lib.home.root);
+        }
+
+        // mkdir %home%/.dev/tools
+        if (!lib.fs.existsSync(lib.home.tools)) {
+            lib.fs.mkdirSync(lib.home.tools);
+        }
+
+        // mkdir %home%/.dev/bin
+        if (!lib.fs.existsSync(lib.home.bin)) {
+            lib.fs.mkdirSync(lib.home.bin);
+        }
+
+        // mkdir %home%/.dev/lib
+        if (!lib.fs.existsSync(lib.home.lib)) {
+            lib.fs.mkdirSync(lib.home.lib);
+        }
         
         // 1> Download de url://dist/registry.json para %HOME%\.dev\registry.json
         //   Este arquivo contém os URL's com plugins (DEVCOM - Development Command),
@@ -289,6 +521,10 @@ class Setup extends lib.DevCom {
         //           "sampleUrlForRegistryFile": "http://dev.mycompany.com/plugins/registry.json"
         //       }
         //   }
+        lib.downloadSync(
+            lib.url.resolve(TOOL_DEFAULT_REGISTRY, TOOL_REGISTRY_FILE),
+            lib.path.resolve(lib.home.root, TOOL_REGISTRY_FILE)
+        );
         
         // 2> Download de url://dist/bin/dev.{cmd,ps1} (Windows) para %HOME%\.dev\bin\dev.{cmd,ps1}
         //   Esses arquivos (dev.cmd e dev.ps1) devem somente repassar os argumentos para o comando
@@ -308,7 +544,8 @@ if(!module.parent && module.filename === __filename) {
     // Instantiate and run the E5R Tools for Development Team process
     new DevToolCommandLine([
         Help,
-        Setup
+        WGet,
+        Setup,
     ]);
 }else{
     lib.logger.debug('Required DEV command...');

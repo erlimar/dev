@@ -1,0 +1,9 @@
+{
+    "e5r-contrib": {
+        "type": "GitHub",
+        "owner": "e5r",
+        "repository": "dev-contrib",
+        "branch": "master",
+        "path": "dist"
+    }
+}
