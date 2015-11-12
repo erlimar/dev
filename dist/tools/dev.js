@@ -178,21 +178,21 @@ class Help extends Builtin {
 }
 
 /**
- * Built-in `install` command
+ * Built-in `setup` command
  * 
- * Install the E5R Development Tool on the user home
+ * Setup the E5R Development Tool on the user home
  * 
- * @TODO: Move to `src/install.js`
+ * @TODO: Move to `src/setup.js`
  */
-class Install extends Builtin {
+class Setup extends Builtin {
     
     /**
-     * Run the `install` built-in command
+     * Run the `setup` built-in command
      * 
      * @param {Array} args - Argument list
      */
     run(args) {
-        _debug('Install built-in is running...');
+        _debug('Set-up built-in is running...');
         
         // 1> Download de url://dist/registry.json para %HOME%\.dev\registry.json
         //   Este arquivo contém os URL's com plugins (DEVCOM - Development Command),
@@ -230,7 +230,7 @@ class Install extends Builtin {
 // Instantiate and run the E5R Tools for Development Team process
 new DevTool([
     Help,
-    Install
+    Setup
 ]);
 
 /* 
