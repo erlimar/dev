@@ -152,7 +152,7 @@ Function Install-Dev
     Get-WebFile -Origin $JSInstallerURL -Destination $BinJSInstaller
     
     # Invoke $> node install.js
-    Invoke-Expression "$BinJSEngine $OptionsJSEngine $BinJSInstaller"
+    Invoke-Expression "$BinJSEngine $OptionsJSEngine $BinJSInstaller setup"
 }
 
 <#
