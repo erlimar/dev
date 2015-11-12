@@ -480,7 +480,7 @@ class Setup extends lib.DevCom {
      * @param {Array} args - Argument list
      */
     run(toolInstance, args) {
-        lib.logger.debug('Set-up built-in devcom is running...');
+        lib.printf('Set-up E5R Tools for Development Team...');
         
         // mkdir %home%/.dev
         if (!lib.fs.existsSync(lib.home.root)) {
@@ -526,15 +526,27 @@ class Setup extends lib.DevCom {
             lib.path.resolve(lib.home.root, TOOL_REGISTRY_FILE)
         );
         
-        // 2> Download de url://dist/bin/dev.{cmd,ps1} (Windows) para %HOME%\.dev\bin\dev.{cmd,ps1}
-        //   Esses arquivos (dev.cmd e dev.ps1) devem somente repassar os argumentos para o comando
-        //   nodeJS [jsengine.exe dev.js *ARGS*]
+        // 2> Add /bin to PATH
         //   - Inclui %HOME%\.dev\bin ao %PATH%
         //   - Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%.
+        //   - Ver FLAG de tipo de sessão (PS1, CMD, SH)
         
-        // 3> Download de url://dist/tools/dev.js par %HOME%\.dev\tools\dev.js
+        // 3> Instala binários
+        //   - $> dev bin-install e5r-contrib
+        //   - Download de url://dist/bin/dev.{cmd,ps1} (Windows) para %HOME%\.dev\bin\dev.{cmd,ps1}
+        //     Esses arquivos (dev.cmd e dev.ps1) devem somente repassar os argumentos para o comando
+        //     nodeJS [jsengine.exe dev.js *ARGS*]
+        //
+        //   - Sugest:
+        //     js> let binInstall = lib.require('devcom/bin-install');
+        //     js> if(binInstall.run(toolInstance, ['e5r-contrib']))...
+        //
+        //   - Others:
+        //     js> lib.require('lib://my-lib');
+        //     js> lib.require('cmd://bin-install');
+        //     js> lib.require('hlp://setup').show({full:true});
         
-        // 4> Apagar este arquivo (%HOME%\.dev\tools\install.js)
+        // 4> Show completed info
 
     }
 }
