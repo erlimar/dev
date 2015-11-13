@@ -219,7 +219,9 @@ let lib = new class DevToolLib {
             protocol = urlOptions.protocol.split(':')[0],
             wget = lib[protocol].request;
         
-        /* @todo: Backup a file */
+        /**
+         * @todo: Backup a file
+         */
         
         let file = lib.fs.createWriteStream(path);
 
@@ -247,7 +249,9 @@ let lib = new class DevToolLib {
             throw new lib.Error('Download error:', error);
         });
         
-        /* @todo: Add timeout */
+        /**
+         * @todo: Add timeout
+         */
         // req.setTimeout(12000, function () {
         //     req.abort();
         // });
@@ -291,6 +295,8 @@ let lib = new class DevToolLib {
     /**
      * Smart substitute for `require()' native function
      * 
+     * @undone: Not Implemented!
+     * 
      * @param {string} uri - URI for resource
      * 
      * @return {any} - Instance of DevCom module for 'cmd://'
@@ -311,8 +317,6 @@ let lib = new class DevToolLib {
             name = regexResult[2];
         
         lib.logger.debug('%s => type {%s}, name {%s}', regexResult[0], type, name);
-        
-        /* @todo: Implements */
     }
 }
 
