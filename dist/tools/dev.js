@@ -5,14 +5,16 @@
 
 /* @TODO: Use Gulp to build system */
 /* @TODO: Add async support */
+/* @TOOD: Implements verbosity */
 
 const TOOL_TITLE = 'E5R Tools for Development Team';
 const TOOL_VERSION = '0.1.0-alpha';
 const TOOL_COPYRIGHT = 'Copyright (c) E5R Development Team. All rights reserved.';
 const TOOL_DEVFOLDER = '.dev';
-const TOOL_DEFAULT_REGISTRY = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/';
+const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/';
+const TOOL_DEFAULT_SCOPE = 'e5r-devcom'; // See "dist/registry.json"
 const TOOL_REGISTRY_FILE = 'registry.json';
-const TOOL_REGISTRY_LOCKFILE = 'registry.lock.json';
+//const TOOL_REGISTRY_LOCKFILE = 'registry.lock.json';
 const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
 
 /**
@@ -67,7 +69,7 @@ let lib = new class DevToolLib {
         this._logger = new Logger();
         
         let root = this._path.resolve(this._os.homedir(), TOOL_DEVFOLDER);
-        this._home = {
+        this._devHome = {
             root: root,
             tools: this._path.join(root, 'tools'),
             bin: this._path.join(root, 'bin'),
@@ -80,8 +82,8 @@ let lib = new class DevToolLib {
     /**
      * Tool folder map
      */
-    get home() {
-        return this._home;
+    get devHome() {
+        return this._devHome;
     }
     
     /**
@@ -155,6 +157,32 @@ let lib = new class DevToolLib {
     }
     
     /**
+     * Resolve name in camelCase to "camel-case"
+     * 
+     * @param {string} name - Name in camelCase
+     * 
+     * @return {string} - Return a name formated to "camel-case"
+     */
+    resolveCamelCaseName(name) {
+        if (typeof name !== 'string') {
+            throw new lib.Error('Param name is not a string');
+        }
+
+        let buffer = [],
+            regex = RegExp('^[A-Z]$');
+
+        for (let c = 0; c < name.length; c++) {
+            let char = name.charAt(c);
+            if (c > 0 && regex.test(char.toString())) {
+                buffer.push('-');
+            }
+            buffer.push(char.toLowerCase());
+        }
+
+        return buffer.join('');
+    }
+    
+    /**
      * DevCom base class
      * 
      * @TODO: Move to `src/devcom.js`
@@ -171,7 +199,7 @@ let lib = new class DevToolLib {
                 run(toolInstance, args) {
                     throw new lib.Error('Built-in [run()] not implemented.');
                 }
-            }
+            } 
         }
         
         return  this._DevComType_;
@@ -205,7 +233,7 @@ let lib = new class DevToolLib {
         });
         
         file.on('finish', function(){
-            lib.logger.debug('Download successfuly!');
+            lib.logger.verbose('Download successfuly!');
             file.close(/* callback */);
         });
         
@@ -256,6 +284,33 @@ let lib = new class DevToolLib {
         }
         
         return lib.fs.existsSync(path);
+    }
+    
+    /**
+     * Smart substitute for `require()' native function
+     * 
+     * @param {string} uri - URI for resource
+     * 
+     * @return {any} - Instance of DevCom module for 'cmd://'
+     *                 Instance of simple module for 'lib://'
+     *                 Doc text for 'doc://*'
+     */
+    require(uri){
+        uri = uri.toString();
+        
+        let regex = new RegExp('^(cmd|lib|doc)://(([a-z0-9]|\-|_)+)$'),
+            regexResult = regex.exec(uri);
+        
+        if(!regexResult){
+            throw new lib.Error('Invalid URI: "' + uri + '" for lib.require().');
+        }
+        
+        let type = regexResult[1],
+            name = regexResult[2];
+        
+        lib.logger.debug('%s => type {%s}, name {%s}', regexResult[0], type, name);
+        
+        /* @TODO: Implements */
     }
 }
 
@@ -396,7 +451,7 @@ class DevToolCommandLine {
         }
 
         let instance = new BuiltinType,
-            name = BuiltinType.name.toLowerCase();
+            name = lib.resolveCamelCaseName(BuiltinType.name);
 
         if (!(instance instanceof lib.DevCom)) {
             throw new lib.Error('Invalid Built-in type inheritance.');
@@ -425,7 +480,7 @@ class DevToolCommandLine {
  * 
  * @TODO: Move to `src/wget.js`
  */
-class WGet extends lib.DevCom {
+class Wget extends lib.DevCom {
     
     /**
      * Run the `wget` built-in devcom
@@ -482,18 +537,18 @@ class Setup extends lib.DevCom {
                 }
             }
         })([
-            lib.home.root,
-            lib.home.tools,
-            lib.home.bin,
-            lib.home.lib,
-            lib.home.cmd,
-            lib.home.doc
+            lib.devHome.root,
+            lib.devHome.tools,
+            lib.devHome.bin,
+            lib.devHome.lib,
+            lib.devHome.cmd,
+            lib.devHome.doc
         ]);
         
         // 2> Download `registry.json`
         lib.downloadSync(
-            lib.url.resolve(TOOL_DEFAULT_REGISTRY, TOOL_REGISTRY_FILE),
-            lib.path.resolve(lib.home.root, TOOL_REGISTRY_FILE)
+            lib.url.resolve(TOOL_DEFAULT_REGISTRY_URL, TOOL_REGISTRY_FILE),
+            lib.path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE)
         );
         
         // 3> Add /bin to PATH
@@ -527,6 +582,13 @@ class Setup extends lib.DevCom {
         //     js> lib.require('lib://my-lib');
         //     js> lib.require('cmd://bin-install');
         //     js> lib.require('doc://setup').show({full:true});
+        // $> dev registry --install "bin" --scope "e5r-devcom""
+        let cmd = lib.require('cmd://registry');
+        
+        cmd.run(toolInstance, [
+            '--install', 'bin',
+            '--scope', TOOL_DEFAULT_SCOPE
+        ]);
         
         // 5> Show completed info
         lib.printf('Set-up completed!');
@@ -534,19 +596,19 @@ class Setup extends lib.DevCom {
 }
 
 if (!module.parent && module.filename === __filename) {
-    lib.logger.debug('Running DEV command...');
+    lib.logger.debug('Running DEV command line tool...');
     
     /* @HACK: Lock module resolves only from lib directory */
-    module.paths = [lib.home.lib];
+    module.paths = [lib.devHome.lib];
     
     // Run process tools
     new DevToolCommandLine([
-        WGet,
+        Wget,
         Setup,
     ]);
 } else {
-    lib.logger.debug('Required DEV command...');
-    module.exports = lib;
+    lib.logger.debug('Required DEV tool...');
+    exports = module.exports = lib;
 }
 
 
