@@ -26,7 +26,7 @@ const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/dev/dev
 
 /** 
  * @constant {string}
- * @description See "dist/registry.json"
+ * @see "dist/registry.json"
 */
 const TOOL_DEFAULT_SCOPE = 'e5r-devcom'; // 
 
