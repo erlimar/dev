@@ -9,18 +9,43 @@
  * @todo: Implements verbosity
  */
 
+/** @constant {string} */
 const TOOL_TITLE = 'E5R Tools for Development Team';
+
+/** @constant {string} */
 const TOOL_VERSION = '0.1.0-alpha';
+
+/** @constant {string} */
 const TOOL_COPYRIGHT = 'Copyright (c) E5R Development Team. All rights reserved.';
+
+/** @constant {string} */
 const TOOL_DEVFOLDER = '.dev';
+
+/** @constant {string} */
 const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/';
-const TOOL_DEFAULT_SCOPE = 'e5r-devcom'; // See "dist/registry.json"
+
+/** 
+ * @constant {string}
+ * @description See "dist/registry.json"
+*/
+const TOOL_DEFAULT_SCOPE = 'e5r-devcom'; // 
+
+/** @constant {string} */
 const TOOL_REGISTRY_FILE = 'registry.json';
+
 //const TOOL_REGISTRY_LOCKFILE = 'registry.lock.json';
+
+/** @constant {number} */
 const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
 
 /**
  * Logger dispatcher
+ * @class
+ * 
+ * @property {object} verbose
+ * @property {object} debug
+ * @property {object} warning
+ * @property {object} error
  */
 class Logger {
     
@@ -55,11 +80,34 @@ class Logger {
     }
 }
 
+/** @instance */
+let lib = 
+
 /**
  * Library for E5R Tools for Development Team.
+ * @class
+ * 
+ * @property {object} os
+ * @property {object} path
+ * @property {object} fs
+ * @property {object} url
+ * @property {object} http
+ * @property {object} https
+ * @property {object} childProcess
+ * @property {object} printf
+ * @property {object} logger
+ * @property {Error} Error
+ * @property {object} devHome
+ * @property {string} devHome.root
+ * @property {string} devHome.tools
+ * @property {string} devHome.bin
+ * @property {string} devHome.lib
+ * @property {string} devHome.cmd
+ * @property {string} devHome.doc
  */
-let lib = new class DevToolLib {
+new class DevToolLib {
 
+    /** @constructor */
     constructor() {
         this._os = require('os');
         this._path = require('path');
@@ -188,6 +236,8 @@ let lib = new class DevToolLib {
      * DevCom base class
      * 
      * @todo: Move to `src/devcom.js`
+     * 
+     * @return {DevCom}
      */
     get DevCom() {
         if(!this._DevComType_) {
@@ -265,7 +315,7 @@ let lib = new class DevToolLib {
      * @param {string} url - Url for download
      * @param {string} path - Path to save file
      * 
-     * @return {bool} `true` if success
+     * @return {bool}
      */    
     downloadSync(url, path) {
         let jsEngine = process.execPath,
@@ -299,9 +349,7 @@ let lib = new class DevToolLib {
      * 
      * @param {string} uri - URI for resource
      * 
-     * @return {any} - Instance of DevCom module for 'cmd://'
-     *                 Instance of simple module for 'lib://'
-     *                 Doc text for 'doc://*'
+     * @return {object}
      */
     require(uri){
         uri = uri.toString();
@@ -322,6 +370,7 @@ let lib = new class DevToolLib {
 
 /**
  * Command line runner for E5R Tools for Development Team.
+ * @class
  * 
  * @todo: Move to `src/devtool.js`
  */
@@ -406,6 +455,8 @@ class DevToolCommandLine {
      * Registry Built-in Functions.
      * 
      * @param {Array} builtins - List of built-in functions
+     * 
+     * @return {Promise}
      */
     registry(builtins) {
         let self = this;
@@ -436,7 +487,7 @@ class DevToolCommandLine {
             throw new lib.Error('DEVCOM [' + self._cmd + '] not found!');
         }
 
-        return devcom.run(self, self._args);
+        devcom.run(self, self._args);
     }
     
     /**
@@ -481,6 +532,7 @@ class DevToolCommandLine {
 
 /**
  * DevCom `wget` command
+ * @class
  * 
  * Download a web file
  * 
@@ -518,6 +570,7 @@ class Wget extends lib.DevCom {
 
 /**
  * Devcom `setup` command
+ * @class
  * 
  * Setup the E5R Development Tool on the user home
  * 
@@ -604,7 +657,7 @@ class Setup extends lib.DevCom {
 if (!module.parent && module.filename === __filename) {
     lib.logger.debug('Running DEV command line tool...');
     
-    /* @HACK: Lock module resolves only from lib directory */
+    /* @hack: Lock module resolves only from lib directory */
     module.paths = [lib.devHome.lib];
     
     // Run process tools
