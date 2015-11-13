@@ -23,7 +23,7 @@ const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
 class Logger {
     
     /**
-     * Print verbosed messages
+     * Print verbose messages
      */
     get verbose() {
         return console.info;
@@ -217,7 +217,7 @@ let lib = new class DevToolLib {
             protocol = urlOptions.protocol.split(':')[0],
             wget = lib[protocol].request;
         
-        // @TODO: Backup a file
+        /* @TODO: Backup a file */
         
         let file = lib.fs.createWriteStream(path);
 
@@ -245,7 +245,7 @@ let lib = new class DevToolLib {
             throw new lib.Error('Download error:', error);
         });
         
-        // @TODO: Add timeout.
+        /* @TODO: Add timeout */
         // req.setTimeout(12000, function () {
         //     req.abort();
         // });
@@ -317,7 +317,7 @@ let lib = new class DevToolLib {
 /**
  * Command line runner for E5R Tools for Development Team.
  * 
- * @TODO: Move to `src/devtool.js`
+ * @todo: Move to `src/devtool.js`
  */
 class DevToolCommandLine {
     
