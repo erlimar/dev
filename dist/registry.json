@@ -1,8 +1,8 @@
 {
-    "e5r-contrib": {
+    "e5r-devcom": {
         "type": "GitHub",
         "owner": "e5r",
-        "repository": "dev-contrib",
+        "repository": "dev-devcom",
         "branch": "master",
         "path": "dist"
     }
