@@ -641,11 +641,11 @@ class Setup extends lib.DevCom {
         //     js> lib.require('lib://my-lib');
         //     js> lib.require('cmd://bin-install');
         //     js> lib.require('doc://setup').show({full:true});
-        // $> dev registry --install "bin" --scope "e5r-devcom""
+        // $> dev registry install "bin,doc" --scope "e5r-devcom""
         let cmd = lib.require('cmd://registry');
         
         cmd.run(toolInstance, [
-            '--install', 'bin',
+            'install', 'bin,doc',
             '--scope', TOOL_DEFAULT_SCOPE
         ]);
         
