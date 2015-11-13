@@ -345,7 +345,7 @@ new class DevToolLib {
     /**
      * Smart substitute for `require()' native function
      * 
-     * @undone: Not Implemented!
+     * @todo: Not Implemented!
      * 
      * @param {string} uri - URI for resource
      * 
