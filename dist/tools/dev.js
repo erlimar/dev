@@ -3,9 +3,9 @@
 
 /* global process, __filename, __dirname */
 
-/* @TODO: Use Gulp to build system */
-/* @TODO: Add async support */
-/* @TOOD: Implements verbosity */
+/* @todo: Use Gulp to build system */
+/* @todo: Add async support */
+/* @todo: Implements verbosity */
 
 const TOOL_TITLE = 'E5R Tools for Development Team';
 const TOOL_VERSION = '0.1.0-alpha';
@@ -185,7 +185,7 @@ let lib = new class DevToolLib {
     /**
      * DevCom base class
      * 
-     * @TODO: Move to `src/devcom.js`
+     * @todo: Move to `src/devcom.js`
      */
     get DevCom() {
         if(!this._DevComType_) {
@@ -217,7 +217,7 @@ let lib = new class DevToolLib {
             protocol = urlOptions.protocol.split(':')[0],
             wget = lib[protocol].request;
         
-        /* @TODO: Backup a file */
+        /* @todo: Backup a file */
         
         let file = lib.fs.createWriteStream(path);
 
@@ -245,7 +245,7 @@ let lib = new class DevToolLib {
             throw new lib.Error('Download error:', error);
         });
         
-        /* @TODO: Add timeout */
+        /* @todo: Add timeout */
         // req.setTimeout(12000, function () {
         //     req.abort();
         // });
@@ -310,7 +310,7 @@ let lib = new class DevToolLib {
         
         lib.logger.debug('%s => type {%s}, name {%s}', regexResult[0], type, name);
         
-        /* @TODO: Implements */
+        /* @todo: Implements */
     }
 }
 
@@ -478,7 +478,7 @@ class DevToolCommandLine {
  * 
  * Download a web file
  * 
- * @TODO: Move to `src/wget.js`
+ * @todo: Move to `src/wget.js`
  */
 class Wget extends lib.DevCom {
     
@@ -515,7 +515,7 @@ class Wget extends lib.DevCom {
  * 
  * Setup the E5R Development Tool on the user home
  * 
- * @TODO: Move to `src/setup.js`
+ * @todo: Move to `src/setup.js`
  */
 class Setup extends lib.DevCom {
     
