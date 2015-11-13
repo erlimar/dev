@@ -3,9 +3,11 @@
 
 /* global process, __filename, __dirname */
 
-/* @todo: Use Gulp to build system */
-/* @todo: Add async support */
-/* @todo: Implements verbosity */
+/**
+ * @todo: Use Gulp to build system
+ * @todo: Add async support
+ * @todo: Implements verbosity
+ */
 
 const TOOL_TITLE = 'E5R Tools for Development Team';
 const TOOL_VERSION = '0.1.0-alpha';
