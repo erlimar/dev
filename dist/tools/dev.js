@@ -4,6 +4,7 @@
 /* global process, __filename, __dirname */
 
 /* @TODO: Use Gulp to build system */
+/* @TODO: Add async support */
 
 const TOOL_TITLE = 'E5R Tools for Development Team';
 const TOOL_VERSION = '0.1.0-alpha';
@@ -11,6 +12,7 @@ const TOOL_COPYRIGHT = 'Copyright (c) E5R Development Team. All rights reserved.
 const TOOL_DEVFOLDER = '.dev';
 const TOOL_DEFAULT_REGISTRY = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/';
 const TOOL_REGISTRY_FILE = 'registry.json';
+const TOOL_REGISTRY_LOCKFILE = 'registry.lock.json';
 const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
 
 /**
@@ -50,7 +52,7 @@ class Logger {
 }
 
 /**
- * Library for Dev
+ * Library for E5R Tools for Development Team.
  */
 let lib = new class DevToolLib {
 
@@ -63,19 +65,23 @@ let lib = new class DevToolLib {
         this._https = require('https');
         this._childProcess = require('child_process');
         this._logger = new Logger();
+        
+        let root = this._path.resolve(this._os.homedir(), TOOL_DEVFOLDER);
+        this._home = {
+            root: root,
+            tools: this._path.join(root, 'tools'),
+            bin: this._path.join(root, 'bin'),
+            lib: this._path.join(root, 'lib'),
+            cmd: this._path.join(root, 'lib', 'cmd'),
+            doc: this._path.join(root, 'doc')
+        }
     }
     
     /**
      * Tool folder map
      */
     get home() {
-        let root = lib.path.resolve(lib.os.homedir(), TOOL_DEVFOLDER);
-        return {
-            root: root,
-            tools: lib.path.join(root, 'tools'),
-            bin: lib.path.join(root, 'bin'),
-            lib: lib.path.join(root, 'lib')
-        }
+        return this._home;
     }
     
     /**
@@ -176,8 +182,6 @@ let lib = new class DevToolLib {
      * 
      * @param {string} url - Url for download
      * @param {string} path - Path to save file
-     * 
-     * @return {bool} `true` if success
      */
     download(url, path) {
         lib.logger.verbose('Downloading "' + url + '"...');
@@ -221,15 +225,20 @@ let lib = new class DevToolLib {
         req.end();
     }
     
+    /**
+     * Download a web file with process blocked
+     * 
+     * @param {string} url - Url for download
+     * @param {string} path - Path to save file
+     * 
+     * @return {bool} `true` if success
+     */    
     downloadSync(url, path) {
         let jsEngine = process.execPath,
             jsEngineArgv = process.execArgv,
             jsScript = module.filename,
-            exec = this.childProcess.spawnSync;
-        
-        //lib.logger.debug('downloadSync:', process);
-              
-        let child = exec(jsEngine, jsEngineArgv.concat([
+            exec = this.childProcess.spawnSync,
+            child = exec(jsEngine, jsEngineArgv.concat([
                 jsScript,
                 'wget',
                 url,
@@ -245,11 +254,13 @@ let lib = new class DevToolLib {
             lib.logger.error('  CMD:', child.args.join(' '));
             lib.logger.error('======');
         }
+        
+        return lib.fs.existsSync(path);
     }
 }
 
 /**
- * E5R Development Tool command line
+ * Command line runner for E5R Tools for Development Team.
  * 
  * @TODO: Move to `src/devtool.js`
  */
@@ -408,26 +419,6 @@ class DevToolCommandLine {
 }
 
 /**
- * DevCom `help` command
- * 
- * Show help information for tool and commands
- * 
- * @TODO: Move to `src/help.js`
- */
-class Help extends lib.DevCom {
-    
-    /**
-     * Run the `help` built-in devcom
-     * 
-     * @param {DevToolCommandLine} toolInstance - Instance of DevToolCommandLine
-     * @param {Array} args - Argument list
-     */
-    run(toolInstance, args) {
-        lib.logger.debug('Help built-in devcom is running...'); 
-    }
-}
-
-/**
  * DevCom `wget` command
  * 
  * Download a web file
@@ -482,57 +473,48 @@ class Setup extends lib.DevCom {
     run(toolInstance, args) {
         lib.printf('Set-up E5R Tools for Development Team...');
         
-        // mkdir %home%/.dev
-        if (!lib.fs.existsSync(lib.home.root)) {
-            lib.fs.mkdirSync(lib.home.root);
-        }
-
-        // mkdir %home%/.dev/tools
-        if (!lib.fs.existsSync(lib.home.tools)) {
-            lib.fs.mkdirSync(lib.home.tools);
-        }
-
-        // mkdir %home%/.dev/bin
-        if (!lib.fs.existsSync(lib.home.bin)) {
-            lib.fs.mkdirSync(lib.home.bin);
-        }
-
-        // mkdir %home%/.dev/lib
-        if (!lib.fs.existsSync(lib.home.lib)) {
-            lib.fs.mkdirSync(lib.home.lib);
-        }
+        // 2> Make directory structure
+        ((paths) => {
+            for (let p in paths) {
+                let path = paths[p];
+                if (!lib.fs.existsSync(path)) {
+                    lib.fs.mkdirSync(path);
+                }
+            }
+        })([
+            lib.home.root,
+            lib.home.tools,
+            lib.home.bin,
+            lib.home.lib,
+            lib.home.cmd,
+            lib.home.doc
+        ]);
         
-        // 1> Download de url://dist/registry.json para %HOME%\.dev\registry.json
-        //   Este arquivo contém os URL's com plugins (DEVCOM - Development Command),
-        //   no seguinte formato:
-        //   {
-        //       "default": {
-        //           "type": "GitHub",
-        //           "owner": "e5r",
-        //           "repository": "dev",
-        //           "branch": "develop",
-        //           "path": "dist"
-        //           },
-        //           "sampleUrlForRegistryFile": "https://raw.githubusercontent.com/e5r/dev/develop/dist/registry.json"
-        //       },
-        //       "default-url": {
-        //           "type": "URL",
-        //           "repository": "http://dev.mycompany.com/plugins",
-        //           "sampleUrlForRegistryFile": "http://dev.mycompany.com/plugins/registry.json"
-        //       }
-        //   }
+        // 2> Download `registry.json`
         lib.downloadSync(
             lib.url.resolve(TOOL_DEFAULT_REGISTRY, TOOL_REGISTRY_FILE),
             lib.path.resolve(lib.home.root, TOOL_REGISTRY_FILE)
         );
         
-        // 2> Add /bin to PATH
+        // 3> Add /bin to PATH
         //   - Inclui %HOME%\.dev\bin ao %PATH%
         //   - Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%.
         //   - Ver FLAG de tipo de sessão (PS1, CMD, SH)
+        /* @DOC
+            - Comando windows para definição de variável do usuário
+            SETX NOME_ERLIMAR "Erlimar Silva Campos"
+            
+            - Comando windows para definição de variável do usuário + máquina
+            SETX NOME_ERLIMAR "Erlimar Silva Campos" /M
+            
+            - Sugestões para Linux
+            ABC="123"; export ABC
+            export ABC="123"
+            echo 'export ABC="123"' >> ~/.profile
+        */
         
-        // 3> Instala binários
-        //   - $> dev bin-install e5r-contrib
+        // 4> Instala binários
+        //   - $> dev bin-install e5r-devcom
         //   - Download de url://dist/bin/dev.{cmd,ps1} (Windows) para %HOME%\.dev\bin\dev.{cmd,ps1}
         //     Esses arquivos (dev.cmd e dev.ps1) devem somente repassar os argumentos para o comando
         //     nodeJS [jsengine.exe dev.js *ARGS*]
@@ -544,22 +526,25 @@ class Setup extends lib.DevCom {
         //   - Others:
         //     js> lib.require('lib://my-lib');
         //     js> lib.require('cmd://bin-install');
-        //     js> lib.require('hlp://setup').show({full:true});
+        //     js> lib.require('doc://setup').show({full:true});
         
-        // 4> Show completed info
-
+        // 5> Show completed info
+        lib.printf('Set-up completed!');
     }
 }
 
-if(!module.parent && module.filename === __filename) {
+if (!module.parent && module.filename === __filename) {
     lib.logger.debug('Running DEV command...');
-    // Instantiate and run the E5R Tools for Development Team process
+    
+    /* @HACK: Lock module resolves only from lib directory */
+    module.paths = [lib.home.lib];
+    
+    // Run process tools
     new DevToolCommandLine([
-        Help,
         WGet,
         Setup,
     ]);
-}else{
+} else {
     lib.logger.debug('Required DEV command...');
     module.exports = lib;
 }
