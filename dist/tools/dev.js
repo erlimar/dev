@@ -96,7 +96,7 @@ let lib =
  * @property {object} childProcess
  * @property {object} printf
  * @property {object} logger
- * @property {Error} Error
+ * @property {object} Error
  * @property {object} devHome
  * @property {string} devHome.root
  * @property {string} devHome.tools
