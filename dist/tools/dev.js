@@ -33,6 +33,12 @@ const TOOL_DEFAULT_SCOPE = 'e5r-devcom'; //
 /** @constant {string} */
 const TOOL_REGISTRY_FILE = 'registry.json';
 
+/** @constant {string} */
+const REQUIRE_URI_REGEX = '^(cmd|lib|doc)://(([a-z0-9]|\-|_)+)$';
+
+/** @constant {number} */
+const CACHE_MAX_FILE = 2;
+
 //const TOOL_REGISTRY_LOCKFILE = 'registry.lock.json';
 
 /** @constant {number} */
@@ -118,15 +124,20 @@ new class DevToolLib {
         this._childProcess = require('child_process');
         this._logger = new Logger();
         
-        let root = this._path.resolve(this._os.homedir(), TOOL_DEVFOLDER);
-        this._devHome = {
-            root: root,
-            tools: this._path.join(root, 'tools'),
-            bin: this._path.join(root, 'bin'),
-            lib: this._path.join(root, 'lib'),
-            cmd: this._path.join(root, 'lib', 'cmd'),
-            doc: this._path.join(root, 'doc')
-        }
+        // Enable cache to lib.require() 
+        this.__require_cache__ = [];
+        
+        // Home map
+        this._devHome = (root => {
+                return {
+                root: root,
+                tools: this._path.join(root, 'tools'),
+                bin: this._path.join(root, 'bin'),
+                lib: this._path.join(root, 'lib'),
+                cmd: this._path.join(root, 'lib', 'cmd'),
+                doc: this._path.join(root, 'doc')
+            }
+        })(this._path.resolve(this._os.homedir(), TOOL_DEVFOLDER));
     }
     
     /**
@@ -319,26 +330,34 @@ new class DevToolLib {
      */    
     downloadSync(url, path) {
         let jsEngine = process.execPath,
-            jsEngineArgv = process.execArgv,
+            jsEngineArgv = [],
             jsScript = module.filename,
-            exec = this.childProcess.spawnSync,
-            child = exec(jsEngine, jsEngineArgv.concat([
-                jsScript,
-                'wget',
-                url,
-                path
-            ]));
-            
+            exec = this.childProcess.spawnSync;
+
+        /* @hack: No crash node debug mode */
+        process.execArgv.map((value) => {
+            if (!value.startsWith('--debug-brk') && !value.startsWith('--nolazy')) {
+                jsEngineArgv.push(value);
+            }
+        });
+
+        let child = exec(jsEngine, jsEngineArgv.concat([
+            jsScript,
+            'wget',
+            url,
+            path
+        ]));
+
         lib.printf(child.output[2].toString());
-        
-        if(child.status !== 0) {
+
+        if (child.status !== 0) {
             lib.logger.error('======');
             lib.logger.error('Error: Failed of exec shell command');
             lib.logger.error('  PID:', child.pid);
             lib.logger.error('  CMD:', child.args.join(' '));
             lib.logger.error('======');
         }
-        
+
         return lib.fs.existsSync(path);
     }
     
@@ -352,19 +371,86 @@ new class DevToolLib {
      * @return {object}
      */
     require(uri){
-        uri = uri.toString();
-        
-        let regex = new RegExp('^(cmd|lib|doc)://(([a-z0-9]|\-|_)+)$'),
+        if (typeof uri !== 'string') {
+            throw new lib.Error('Param uri is not a string');
+        }
+
+        let regex = new RegExp(REQUIRE_URI_REGEX),
             regexResult = regex.exec(uri);
-        
-        if(!regexResult){
+
+        if (!regexResult) {
             throw new lib.Error('Invalid URI: "' + uri + '" for lib.require().');
         }
-        
+
         let type = regexResult[1],
-            name = regexResult[2];
+            name = regexResult[2],
+            fileName = name,
+            isJS = false;
         
-        lib.logger.debug('%s => type {%s}, name {%s}', regexResult[0], type, name);
+        if (type === 'cmd' || type === 'lib') {
+            fileName = name.concat('.js');
+            isJS = true;
+        }
+
+        if (type === 'doc') {
+            fileName = name.concat('.txt');
+        }
+
+        let parts = [type, fileName];
+        
+        // .dev/cmd -> .dev/lib/cmd
+        if (type === 'cmd') {
+            parts = ['lib'].concat(parts);
+        }
+
+        let path = lib.path.resolve(lib.devHome.root, parts.join(lib.path.sep)),
+            urlSufix = parts.join('/');
+        
+        lib.logger.debug('%s => type {%s},\n name {%s},\n path {%s},\n url {%s}',
+            regexResult[0],
+            type,
+            name,
+            path,
+            urlSufix);
+        
+        // Load file from
+        for (let c in lib.__require_cache__) {
+            let cacheObj = lib.__require_cache__[c];
+            if (cacheObj.name === urlSufix) {
+                return cacheObj.file;
+            }
+        }
+        
+        let fileExists = lib.fs.existsSync(path);
+        
+        // Load Javascript file from disk
+        if (fileExists && isJS) {
+            let file = require(path);
+            if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
+                lib.__require_cache__.splice(0,1);
+            }
+            lib.__require_cache__.push({
+                name: urlSufix,
+                file: file
+            });
+            return file;
+        }
+        
+        // Load Text file from disk
+        if (fileExists && !isJS) {
+            let file = lib.fs.readFileSync(path, 'utf8');
+            if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
+                lib.__require_cache__.splice(0,1);
+            }
+            lib.__require_cache__.push({
+                name: urlSufix,
+                file: file
+            });
+            return file;
+        }
+        
+        // Download file from registry.json
+        
     }
 }
 
@@ -588,21 +674,18 @@ class Setup extends lib.DevCom {
         lib.printf('Set-up E5R Tools for Development Team...');
         
         // 2> Make directory structure
-        ((paths) => {
-            for (let p in paths) {
-                let path = paths[p];
-                if (!lib.fs.existsSync(path)) {
-                    lib.fs.mkdirSync(path);
-                }
-            }
-        })([
-            lib.devHome.root,
-            lib.devHome.tools,
-            lib.devHome.bin,
-            lib.devHome.lib,
-            lib.devHome.cmd,
-            lib.devHome.doc
-        ]);
+        // [
+        //     lib.devHome.root,
+        //     lib.devHome.tools,
+        //     lib.devHome.bin,
+        //     lib.devHome.lib,
+        //     lib.devHome.cmd,
+        //     lib.devHome.doc
+        // ].map(path => {
+        //     if (!lib.fs.existsSync(path)) {
+        //         lib.fs.mkdirSync(path);
+        //     }
+        // });
         
         // 2> Download `registry.json`
         lib.downloadSync(
@@ -642,12 +725,19 @@ class Setup extends lib.DevCom {
         //     js> lib.require('cmd://bin-install');
         //     js> lib.require('doc://setup').show({full:true});
         // $> dev registry install "bin,doc" --scope "e5r-devcom"
-        let cmd = lib.require('cmd://registry');
+        // let cmd = lib.require('cmd://registry');
+        // 
+        // cmd.run(toolInstance, [
+        //     'install', 'bin,doc',
+        //     '--scope', TOOL_DEFAULT_SCOPE
+        // ]);
         
-        cmd.run(toolInstance, [
-            'install', 'bin,doc',
-            '--scope', TOOL_DEFAULT_SCOPE
-        ]);
+        let _cmd = lib.require('cmd://registry'),
+            _cmdCache = lib.require('cmd://registry'),
+            _lib = lib.require('lib://my-lib'),
+            _libCache = lib.require('lib://my-lib'),
+            _doc = lib.require('doc://my-lib'),
+            _docCache = lib.require('doc://my-lib');
         
         // 5> Show completed info
         lib.printf('Set-up completed!');
@@ -671,18 +761,6 @@ if (!module.parent && module.filename === __filename) {
 }
 
 
-
-/* 
-
-@NOTES:
-    
-O primeiro argumento sempre deve ser o %DEVCOM%, e existe em:
-%HOME%\.dev\tools\devcom\*.js
-
-Se o mesmo não existir, percorre-se o registro (%HOME%\.dev\registry.json)
-combinando a url gerada com o nome possível do arquivo em busca do arquivo
-para download. 
-*/
 
 /*
 DEVCOM padrões:
