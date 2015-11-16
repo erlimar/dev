@@ -885,6 +885,32 @@ class Setup extends lib.DevCom {
         
         let _cmd = lib.require('cmd://registry');
         
+        // Ideia
+        /*
+        // let cmd = lib.require('cmd://registry');
+        //
+        // cmd.run(toolInstance, [
+        //     'install',
+        //     '--resources', 'bin,doc',
+        //     '--scope', TOOL_DEFAULT_SCOPE
+        // ]);
+        //
+        // Lib.require => Usa lib.getResources('DevComName') pra baixar arquivos da Web
+        //                depois carrega.
+        //
+        // Registry.js {
+             let command = args.splice(0, 1);
+             let params = lib.parseParams(args);
+             
+             if(command === 'install') {
+                 lib.getResources(params.resources, params.scope);
+                 return;
+             }
+             
+             ...
+        // }
+        */
+        
         _cmd.run(toolInstance, args);
         
         let _cmdCache = lib.require('cmd://registry'),
