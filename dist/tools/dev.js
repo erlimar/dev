@@ -129,15 +129,14 @@ new class DevToolLib {
         
         // Home map
         this._devHome = (root => {
-                return {
+            return {
                 root: root,
                 tools: this._path.join(root, 'tools'),
                 bin: this._path.join(root, 'bin'),
                 lib: this._path.join(root, 'lib'),
                 cmd: this._path.join(root, 'lib', 'cmd'),
                 doc: this._path.join(root, 'doc')
-            }
-        })(this._path.resolve(this._os.homedir(), TOOL_DEVFOLDER));
+            }})(this._path.resolve(this._os.homedir(), TOOL_DEVFOLDER));
     }
     
     /**
@@ -674,18 +673,18 @@ class Setup extends lib.DevCom {
         lib.printf('Set-up E5R Tools for Development Team...');
         
         // 2> Make directory structure
-        // [
-        //     lib.devHome.root,
-        //     lib.devHome.tools,
-        //     lib.devHome.bin,
-        //     lib.devHome.lib,
-        //     lib.devHome.cmd,
-        //     lib.devHome.doc
-        // ].map(path => {
-        //     if (!lib.fs.existsSync(path)) {
-        //         lib.fs.mkdirSync(path);
-        //     }
-        // });
+        [
+            lib.devHome.root,
+            lib.devHome.tools,
+            lib.devHome.bin,
+            lib.devHome.lib,
+            lib.devHome.cmd,
+            lib.devHome.doc
+        ].map(path => {
+            if (!lib.fs.existsSync(path)) {
+                lib.fs.mkdirSync(path);
+            }
+        });
         
         // 2> Download `registry.json`
         lib.downloadSync(
