@@ -35,7 +35,12 @@ Set-Variable -Option Constant "ScriptFile" $MyInvocation.InvocationName
 Set-Variable -Option Constant "GitBranch" $Branch
 Set-Variable -Option Constant "DevHome" "$Home\.dev"
 Set-Variable -Option Constant "DevTools" "$DevHome\tools"
+
+# HACK: All libraries are installed in "/lib" or "/lib/cmd". So when these libraries
+#       use "require('dev')" will always find the file "dist/dev.js" as a module,
+#       as is the standard way of resolving NodeJS dependencies.
 Set-Variable -Option Constant "DevLib" "$DevHome\lib\node_modules"
+
 Set-Variable -Option Constant "BinJSEngine" "$DevTools\jsengine.exe"
 Set-Variable -Option Constant "OptionsJSEngine" "--use_strict"
 Set-Variable -Option Constant "BinJSInstaller" "$DevLib\dev.js"
