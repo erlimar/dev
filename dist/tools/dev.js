@@ -39,7 +39,14 @@ const REQUIRE_URI_REGEX = '^(cmd|lib|doc)://(([a-z0-9]|\-|_)+)$';
 /** @constant {number} */
 const CACHE_MAX_FILE = 2;
 
-//const TOOL_REGISTRY_LOCKFILE = 'registry.lock.json';
+/** @constant {string} */
+const TOOL_REGISTRY_LOCKFILE = 'registry.lock.json';
+
+/** @constant {string} */
+const MAGIC_REGISTRY_LOCKNAME = '{name}';
+
+/** @constant {string} */
+const TOOL_REGISTRY_LOCAL_LOCKFILE = 'registry.' + MAGIC_REGISTRY_LOCKNAME +'.lock.json';
 
 /** @constant {number} */
 const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
@@ -126,6 +133,7 @@ new class DevToolLib {
         
         // Enable cache to lib.require() 
         this.__require_cache__ = [];
+        this.__registry_cache__ = null;
         
         // Home map
         this._devHome = (root => {
@@ -283,26 +291,30 @@ new class DevToolLib {
          * @todo: Backup a file
          */
         
-        let file = lib.fs.createWriteStream(path);
-
-        let req = wget(urlOptions, function(res) {
-            if(res.statusCode !== 200){
-                if(lib.fs.existsSync(path)){
-                    lib.fs.unlink(path);
-                    // callback
-                }
-                throw new lib.Error('Response status code: ' + res.statusCode + ' ' + res.statusMessage);
+        let file;
+        
+        let req = wget(urlOptions, function (res) {
+            if (res.statusCode !== 200) {
+                throw new lib.Error('Response status code: ' + res.statusCode + ' ' + res.statusMessage + ' >>> ' + url);
             }
+
+            file = lib.fs.createWriteStream(path);
+
+            file.on('finish', function () {
+                lib.logger.verbose('Download successfuly!');
+                file.close(/* callback */);
+            });
+
             res.pipe(file);
         });
         
-        file.on('finish', function(){
-            lib.logger.verbose('Download successfuly!');
-            file.close(/* callback */);
-        });
         
-        req.on('error', function(error){
-            if(lib.fs.existsSync(path)){
+        
+        req.on('error', function (error) {
+            if (file) {
+                file.close(/* callback */);
+            }
+            if (lib.fs.existsSync(path)) {
                 lib.fs.unlink(path);
                 // callback
             }
@@ -405,14 +417,14 @@ new class DevToolLib {
         let path = lib.path.resolve(lib.devHome.root, parts.join(lib.path.sep)),
             urlSufix = parts.join('/');
         
-        lib.logger.debug('%s => type {%s},\n name {%s},\n path {%s},\n url {%s}',
-            regexResult[0],
-            type,
-            name,
-            path,
-            urlSufix);
+        // lib.logger.debug('%s => type {%s},\n name {%s},\n path {%s},\n url {%s}',
+        //     regexResult[0],
+        //     type,
+        //     name,
+        //     path,
+        //     urlSufix);
         
-        // Load file from
+        // Load file from cache
         for (let c in lib.__require_cache__) {
             let cacheObj = lib.__require_cache__[c];
             if (cacheObj.name === urlSufix) {
@@ -423,6 +435,7 @@ new class DevToolLib {
         let fileExists = lib.fs.existsSync(path);
         
         // Load Javascript file from disk
+        /** @todo: Move to method */
         if (fileExists && isJS) {
             let file = require(path);
             if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
@@ -436,6 +449,7 @@ new class DevToolLib {
         }
         
         // Load Text file from disk
+        /** @todo: Move to method */
         if (fileExists && !isJS) {
             let file = lib.fs.readFileSync(path, 'utf8');
             if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
@@ -449,7 +463,145 @@ new class DevToolLib {
         }
         
         // Download file from registry.json
+        let registryPath = lib.path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
         
+        lib.logger.debug('REGISTRY file:', registryPath);
+        
+        if(!lib.__registry_cache__ && !lib.fs.existsSync(registryPath))
+        {
+            throw new lib.Error('Registry file "' + TOOL_REGISTRY_FILE + ' " not found!');
+        }
+        
+        if(!lib.__registry_cache__){
+            let registry_text = lib.fs.readFileSync(registryPath, 'utf8');
+            lib.__registry_cache__ = JSON.parse(registry_text);
+        }
+        
+        if (typeof lib.__registry_cache__ !== 'object') {
+            throw new lib.Error('Invalid registry content. Must be an object.');
+        }
+        
+        let registryNames = Object.getOwnPropertyNames(lib.__registry_cache__),
+            registryFileUrl;
+        
+        for (let r in registryNames) {
+            let registryName = registryNames[r],
+                registryContent = lib.__registry_cache__[registryName],
+                registryLockFileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, registryName),
+                registryLockFilePath = lib.path.resolve(lib.devHome.root, registryLockFileName),
+                registryType = registryContent.type.toLowerCase(),
+                registryURL;
+            
+            lib.logger.debug('REGISTRY name:', registryName);
+            lib.logger.debug('REGISTRY lock:', registryLockFilePath);
+            
+            if (typeof registryContent.type !== 'string') {
+                throw new lib.Error('Invalid registry type for "' + registryName + '"');
+            }
+
+            if (registryType === 'github' && registryContent.owner && registryContent.repository && registryContent.branch) {
+                registryURL = 'https://raw.githubusercontent.com/{owner}/{repository}/{branch}/{path}'
+                    .replace('{owner}', registryContent.owner)
+                    .replace('{repository}', registryContent.repository)
+                    .replace('{branch}', registryContent.branch)
+                    .replace('{path}', registryContent.path);
+            }
+            
+            /** @todo: Implements type URL */
+            //if(registryType === 'url' && registryContent...)
+            
+            if (typeof registryURL !== 'string') {
+                throw new lib.Error('Unable to determine the URL for registry "' + registryName + '"');
+            }
+            
+            // Normalize lock URL
+            let registryLockURL = registryURL.concat(
+                    registryURL.lastIndexOf('/') !== registryURL.length - 1
+                    ? '/' + TOOL_REGISTRY_LOCKFILE
+                    : TOOL_REGISTRY_LOCKFILE
+                );
+            
+            
+            lib.logger.debug('REGISTRY URL:', registryURL);
+            lib.logger.debug('LOCK URL:', registryLockURL);
+
+            // Download LOCK file
+            if (!registryContent.lock && !lib.fs.existsSync(registryLockFilePath)) {
+                lib.downloadSync(registryLockURL, registryLockFilePath);
+            }
+            
+            // Load LOCK file
+            if (!registryContent.lock) {
+                registryContent.lock = require(registryLockFilePath);
+                
+                if(!Array.isArray(registryContent.lock)){
+                    throw new lib.Error('Invalid lock content. Must be an array of file paths.');
+                }
+            }
+            
+            if(-1 < registryContent.lock.indexOf(urlSufix)){
+                // Normalize lock URL
+                registryFileUrl = registryURL.concat(
+                        registryURL.lastIndexOf('/') !== registryURL.length - 1
+                        ? '/' + urlSufix
+                        : urlSufix
+                    );
+                break;
+            }
+        }
+        
+        if(!registryFileUrl){
+            let typeName = type === 'cmd'
+                ? 'DevCom'
+                : type === 'lib'
+                ? 'Library'
+                : 'Documentation';
+            throw new lib.Error(typeName + ' "' + name + '' + '" not found!');
+        }
+        
+        lib.logger.debug('Downloading:', registryFileUrl);
+        lib.logger.debug('         To:', path);
+        
+        lib.downloadSync(registryFileUrl, path);
+        
+        //
+        // Reload resource file from distk
+        //
+        fileExists = lib.fs.existsSync(path);
+             
+        if (!fileExists) {
+            throw new lib.Error('Download failed to:', registryFileUrl);
+        }
+        
+        // Load Javascript file from disk
+        /** @todo: Move to method */
+        if (fileExists && isJS) {
+            let file = require(path);
+            if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
+                lib.__require_cache__.splice(0,1);
+            }
+            lib.__require_cache__.push({
+                name: urlSufix,
+                file: file
+            });
+            return file;
+        }
+        
+        // Load Text file from disk
+        /** @todo: Move to method */
+        if (fileExists && !isJS) {
+            let file = lib.fs.readFileSync(path, 'utf8');
+            if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
+                lib.__require_cache__.splice(0,1);
+            }
+            lib.__require_cache__.push({
+                name: urlSufix,
+                file: file
+            });
+            return file;
+        }
+        
+        throw new lib.Error('Unexpected result to lib.require()!');
     }
 }
 
@@ -747,7 +899,7 @@ if (!module.parent && module.filename === __filename) {
     lib.logger.debug('Running DEV command line tool...');
     
     /* @hack: Lock module resolves only from lib directory */
-    module.paths = [lib.devHome.lib];
+    module.paths = [lib.devHome.lib, lib.path.parse(module.filename).dir];
     
     // Run process tools
     new DevToolCommandLine([
