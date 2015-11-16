@@ -883,8 +883,11 @@ class Setup extends lib.DevCom {
         //     '--scope', TOOL_DEFAULT_SCOPE
         // ]);
         
-        let _cmd = lib.require('cmd://registry'),
-            _cmdCache = lib.require('cmd://registry'),
+        let _cmd = lib.require('cmd://registry');
+        
+        _cmd.run(toolInstance, args);
+        
+        let _cmdCache = lib.require('cmd://registry'),
             _lib = lib.require('lib://my-lib'),
             _libCache = lib.require('lib://my-lib'),
             _doc = lib.require('doc://my-lib'),
