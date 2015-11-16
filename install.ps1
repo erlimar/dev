@@ -35,11 +35,12 @@ Set-Variable -Option Constant "ScriptFile" $MyInvocation.InvocationName
 Set-Variable -Option Constant "GitBranch" $Branch
 Set-Variable -Option Constant "DevHome" "$Home\.dev"
 Set-Variable -Option Constant "DevTools" "$DevHome\tools"
+Set-Variable -Option Constant "DevLib" "$DevHome\lib\node_modules"
 Set-Variable -Option Constant "BinJSEngine" "$DevTools\jsengine.exe"
 Set-Variable -Option Constant "OptionsJSEngine" "--use_strict"
-Set-Variable -Option Constant "BinJSInstaller" "$DevTools\dev.js"
+Set-Variable -Option Constant "BinJSInstaller" "$DevLib\dev.js"
 Set-Variable -Option Constant "NodeURL" "https://nodejs.org/dist/latest-v5.x/win-$Arch/node.exe" 
-Set-Variable -Option Constant "JSInstallerURL" "https://raw.githubusercontent.com/e5r/dev/$GitBranch/dist/tools/dev.js" 
+Set-Variable -Option Constant "JSInstallerURL" "https://raw.githubusercontent.com/e5r/dev/$GitBranch/dist/dev.js" 
 
 <#
 .SYNOPSIS
@@ -144,6 +145,7 @@ Function Install-Dev
     
     # Make directory structure
     New-Item -Path $DevTools -ItemType Directory -Force | Out-Null
+    New-Item -Path $DevLib -ItemType Directory -Force | Out-Null
     
     # Download NODEJS
     Get-WebFile -Origin $NodeURL -Destination $BinJSEngine
