@@ -382,60 +382,74 @@ new class DevToolLib {
      * @return {object}
      */
     require(uri){
-        if (typeof uri !== 'string') {
-            throw new lib.Error('Param uri is not a string');
+        /** @todo: Move to new method */
+        let compileRequireData = (uri) => {
+            if (typeof uri !== 'string') {
+                throw new lib.Error('Param uri is not a string');
+            }
+    
+            let regex = new RegExp(REQUIRE_URI_REGEX),
+                regexResult = regex.exec(uri);
+    
+            if (!regexResult) {
+                throw new lib.Error('Invalid URI: "' + uri + '" for lib.require().');
+            }
+    
+            let type = regexResult[1],
+                name = regexResult[2],
+                fileName = name,
+                isJS = false;
+            
+            if (type === 'cmd' || type === 'lib') {
+                fileName = name.concat('.js');
+                isJS = true;
+            }
+    
+            if (type === 'doc') {
+                fileName = name.concat('.txt');
+            }
+    
+            let parts = [type, fileName];
+            
+            // .dev/cmd -> .dev/lib/cmd
+            if (type === 'cmd') {
+                parts = ['lib'].concat(parts);
+            }
+    
+            let path = lib.path.resolve(lib.devHome.root, parts.join(lib.path.sep)),
+                urlSufix = parts.join('/');
+                
+            return {
+                type: type,
+                name: name,
+                fileName: fileName,
+                isJS: isJS,
+                path: path,
+                urlSufix: urlSufix
+            }
         }
-
-        let regex = new RegExp(REQUIRE_URI_REGEX),
-            regexResult = regex.exec(uri);
-
-        if (!regexResult) {
-            throw new lib.Error('Invalid URI: "' + uri + '" for lib.require().');
-        }
-
-        let type = regexResult[1],
-            name = regexResult[2],
-            fileName = name,
-            isJS = false;
         
-        if (type === 'cmd' || type === 'lib') {
-            fileName = name.concat('.js');
-            isJS = true;
-        }
-
-        if (type === 'doc') {
-            fileName = name.concat('.txt');
-        }
-
-        let parts = [type, fileName];
-        
-        // .dev/cmd -> .dev/lib/cmd
-        if (type === 'cmd') {
-            parts = ['lib'].concat(parts);
-        }
-
-        let path = lib.path.resolve(lib.devHome.root, parts.join(lib.path.sep)),
-            urlSufix = parts.join('/');
+        let uriData = compileRequireData(uri);
         
         // Load file from cache
         for (let c in lib.__require_cache__) {
             let cacheObj = lib.__require_cache__[c];
-            if (cacheObj.name === urlSufix) {
+            if (cacheObj.name === uriData.urlSufix) {
                 return cacheObj.file;
             }
         }
         
-        let fileExists = lib.fs.existsSync(path);
+        let fileExists = lib.fs.existsSync(uriData.path);
         
         // Load Javascript file from disk
         /** @todo: Move to method */
-        if (fileExists && isJS) {
-            let file = require(path);
+        if (fileExists && uriData.isJS) {
+            let file = require(uriData.path);
             if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
                 lib.__require_cache__.splice(0,1);
             }
             lib.__require_cache__.push({
-                name: urlSufix,
+                name: uriData.urlSufix,
                 file: file
             });
             return file;
@@ -443,13 +457,13 @@ new class DevToolLib {
         
         // Load Text file from disk
         /** @todo: Move to method */
-        if (fileExists && !isJS) {
-            let file = lib.fs.readFileSync(path, 'utf8');
+        if (fileExists && !uriData.isJS) {
+            let file = lib.fs.readFileSync(uriData.path, 'utf8');
             if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
                 lib.__require_cache__.splice(0,1);
             }
             lib.__require_cache__.push({
-                name: urlSufix,
+                name: uriData.urlSufix,
                 file: file
             });
             return file;
@@ -523,32 +537,32 @@ new class DevToolLib {
                 }
             }
             
-            if(-1 < registryContent.lock.indexOf(urlSufix)){
+            if(-1 < registryContent.lock.indexOf(uriData.urlSufix)){
                 // Normalize lock URL
                 registryFileUrl = registryURL.concat(
                         registryURL.lastIndexOf('/') !== registryURL.length - 1
-                        ? '/' + urlSufix
-                        : urlSufix
+                        ? '/' + uriData.urlSufix
+                        : uriData.urlSufix
                     );
                 break;
             }
         }
         
         if(!registryFileUrl){
-            let typeName = type === 'cmd'
+            let typeName = uriData.type === 'cmd'
                 ? 'DevCom'
-                : type === 'lib'
+                : uriData.type === 'lib'
                 ? 'Library'
                 : 'Documentation';
             throw new lib.Error(typeName + ' "' + name + '' + '" not found!');
         }
         
-        lib.downloadSync(registryFileUrl, path);
+        lib.downloadSync(registryFileUrl, uriData.path);
         
         //
         // Reload resource file from distk
         //
-        fileExists = lib.fs.existsSync(path);
+        fileExists = lib.fs.existsSync(uriData.path);
              
         if (!fileExists) {
             throw new lib.Error('Download failed to:', registryFileUrl);
@@ -556,13 +570,13 @@ new class DevToolLib {
         
         // Load Javascript file from disk
         /** @todo: Move to method */
-        if (fileExists && isJS) {
-            let file = require(path);
+        if (fileExists && uriData.isJS) {
+            let file = require(uriData.path);
             if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
                 lib.__require_cache__.splice(0,1);
             }
             lib.__require_cache__.push({
-                name: urlSufix,
+                name: uriData.urlSufix,
                 file: file
             });
             return file;
@@ -570,13 +584,13 @@ new class DevToolLib {
         
         // Load Text file from disk
         /** @todo: Move to method */
-        if (fileExists && !isJS) {
-            let file = lib.fs.readFileSync(path, 'utf8');
+        if (fileExists && !uriData.isJS) {
+            let file = lib.fs.readFileSync(uriData.path, 'utf8');
             if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
                 lib.__require_cache__.splice(0,1);
             }
             lib.__require_cache__.push({
-                name: urlSufix,
+                name: uriData.urlSufix,
                 file: file
             });
             return file;
