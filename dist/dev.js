@@ -417,13 +417,6 @@ new class DevToolLib {
         let path = lib.path.resolve(lib.devHome.root, parts.join(lib.path.sep)),
             urlSufix = parts.join('/');
         
-        // lib.logger.debug('%s => type {%s},\n name {%s},\n path {%s},\n url {%s}',
-        //     regexResult[0],
-        //     type,
-        //     name,
-        //     path,
-        //     urlSufix);
-        
         // Load file from cache
         for (let c in lib.__require_cache__) {
             let cacheObj = lib.__require_cache__[c];
@@ -465,8 +458,6 @@ new class DevToolLib {
         // Download file from registry.json
         let registryPath = lib.path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
         
-        lib.logger.debug('REGISTRY file:', registryPath);
-        
         if(!lib.__registry_cache__ && !lib.fs.existsSync(registryPath))
         {
             throw new lib.Error('Registry file "' + TOOL_REGISTRY_FILE + ' " not found!');
@@ -491,9 +482,6 @@ new class DevToolLib {
                 registryLockFilePath = lib.path.resolve(lib.devHome.root, registryLockFileName),
                 registryType = registryContent.type.toLowerCase(),
                 registryURL;
-            
-            lib.logger.debug('REGISTRY name:', registryName);
-            lib.logger.debug('REGISTRY lock:', registryLockFilePath);
             
             if (typeof registryContent.type !== 'string') {
                 throw new lib.Error('Invalid registry type for "' + registryName + '"');
@@ -521,10 +509,6 @@ new class DevToolLib {
                     : TOOL_REGISTRY_LOCKFILE
                 );
             
-            
-            lib.logger.debug('REGISTRY URL:', registryURL);
-            lib.logger.debug('LOCK URL:', registryLockURL);
-
             // Download LOCK file
             if (!registryContent.lock && !lib.fs.existsSync(registryLockFilePath)) {
                 lib.downloadSync(registryLockURL, registryLockFilePath);
@@ -558,9 +542,6 @@ new class DevToolLib {
                 : 'Documentation';
             throw new lib.Error(typeName + ' "' + name + '' + '" not found!');
         }
-        
-        lib.logger.debug('Downloading:', registryFileUrl);
-        lib.logger.debug('         To:', path);
         
         lib.downloadSync(registryFileUrl, path);
         
@@ -923,9 +904,6 @@ class Setup extends lib.DevCom {
         lib.printf('Set-up completed!');
     }
 }
-
-/* @hack: Lock module resolves only from lib directory */
-module.paths = [lib.devHome.lib, lib.path.parse(module.filename).dir];
 
 if (!module.parent && module.filename === __filename) {
     lib.logger.debug('Running DEV command line tool!');
