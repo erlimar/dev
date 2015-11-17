@@ -924,6 +924,11 @@ class Setup extends lib.DevCom {
     }
 }
 
+console.log('>>> !module.parent:', !module.parent);
+console.log('>>> module.filename:', module.filename);
+console.log('>>> __filename:', __filename);
+console.log('>>> module.filename === __filename:', module.filename === __filename);
+
 if (!module.parent && module.filename === __filename) {
     lib.logger.verbose('Running DEV command line tool...');
     
