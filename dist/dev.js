@@ -48,8 +48,33 @@ const MAGIC_REGISTRY_LOCKNAME = '{name}';
 /** @constant {string} */
 const TOOL_REGISTRY_LOCAL_LOCKFILE = 'registry.' + MAGIC_REGISTRY_LOCKNAME +'.lock.json';
 
+/** @constant {string} */
+const DEBUG_IDENTIFY = 'E5RDEV';
+
 /** @constant {number} */
 const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
+
+let _path = require('path'),
+    _util = require('util'),
+    _os = require('os'),
+    _fs = require('fs'),
+    _url = require('url'),
+    _childProcess = require('child_process'),
+
+    _rootPath = _path.resolve(_os.homedir(), TOOL_DEVFOLDER),
+
+    _devPaths = {
+        root: _rootPath,
+        tools: _path.join(_rootPath, 'tools'),
+        bin: _path.join(_rootPath, 'bin'),
+        lib: _path.join(_rootPath, 'lib'),
+        cmd: _path.join(_rootPath, 'lib', 'cmd'),
+        doc: _path.join(_rootPath, 'doc')
+    },
+    
+    _createError = (msg) => {
+        return new Error(msg);
+    }
 
 /**
  * Logger dispatcher
@@ -74,7 +99,7 @@ class Logger {
      */
     get debug() {
         if(!this._debug) {
-            this._debug = require('util').debuglog('E5RDEV');
+            this._debug = _util.debuglog(DEBUG_IDENTIFY);
         }
         return this._debug;
     }
@@ -93,6 +118,86 @@ class Logger {
     }
 }
 
+/**
+ * Compile information to URI require
+ * 
+ * @param {string} uri - Uniform Resource Identifier
+ * @sample "(cmd|doc|lib)://[:alphanum:]"
+ * 
+ * @return {object} Object compiled for URI 
+ */
+function compileRequireData(uri) {
+    if (typeof uri !== 'string') {
+        throw _createError('Param uri is not a string');
+    }
+
+    let regex = new RegExp(REQUIRE_URI_REGEX),
+        regexResult = regex.exec(uri);
+
+    if (!regexResult) {
+        throw _createError('Invalid URI: "' + uri + '" for lib.require().');
+    }
+
+    let type = regexResult[1],
+        name = regexResult[2],
+        fileName = name,
+        isJS = false;
+    
+    if (type === 'cmd' || type === 'lib') {
+        fileName = name.concat('.js');
+        isJS = true;
+    }
+
+    if (type === 'doc') {
+        fileName = name.concat('.txt');
+    }
+
+    let parts = [type, fileName];
+    
+    // .dev/cmd -> .dev/lib/cmd
+    if (type === 'cmd') {
+        parts = ['lib'].concat(parts);
+    }
+
+    let path = _path.resolve(_devPaths.root, parts.join(_path.sep)),
+        urlSufix = parts.join('/');
+        
+    return {
+        type: type,
+        name: name,
+        fileName: fileName,
+        isJS: isJS,
+        path: path,
+        urlSufix: urlSufix
+    }
+}
+
+/**
+ * Resolve name in camelCase to "camel-case"
+ * 
+ * @param {string} name - Name in camelCase
+ * 
+ * @return {string} - Return a name formated to "camel-case"
+ */
+function resolveCamelCaseName(name) {
+    if (typeof name !== 'string') {
+        throw _createError('Param name is not a string');
+    }
+
+    let buffer = [],
+        regex = RegExp('^[A-Z]$');
+
+    for (let c = 0; c < name.length; c++) {
+        let char = name.charAt(c);
+        if (c > 0 && regex.test(char.toString())) {
+            buffer.push('-');
+        }
+        buffer.push(char.toLowerCase());
+    }
+
+    return buffer.join('');
+}
+
 /** @instance */
 let lib = 
 
@@ -100,16 +205,8 @@ let lib =
  * Library for E5R Tools for Development Team.
  * @class
  * 
- * @property {object} os
- * @property {object} path
- * @property {object} fs
- * @property {object} url
- * @property {object} http
- * @property {object} https
- * @property {object} childProcess
  * @property {object} printf
  * @property {object} logger
- * @property {object} Error
  * @property {object} devHome
  * @property {string} devHome.root
  * @property {string} devHome.tools
@@ -122,87 +219,20 @@ new class DevToolLib {
 
     /** @constructor */
     constructor() {
-        this._os = require('os');
-        this._path = require('path');
-        this._fs = require('fs');
-        this._url = require('url');
-        this._http = require('http');
-        this._https = require('https');
-        this._childProcess = require('child_process');
         this._logger = new Logger();
         
-        // Enable cache to lib.require() 
+        // Enable cache 
         this.__require_cache__ = [];
         this.__registry_cache__ = null;
-        
-        // Home map
-        this._devHome = (root => {
-            return {
-                root: root,
-                tools: this._path.join(root, 'tools'),
-                bin: this._path.join(root, 'bin'),
-                lib: this._path.join(root, 'lib'),
-                cmd: this._path.join(root, 'lib', 'cmd'),
-                doc: this._path.join(root, 'doc')
-            }})(this._path.resolve(this._os.homedir(), TOOL_DEVFOLDER));
     }
     
     /**
      * Tool folder map
      */
     get devHome() {
-        return this._devHome;
+        return _devPaths;
     }
     
-    /**
-     * Alias to `require('os')`
-     */
-    get os() {
-       return this._os; 
-    }
-    
-    /**
-     * Alias to `require('path')`
-     */
-    get path() {
-        return this._path;
-    }
-    
-    /**
-     * Alias to `require('fs')`
-     */
-    get fs() {
-        return this._fs;
-    }
-    
-    /**
-     * Alias to `require('url')`
-     */
-    get url() {
-        return this._url;
-    }
-
-    /**
-     * Alias to `require('http')`
-     */
-    get http() {
-        return this._http;
-    }
-    
-    /**
-     * Alias to `require('https')`
-     */
-    get https() {
-        return this._https;
-    }
-    
-    /**
-     * Alias to `require('child_process')`
-     */
-    get childProcess() {
-        return this._childProcess;
-    }
-
     /**
      * Print formated messages on console
      */
@@ -215,39 +245,6 @@ new class DevToolLib {
      */
     get logger() {
         return this._logger;
-    }
-    
-    /**
-     * Alias for `Error`
-     */
-    get Error() {
-        return Error;
-    }
-    
-    /**
-     * Resolve name in camelCase to "camel-case"
-     * 
-     * @param {string} name - Name in camelCase
-     * 
-     * @return {string} - Return a name formated to "camel-case"
-     */
-    resolveCamelCaseName(name) {
-        if (typeof name !== 'string') {
-            throw new lib.Error('Param name is not a string');
-        }
-
-        let buffer = [],
-            regex = RegExp('^[A-Z]$');
-
-        for (let c = 0; c < name.length; c++) {
-            let char = name.charAt(c);
-            if (c > 0 && regex.test(char.toString())) {
-                buffer.push('-');
-            }
-            buffer.push(char.toLowerCase());
-        }
-
-        return buffer.join('');
     }
     
     /**
@@ -267,7 +264,7 @@ new class DevToolLib {
                 * @param {Array} args - Arguments of command
                 */
                 run(toolInstance, args) {
-                    throw new lib.Error('Built-in [run()] not implemented.');
+                    throw _createError('Built-in [run()] not implemented.');
                 }
             } 
         }
@@ -283,9 +280,10 @@ new class DevToolLib {
      */
     download(url, path) {
         lib.logger.verbose('Downloading "' + url + '"...');
-        let urlOptions = lib.url.parse(url),
+        
+        let urlOptions = _url.parse(url),
             protocol = urlOptions.protocol.split(':')[0],
-            wget = lib[protocol].request;
+            wget = require(protocol).request;
         
         /**
          * @todo: Backup a file
@@ -295,10 +293,10 @@ new class DevToolLib {
         
         let req = wget(urlOptions, function (res) {
             if (res.statusCode !== 200) {
-                throw new lib.Error('Response status code: ' + res.statusCode + ' ' + res.statusMessage + ' >>> ' + url);
+                throw _createError('Response status code: ' + res.statusCode + ' ' + res.statusMessage + ' >>> ' + url);
             }
 
-            file = lib.fs.createWriteStream(path);
+            file = _fs.createWriteStream(path);
 
             file.on('finish', function () {
                 lib.logger.verbose('Download successfuly!');
@@ -308,17 +306,15 @@ new class DevToolLib {
             res.pipe(file);
         });
         
-        
-        
         req.on('error', function (error) {
             if (file) {
                 file.close(/* callback */);
             }
-            if (lib.fs.existsSync(path)) {
-                lib.fs.unlink(path);
+            if (_fs.existsSync(path)) {
+                _fs.unlink(path);
                 // callback
             }
-            throw new lib.Error('Download error:', error);
+            throw _createError('Download error:', error);
         });
         
         /**
@@ -343,7 +339,7 @@ new class DevToolLib {
         let jsEngine = process.execPath,
             jsEngineArgv = [],
             jsScript = module.filename,
-            exec = this.childProcess.spawnSync;
+            exec = _childProcess.spawnSync;
 
         /* @hack: No crash node debug mode */
         process.execArgv.map((value) => {
@@ -369,58 +365,19 @@ new class DevToolLib {
             lib.logger.error('======');
         }
 
-        return lib.fs.existsSync(path);
+        return _fs.existsSync(path);
     }
     
-    /** @todo: Move to new method */
-    compileRequireData(uri) {
-        if (typeof uri !== 'string') {
-            throw new lib.Error('Param uri is not a string');
-        }
-
-        let regex = new RegExp(REQUIRE_URI_REGEX),
-            regexResult = regex.exec(uri);
-
-        if (!regexResult) {
-            throw new lib.Error('Invalid URI: "' + uri + '" for lib.require().');
-        }
-
-        let type = regexResult[1],
-            name = regexResult[2],
-            fileName = name,
-            isJS = false;
-        
-        if (type === 'cmd' || type === 'lib') {
-            fileName = name.concat('.js');
-            isJS = true;
-        }
-
-        if (type === 'doc') {
-            fileName = name.concat('.txt');
-        }
-
-        let parts = [type, fileName];
-        
-        // .dev/cmd -> .dev/lib/cmd
-        if (type === 'cmd') {
-            parts = ['lib'].concat(parts);
-        }
-
-        let path = lib.path.resolve(lib.devHome.root, parts.join(lib.path.sep)),
-            urlSufix = parts.join('/');
-            
-        return {
-            type: type,
-            name: name,
-            fileName: fileName,
-            isJS: isJS,
-            path: path,
-            urlSufix: urlSufix
-        }
-    }
-    
-    /** @todo: Move to new method */
-    loadCachedObjectResource(uriData) {
+    /**
+     * Load the resource object to cache from disk
+     * 
+     * @param {string} uri - Uniform Resource Identifier
+     * 
+     * @return {object} Cached object
+     */
+    loadCachedObjectResource(uri) {
+        let uriData = compileRequireData(uri);
+         
         // Load file from cache
         for (let c in lib.__require_cache__) {
             let cacheObj = lib.__require_cache__[c];
@@ -429,10 +386,9 @@ new class DevToolLib {
             }
         }
         
-        let fileExists = lib.fs.existsSync(uriData.path);
+        let fileExists = _fs.existsSync(uriData.path);
         
         // Load Javascript file from disk
-        /** @todo: Move to method */
         if (fileExists && uriData.isJS) {
             let file = require(uriData.path);
             if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
@@ -446,7 +402,6 @@ new class DevToolLib {
         }
         
         // Load Text file from disk
-        /** @todo: Move to method */
         if (fileExists && !uriData.isJS) {
             let file = lib.fs.readFileSync(uriData.path, 'utf8');
             if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
@@ -462,23 +417,27 @@ new class DevToolLib {
         return null;
     }
     
-    /** @todo: Move to new method */
-    loadWebObjectResource(uriData) {
-        /** @todo: Use compileRequireData(uri string) over uriData */ 
-        let registryPath = lib.path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
+    /**
+     * Download resource object from web
+     * 
+     * @param {string} uri - Uniform Resource Identifier
+     */
+    downloadWebObjectResource(uri) {
+        let uriData = compileRequireData(uri),
+            registryPath = _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
         
         if(!lib.__registry_cache__ && !lib.fs.existsSync(registryPath))
         {
-            throw new lib.Error('Registry file "' + TOOL_REGISTRY_FILE + ' " not found!');
+            throw _createError('Registry file "' + TOOL_REGISTRY_FILE + ' " not found!');
         }
         
         if(!lib.__registry_cache__){
-            let registry_text = lib.fs.readFileSync(registryPath, 'utf8');
+            let registry_text = _fs.readFileSync(registryPath, 'utf8');
             lib.__registry_cache__ = JSON.parse(registry_text);
         }
         
         if (typeof lib.__registry_cache__ !== 'object') {
-            throw new lib.Error('Invalid registry content. Must be an object.');
+            throw _createError('Invalid registry content. Must be an object.');
         }
         
         let registryNames = Object.getOwnPropertyNames(lib.__registry_cache__),
@@ -488,12 +447,12 @@ new class DevToolLib {
             let registryName = registryNames[r],
                 registryContent = lib.__registry_cache__[registryName],
                 registryLockFileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, registryName),
-                registryLockFilePath = lib.path.resolve(lib.devHome.root, registryLockFileName),
+                registryLockFilePath = _path.resolve(lib.devHome.root, registryLockFileName),
                 registryType = registryContent.type.toLowerCase(),
                 registryURL;
             
             if (typeof registryContent.type !== 'string') {
-                throw new lib.Error('Invalid registry type for "' + registryName + '"');
+                throw _createError('Invalid registry type for "' + registryName + '"');
             }
 
             if (registryType === 'github' && registryContent.owner && registryContent.repository && registryContent.branch) {
@@ -508,7 +467,7 @@ new class DevToolLib {
             //if(registryType === 'url' && registryContent...)
             
             if (typeof registryURL !== 'string') {
-                throw new lib.Error('Unable to determine the URL for registry "' + registryName + '"');
+                throw _createError('Unable to determine the URL for registry "' + registryName + '"');
             }
             
             // Normalize lock URL
@@ -519,7 +478,7 @@ new class DevToolLib {
                 );
             
             // Download LOCK file
-            if (!registryContent.lock && !lib.fs.existsSync(registryLockFilePath)) {
+            if (!registryContent.lock && !_fs.existsSync(registryLockFilePath)) {
                 lib.downloadSync(registryLockURL, registryLockFilePath);
             }
             
@@ -528,7 +487,7 @@ new class DevToolLib {
                 registryContent.lock = require(registryLockFilePath);
                 
                 if(!Array.isArray(registryContent.lock)){
-                    throw new lib.Error('Invalid lock content. Must be an array of file paths.');
+                    throw _createError('Invalid lock content. Must be an array of file paths.');
                 }
             }
             
@@ -549,13 +508,13 @@ new class DevToolLib {
                 : uriData.type === 'lib'
                 ? 'Library'
                 : 'Documentation';
-            throw new lib.Error(typeName + ' "' + uriData.name + '' + '" not found!');
+            throw _createError(typeName + ' "' + uriData.name + '' + '" not found!');
         }
         
         lib.downloadSync(registryFileUrl, uriData.path);
         
-        if (!lib.fs.existsSync(uriData.path)) {
-            throw new lib.Error('Download failed to:', registryFileUrl);
+        if (!_fs.existsSync(uriData.path)) {
+            throw _createError('Download failed to:', registryFileUrl);
         }
     }
     
@@ -564,24 +523,23 @@ new class DevToolLib {
      * 
      * @todo: Not Implemented!
      * 
-     * @param {string} uri - URI for resource
+     * @param {string} uri - Uniform Resource Identifier
      * 
      * @return {object}
      */
     require(uri){
-        let uriData = lib.compileRequireData(uri),
-            cachedFile = lib.loadCachedObjectResource(uriData);
+        let cachedFile = lib.loadCachedObjectResource(uri);
         
         if(!cachedFile){
-            lib.loadWebObjectResource(uriData);
-            cachedFile = lib.loadCachedObjectResource(uriData);
+            lib.downloadWebObjectResource(uri);
+            cachedFile = lib.loadCachedObjectResource(uri);
         }
         
         if(cachedFile){
             return cachedFile;
         }
         
-        throw new lib.Error('Unexpected result to lib.require()!');
+        throw _createError('Unexpected result to lib.require()!');
     }
 }
 
@@ -600,13 +558,13 @@ class DevToolCommandLine {
      */
     constructor(builtins) {
         if (!Array.isArray(builtins)) {
-            throw new lib.Error('Invalid @param builtins. Must be an array builtins.');
+            throw _createError('Invalid @param builtins. Must be an array builtins.');
         }
         
         let self = this;
 
         self._args = process.argv.slice(2);
-        self._name = lib.path.parse(__filename).name;
+        self._name = _path.parse(__filename).name;
         self._cmd = (this._args.shift() || '').toLowerCase();
         self._builtin = new Object;
         
@@ -636,7 +594,7 @@ class DevToolCommandLine {
             'Usage: %s [devcom] [options]',
             '',
             'DevCom:']
-            .join(lib.os.EOL),
+            .join(_os.EOL),
             
             TOOL_TITLE, TOOL_VERSION,
             TOOL_COPYRIGHT,
@@ -655,7 +613,7 @@ class DevToolCommandLine {
             '',
             'Options:',
             '  ???']
-            .join(lib.os.EOL)
+            .join(_os.EOL)
         );
     }
     
@@ -701,7 +659,7 @@ class DevToolCommandLine {
         let devcom = self.builtin[self._cmd];
 
         if (!devcom) {
-            throw new lib.Error('DEVCOM [' + self._cmd + '] not found!');
+            throw _createError('DEVCOM [' + self._cmd + '] not found!');
         }
 
         devcom.run(self, self._args);
@@ -721,18 +679,18 @@ class DevToolCommandLine {
      */
     set builtin(BuiltinType) {
         if (typeof (BuiltinType) != 'function') {
-            throw new lib.Error('Invalid Built-in type');
+            throw _createError('Invalid Built-in type');
         }
 
         let instance = new BuiltinType,
-            name = lib.resolveCamelCaseName(BuiltinType.name);
+            name = resolveCamelCaseName(BuiltinType.name);
 
         if (!(instance instanceof lib.DevCom)) {
-            throw new lib.Error('Invalid Built-in type inheritance.');
+            throw _createError('Invalid Built-in type inheritance.');
         }
         
         if (this._builtin.hasOwnProperty(name)) {
-            throw new lib.Error('Built-in Function [' + name + '] already exists.');
+            throw _createError('Built-in Function [' + name + '] already exists.');
         }
         
         Object.defineProperty(instance, 'getType', {
@@ -771,14 +729,14 @@ class Wget extends lib.DevCom {
                 '  path   Path to save web file local'
             ];
             
-            throw new lib.Error(lines.join(lib.os.EOL));
+            throw _createError(lines.join(lib.os.EOL));
         } 
         
-        let url = lib.url.parse(args[0]),
-            path = lib.path.resolve(args[1]);
+        let url = _url.parse(args[0]),
+            path = _path.resolve(args[1]);
         
         if(!url.protocol) {
-            throw new lib.Error('Invalid URL: ' + args[0]);
+            throw _createError('Invalid URL: ' + args[0]);
         }
 
         lib.download(url.href, path);
@@ -813,15 +771,15 @@ class Setup extends lib.DevCom {
             lib.devHome.cmd,
             lib.devHome.doc
         ].map(path => {
-            if (!lib.fs.existsSync(path)) {
-                lib.fs.mkdirSync(path);
+            if (!_fs.existsSync(path)) {
+                _fs.mkdirSync(path);
             }
         });
         
         // 2> Download `registry.json`
         lib.downloadSync(
-            lib.url.resolve(TOOL_DEFAULT_REGISTRY_URL, TOOL_REGISTRY_FILE),
-            lib.path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE)
+            _url.resolve(TOOL_DEFAULT_REGISTRY_URL, TOOL_REGISTRY_FILE),
+            _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE)
         );
         
         // 3> Add /bin to PATH
