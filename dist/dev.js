@@ -804,7 +804,7 @@ class Setup extends lib.DevCom {
         
         registry.run(toolInstance, [
             'install',
-            '--resources', 'bin,doc',
+            '--resources=bin,doc',
             '--scope', TOOL_DEFAULT_SCOPE
         ]);
         
