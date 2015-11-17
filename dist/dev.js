@@ -481,130 +481,112 @@ new class DevToolLib {
         }
         
         // Download file from registry.json
-        let registryPath = lib.path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
-        
-        if(!lib.__registry_cache__ && !lib.fs.existsSync(registryPath))
-        {
-            throw new lib.Error('Registry file "' + TOOL_REGISTRY_FILE + ' " not found!');
-        }
-        
-        if(!lib.__registry_cache__){
-            let registry_text = lib.fs.readFileSync(registryPath, 'utf8');
-            lib.__registry_cache__ = JSON.parse(registry_text);
-        }
-        
-        if (typeof lib.__registry_cache__ !== 'object') {
-            throw new lib.Error('Invalid registry content. Must be an object.');
-        }
-        
-        let registryNames = Object.getOwnPropertyNames(lib.__registry_cache__),
-            registryFileUrl;
-        
-        for (let r in registryNames) {
-            let registryName = registryNames[r],
-                registryContent = lib.__registry_cache__[registryName],
-                registryLockFileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, registryName),
-                registryLockFilePath = lib.path.resolve(lib.devHome.root, registryLockFileName),
-                registryType = registryContent.type.toLowerCase(),
-                registryURL;
+        /** @todo: Move to new method */
+        let loadWebObjectResource = (uriData) => {
+            /** @todo: Use compileRequireData(uri string) over uriData */ 
+            let registryPath = lib.path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
             
-            if (typeof registryContent.type !== 'string') {
-                throw new lib.Error('Invalid registry type for "' + registryName + '"');
-            }
-
-            if (registryType === 'github' && registryContent.owner && registryContent.repository && registryContent.branch) {
-                registryURL = 'https://raw.githubusercontent.com/{owner}/{repository}/{branch}/{path}'
-                    .replace('{owner}', registryContent.owner)
-                    .replace('{repository}', registryContent.repository)
-                    .replace('{branch}', registryContent.branch)
-                    .replace('{path}', registryContent.path);
+            if(!lib.__registry_cache__ && !lib.fs.existsSync(registryPath))
+            {
+                throw new lib.Error('Registry file "' + TOOL_REGISTRY_FILE + ' " not found!');
             }
             
-            /** @todo: Implements type URL */
-            //if(registryType === 'url' && registryContent...)
-            
-            if (typeof registryURL !== 'string') {
-                throw new lib.Error('Unable to determine the URL for registry "' + registryName + '"');
+            if(!lib.__registry_cache__){
+                let registry_text = lib.fs.readFileSync(registryPath, 'utf8');
+                lib.__registry_cache__ = JSON.parse(registry_text);
             }
             
-            // Normalize lock URL
-            let registryLockURL = registryURL.concat(
-                    registryURL.lastIndexOf('/') !== registryURL.length - 1
-                    ? '/' + TOOL_REGISTRY_LOCKFILE
-                    : TOOL_REGISTRY_LOCKFILE
-                );
-            
-            // Download LOCK file
-            if (!registryContent.lock && !lib.fs.existsSync(registryLockFilePath)) {
-                lib.downloadSync(registryLockURL, registryLockFilePath);
+            if (typeof lib.__registry_cache__ !== 'object') {
+                throw new lib.Error('Invalid registry content. Must be an object.');
             }
             
-            // Load LOCK file
-            if (!registryContent.lock) {
-                registryContent.lock = require(registryLockFilePath);
+            let registryNames = Object.getOwnPropertyNames(lib.__registry_cache__),
+                registryFileUrl;
+            
+            for (let r in registryNames) {
+                let registryName = registryNames[r],
+                    registryContent = lib.__registry_cache__[registryName],
+                    registryLockFileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, registryName),
+                    registryLockFilePath = lib.path.resolve(lib.devHome.root, registryLockFileName),
+                    registryType = registryContent.type.toLowerCase(),
+                    registryURL;
                 
-                if(!Array.isArray(registryContent.lock)){
-                    throw new lib.Error('Invalid lock content. Must be an array of file paths.');
+                if (typeof registryContent.type !== 'string') {
+                    throw new lib.Error('Invalid registry type for "' + registryName + '"');
+                }
+    
+                if (registryType === 'github' && registryContent.owner && registryContent.repository && registryContent.branch) {
+                    registryURL = 'https://raw.githubusercontent.com/{owner}/{repository}/{branch}/{path}'
+                        .replace('{owner}', registryContent.owner)
+                        .replace('{repository}', registryContent.repository)
+                        .replace('{branch}', registryContent.branch)
+                        .replace('{path}', registryContent.path);
+                }
+                
+                /** @todo: Implements type URL */
+                //if(registryType === 'url' && registryContent...)
+                
+                if (typeof registryURL !== 'string') {
+                    throw new lib.Error('Unable to determine the URL for registry "' + registryName + '"');
+                }
+                
+                // Normalize lock URL
+                let registryLockURL = registryURL.concat(
+                        registryURL.lastIndexOf('/') !== registryURL.length - 1
+                        ? '/' + TOOL_REGISTRY_LOCKFILE
+                        : TOOL_REGISTRY_LOCKFILE
+                    );
+                
+                // Download LOCK file
+                if (!registryContent.lock && !lib.fs.existsSync(registryLockFilePath)) {
+                    lib.downloadSync(registryLockURL, registryLockFilePath);
+                }
+                
+                // Load LOCK file
+                if (!registryContent.lock) {
+                    registryContent.lock = require(registryLockFilePath);
+                    
+                    if(!Array.isArray(registryContent.lock)){
+                        throw new lib.Error('Invalid lock content. Must be an array of file paths.');
+                    }
+                }
+                
+                if(-1 < registryContent.lock.indexOf(uriData.urlSufix)){
+                    // Normalize lock URL
+                    registryFileUrl = registryURL.concat(
+                            registryURL.lastIndexOf('/') !== registryURL.length - 1
+                            ? '/' + uriData.urlSufix
+                            : uriData.urlSufix
+                        );
+                    break;
                 }
             }
             
-            if(-1 < registryContent.lock.indexOf(uriData.urlSufix)){
-                // Normalize lock URL
-                registryFileUrl = registryURL.concat(
-                        registryURL.lastIndexOf('/') !== registryURL.length - 1
-                        ? '/' + uriData.urlSufix
-                        : uriData.urlSufix
-                    );
-                break;
+            if(!registryFileUrl){
+                let typeName = uriData.type === 'cmd'
+                    ? 'DevCom'
+                    : uriData.type === 'lib'
+                    ? 'Library'
+                    : 'Documentation';
+                throw new lib.Error(typeName + ' "' + uriData.name + '' + '" not found!');
+            }
+            
+            lib.downloadSync(registryFileUrl, uriData.path);
+            
+            if (!lib.fs.existsSync(uriData.path)) {
+                throw new lib.Error('Download failed to:', registryFileUrl);
             }
         }
         
-        if(!registryFileUrl){
-            let typeName = uriData.type === 'cmd'
-                ? 'DevCom'
-                : uriData.type === 'lib'
-                ? 'Library'
-                : 'Documentation';
-            throw new lib.Error(typeName + ' "' + uriData.name + '' + '" not found!');
-        }
-        
-        lib.downloadSync(registryFileUrl, uriData.path);
+        loadWebObjectResource(uriData);
         
         //
         // Reload resource file from distk
         //
-        let fileExists = lib.fs.existsSync(uriData.path);
-             
-        if (!fileExists) {
-            throw new lib.Error('Download failed to:', registryFileUrl);
-        }
+        let cachedFile2 = loadCachedObjectResource(uriData);
         
-        // Load Javascript file from disk
-        /** @todo: Move to method */
-        if (fileExists && uriData.isJS) {
-            let file = require(uriData.path);
-            if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
-                lib.__require_cache__.splice(0,1);
-            }
-            lib.__require_cache__.push({
-                name: uriData.urlSufix,
-                file: file
-            });
-            return file;
-        }
-        
-        // Load Text file from disk
-        /** @todo: Move to method */
-        if (fileExists && !uriData.isJS) {
-            let file = lib.fs.readFileSync(uriData.path, 'utf8');
-            if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
-                lib.__require_cache__.splice(0,1);
-            }
-            lib.__require_cache__.push({
-                name: uriData.urlSufix,
-                file: file
-            });
-            return file;
+        if(cachedFile2){
+            return cachedFile2;
         }
         
         throw new lib.Error('Unexpected result to lib.require()!');
