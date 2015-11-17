@@ -403,7 +403,7 @@ new class DevToolLib {
         
         // Load Text file from disk
         if (fileExists && !uriData.isJS) {
-            let file = lib.fs.readFileSync(uriData.path, 'utf8');
+            let file = _fs.readFileSync(uriData.path, 'utf8');
             if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
                 lib.__require_cache__.splice(0,1);
             }
@@ -426,7 +426,7 @@ new class DevToolLib {
         let uriData = compileRequireData(uri),
             registryPath = _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
         
-        if(!lib.__registry_cache__ && !lib.fs.existsSync(registryPath))
+        if(!lib.__registry_cache__ && !_fs.existsSync(registryPath))
         {
             throw _createError('Registry file "' + TOOL_REGISTRY_FILE + ' " not found!');
         }
@@ -729,7 +729,7 @@ class Wget extends lib.DevCom {
                 '  path   Path to save web file local'
             ];
             
-            throw _createError(lines.join(lib.os.EOL));
+            throw _createError(lines.join(_os.EOL));
         } 
         
         let url = _url.parse(args[0]),
