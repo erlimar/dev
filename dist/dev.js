@@ -72,6 +72,12 @@ let _path = require('path'),
         doc: _path.join(_rootPath, 'doc')
     },
 
+    /**
+     * Create a Error instance
+     * 
+     * @param {string} msg - Message of error
+     * @return {object} Instance of Error
+     */
     _createError = (msg) => {
         return new Error(msg);
     }
@@ -270,6 +276,16 @@ let lib =
             }
 
             return this._DevComType_;
+        }
+        
+        /**
+         * Create a Error instance
+         *
+         * @param {string} msg - Message of error
+         * @return {object} Instance of Error
+         */
+        createError(msg) {
+            return _createError(msg);
         }
     
         /**
