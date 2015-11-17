@@ -554,7 +554,7 @@ new class DevToolLib {
                 : uriData.type === 'lib'
                 ? 'Library'
                 : 'Documentation';
-            throw new lib.Error(typeName + ' "' + name + '' + '" not found!');
+            throw new lib.Error(typeName + ' "' + uriData.name + '' + '" not found!');
         }
         
         lib.downloadSync(registryFileUrl, uriData.path);
