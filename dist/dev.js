@@ -573,7 +573,7 @@ new class DevToolLib {
         //
         // Reload resource file from distk
         //
-        fileExists = lib.fs.existsSync(uriData.path);
+        let fileExists = lib.fs.existsSync(uriData.path);
              
         if (!fileExists) {
             throw new lib.Error('Download failed to:', registryFileUrl);
