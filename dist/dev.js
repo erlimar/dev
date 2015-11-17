@@ -608,6 +608,7 @@ new class DevToolLib {
         throw new lib.Error('Unexpected result to lib.require()!');
     }
 }
+console.log('>>> Lib instance:', lib);
 
 /**
  * Command line runner for E5R Tools for Development Team.
