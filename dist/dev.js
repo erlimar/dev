@@ -925,7 +925,7 @@ class Setup extends lib.DevCom {
 }
 
 if (!module.parent && module.filename === __filename) {
-    lib.logger.debug('Running DEV command line tool...');
+    lib.logger.verbose('Running DEV command line tool...');
     
     /* @hack: Lock module resolves only from lib directory */
     module.paths = [lib.devHome.lib, lib.path.parse(module.filename).dir];
@@ -936,7 +936,7 @@ if (!module.parent && module.filename === __filename) {
         Setup,
     ]);
 } else {
-    lib.logger.debug('Required DEV tool...');
+    lib.logger.verbose('Required DEV tool...:', lib);
     exports = module.exports = lib;
 }
 
