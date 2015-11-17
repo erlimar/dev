@@ -431,42 +431,53 @@ new class DevToolLib {
         
         let uriData = compileRequireData(uri);
         
-        // Load file from cache
-        for (let c in lib.__require_cache__) {
-            let cacheObj = lib.__require_cache__[c];
-            if (cacheObj.name === uriData.urlSufix) {
-                return cacheObj.file;
+        /** @todo: Move to new method */
+        let loadCachedObjectResource = (uriData) => {
+            // Load file from cache
+            for (let c in lib.__require_cache__) {
+                let cacheObj = lib.__require_cache__[c];
+                if (cacheObj.name === uriData.urlSufix) {
+                    return cacheObj.file;
+                }
             }
+            
+            let fileExists = lib.fs.existsSync(uriData.path);
+            
+            // Load Javascript file from disk
+            /** @todo: Move to method */
+            if (fileExists && uriData.isJS) {
+                let file = require(uriData.path);
+                if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
+                    lib.__require_cache__.splice(0,1);
+                }
+                lib.__require_cache__.push({
+                    name: uriData.urlSufix,
+                    file: file
+                });
+                return file;
+            }
+            
+            // Load Text file from disk
+            /** @todo: Move to method */
+            if (fileExists && !uriData.isJS) {
+                let file = lib.fs.readFileSync(uriData.path, 'utf8');
+                if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
+                    lib.__require_cache__.splice(0,1);
+                }
+                lib.__require_cache__.push({
+                    name: uriData.urlSufix,
+                    file: file
+                });
+                return file;
+            }
+            
+            return null;
         }
         
-        let fileExists = lib.fs.existsSync(uriData.path);
+        let cachedFile = loadCachedObjectResource(uriData);
         
-        // Load Javascript file from disk
-        /** @todo: Move to method */
-        if (fileExists && uriData.isJS) {
-            let file = require(uriData.path);
-            if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
-                lib.__require_cache__.splice(0,1);
-            }
-            lib.__require_cache__.push({
-                name: uriData.urlSufix,
-                file: file
-            });
-            return file;
-        }
-        
-        // Load Text file from disk
-        /** @todo: Move to method */
-        if (fileExists && !uriData.isJS) {
-            let file = lib.fs.readFileSync(uriData.path, 'utf8');
-            if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
-                lib.__require_cache__.splice(0,1);
-            }
-            lib.__require_cache__.push({
-                name: uriData.urlSufix,
-                file: file
-            });
-            return file;
+        if(cachedFile){
+            return cachedFile;
         }
         
         // Download file from registry.json
