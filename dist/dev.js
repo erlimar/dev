@@ -944,6 +944,8 @@ if (!module.parent && module.filename === __filename) {
     /* @hack: Lock module resolves only from lib directory */
     module.paths = [lib.devHome.lib, lib.path.parse(module.filename).dir];
     
+    exports = module.exports = lib;
+    
     // Run process tools
     new DevToolCommandLine([
         Wget,
