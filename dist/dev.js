@@ -98,7 +98,7 @@ class Logger {
 
 console.log('>>> Defining class DevToolLib...');
 /** @instance */
-let lib = 
+var lib = 
 
 /**
  * Library for E5R Tools for Development Team.
