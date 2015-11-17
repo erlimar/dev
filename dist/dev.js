@@ -9,6 +9,8 @@
  * @todo: Implements verbosity
  */
 
+console.log('>>> Running DEV.JS...');
+
 /** @constant {string} */
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
@@ -60,6 +62,7 @@ const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
  * @property {object} warning
  * @property {object} error
  */
+console.log('>>> Defining class Logger...');
 class Logger {
     
     /**
@@ -93,6 +96,7 @@ class Logger {
     }
 }
 
+console.log('>>> Defining class DevToolLib...');
 /** @instance */
 let lib = 
 
@@ -611,6 +615,7 @@ new class DevToolLib {
  * 
  * @todo: Move to `src/devtool.js`
  */
+console.log('>>> Defining class DevToolCommandLine...');
 class DevToolCommandLine {
     
     /**
@@ -775,6 +780,7 @@ class DevToolCommandLine {
  * 
  * @todo: Move to `src/wget.js`
  */
+console.log('>>> Defining class Wget...');
 class Wget extends lib.DevCom {
     
     /**
@@ -813,6 +819,7 @@ class Wget extends lib.DevCom {
  * 
  * @todo: Move to `src/setup.js`
  */
+console.log('>>> Defining class Setup...');
 class Setup extends lib.DevCom {
     
     /**
