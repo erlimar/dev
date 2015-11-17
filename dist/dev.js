@@ -762,7 +762,7 @@ class Setup extends lib.DevCom {
     run(toolInstance, args) {
         lib.printf('Set-up E5R Tools for Development Team...');
         
-        // 2> Make directory structure
+        // 1> Make directory structure
         [
             lib.devHome.root,
             lib.devHome.tools,
@@ -799,63 +799,14 @@ class Setup extends lib.DevCom {
             echo 'export ABC="123"' >> ~/.profile
         */
         
-        // 4> Instala binários
-        //   - $> dev bin-install e5r-devcom
-        //   - Download de url://dist/bin/dev.{cmd,ps1} (Windows) para %HOME%\.dev\bin\dev.{cmd,ps1}
-        //     Esses arquivos (dev.cmd e dev.ps1) devem somente repassar os argumentos para o comando
-        //     nodeJS [jsengine.exe dev.js *ARGS*]
-        //
-        //   - Sugest:
-        //     js> let binInstall = lib.require('devcom/bin-install');
-        //     js> if(binInstall.run(toolInstance, ['e5r-contrib']))...
-        //
-        //   - Others:
-        //     js> lib.require('lib://my-lib');
-        //     js> lib.require('cmd://bin-install');
-        //     js> lib.require('doc://setup').show({full:true});
-        // $> dev registry install "bin,doc" --scope "e5r-devcom"
-        // let cmd = lib.require('cmd://registry');
-        // 
-        // cmd.run(toolInstance, [
-        //     'install', 'bin,doc',
-        //     '--scope', TOOL_DEFAULT_SCOPE
-        // ]);
+        // 4> InstalL binary
+        let registry = lib.require('cmd://registry');
         
-        let _cmd = lib.require('cmd://registry');
-        
-        // Ideia
-        /*
-        // let cmd = lib.require('cmd://registry');
-        //
-        // cmd.run(toolInstance, [
-        //     'install',
-        //     '--resources', 'bin,doc',
-        //     '--scope', TOOL_DEFAULT_SCOPE
-        // ]);
-        //
-        // Lib.require => Usa lib.getResources('DevComName') pra baixar arquivos da Web
-        //                depois carrega.
-        //
-        // Registry.js {
-             let command = args.splice(0, 1);
-             let params = lib.parseParams(args);
-             
-             if(command === 'install') {
-                 lib.getResources(params.resources, params.scope);
-                 return;
-             }
-             
-             ...
-        // }
-        */
-        
-        _cmd.run(toolInstance, args);
-        
-        let _cmdCache = lib.require('cmd://registry'),
-            _lib = lib.require('lib://my-lib'),
-            _libCache = lib.require('lib://my-lib'),
-            _doc = lib.require('doc://my-lib'),
-            _docCache = lib.require('doc://my-lib');
+        registry.run(toolInstance, [
+            'install',
+            '-resources', 'bin,doc',
+            '--scope', TOOL_DEFAULT_SCOPE
+        ]);
         
         // 5> Show completed info
         lib.printf('Set-up completed!');
