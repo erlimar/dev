@@ -9,8 +9,6 @@
  * @todo: Implements verbosity
  */
 
-console.log('>>> Running DEV.JS...');
-
 /** @constant {string} */
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
@@ -62,7 +60,6 @@ const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
  * @property {object} warning
  * @property {object} error
  */
-console.log('>>> Defining class Logger...');
 class Logger {
     
     /**
@@ -96,7 +93,6 @@ class Logger {
     }
 }
 
-console.log('>>> Defining class DevToolLib...');
 /** @instance */
 let lib = 
 
@@ -608,7 +604,6 @@ new class DevToolLib {
         throw new lib.Error('Unexpected result to lib.require()!');
     }
 }
-console.log('>>> Lib instance:', lib);
 
 /**
  * Command line runner for E5R Tools for Development Team.
@@ -616,7 +611,6 @@ console.log('>>> Lib instance:', lib);
  * 
  * @todo: Move to `src/devtool.js`
  */
-console.log('>>> Defining class DevToolCommandLine...');
 class DevToolCommandLine {
     
     /**
@@ -781,7 +775,6 @@ class DevToolCommandLine {
  * 
  * @todo: Move to `src/wget.js`
  */
-console.log('>>> Defining class Wget...');
 class Wget extends lib.DevCom {
     
     /**
@@ -820,7 +813,6 @@ class Wget extends lib.DevCom {
  * 
  * @todo: Move to `src/setup.js`
  */
-console.log('>>> Defining class Setup...');
 class Setup extends lib.DevCom {
     
     /**
@@ -932,19 +924,11 @@ class Setup extends lib.DevCom {
     }
 }
 
-console.log('>>> !module.parent:', !module.parent);
-console.log('>>> module.filename:', module.filename);
-console.log('>>> __filename:', __filename);
-console.log('>>> module.filename === __filename:', module.filename === __filename);
-console.log('>>> !module.parent && module.filename === __filename:', !module.parent && module.filename === __filename);
+/* @hack: Lock module resolves only from lib directory */
+module.paths = [lib.devHome.lib, lib.path.parse(module.filename).dir];
 
 if (!module.parent && module.filename === __filename) {
-    console.log('>>>> Running DEV command line tool...');
-    
-    /* @hack: Lock module resolves only from lib directory */
-    module.paths = [lib.devHome.lib, lib.path.parse(module.filename).dir];
-    
-    exports = module.exports = lib;
+    lib.logger.debug('Running DEV command line tool!');
     
     // Run process tools
     new DevToolCommandLine([
@@ -952,23 +936,7 @@ if (!module.parent && module.filename === __filename) {
         Setup,
     ]);
 } else {
-    console.log('>>>> Required DEV tool...:', lib);
-    exports = module.exports = lib;
+    lib.logger.debug('Required DEV tool!');
 }
 
-
-
-/*
-DEVCOM padrões:
-
-- help -> builtin
-    Exibe o arquivo /help/devcom/command.html no navegador
-    ou, /help/devcom/command.man/ no prompt
-
-- registry -> builtin
-    * list -> Lista os nomes dos registros em `registry.json`
-    * show [name] -> Exibe as informações do registro X em `registry.json`
-    * remove [name] -> Remove um registro da lista
-    * update [url for registry.json] -> Faz um merge do `registry.json` atual com o baixado da url
-    Todos os registros no remoto serão adicionados ou substituirão os existentes localmente
-*/
+exports = module.exports = lib;
