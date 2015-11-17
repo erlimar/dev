@@ -391,13 +391,20 @@ let lib =
             // Load Javascript file from disk
             if (fileExists && uriData.isJS) {
                 let file = require(uriData.path);
+
+                if (uriData.type === 'cmd' && !(file instanceof lib.DevCom)) {
+                    throw _createError('Invalid DevCom type inheritance.');
+                }
+
                 if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
                     lib.__require_cache__.splice(0, 1);
                 }
+                
                 lib.__require_cache__.push({
                     name: uriData.urlSufix,
                     file: file
                 });
+                
                 return file;
             }
         
