@@ -910,6 +910,8 @@ class Setup extends lib.DevCom {
     }
 }
 
+exports = module.exports = lib;
+
 if (!module.parent && module.filename === __filename) {
     lib.logger.debug('Running DEV command line tool!');
     
@@ -921,5 +923,3 @@ if (!module.parent && module.filename === __filename) {
 } else {
     lib.logger.debug('Required DEV tool!');
 }
-
-exports = module.exports = lib;
