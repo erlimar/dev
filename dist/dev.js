@@ -894,16 +894,13 @@ class Setup extends lib.DevCom {
         */
         
         // 4> InstalL binary
-        lib.logger.debug('4> InstalL binary');
         let registry = lib.require('cmd://registry');
 
-        lib.logger.debug('registry.run()');
         registry.run(devTool, parseArgOptions([
             'install',
             '--resources=bin,doc',
             '--scope', TOOL_DEFAULT_SCOPE
         ]));
-        lib.logger.debug('registry.run() finished!');
         
         // 5> Show completed info
         lib.printf('Set-up completed!');
@@ -913,13 +910,9 @@ class Setup extends lib.DevCom {
 exports = module.exports = lib;
 
 if (!module.parent && module.filename === __filename) {
-    lib.logger.debug('Running DEV command line tool!');
-    
     // Run process tools
     new DevToolCommandLine([
         Wget,
         Setup,
     ]);
-} else {
-    lib.logger.debug('Required DEV tool!');
 }
