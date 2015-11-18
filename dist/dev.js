@@ -375,6 +375,20 @@ let lib =
         }
         
         /**
+         * Normalize a URL, adding '/' end if necessary.
+         * 
+         * @param {string} url - An URL
+         * @return {string} An normalized URL
+         */
+        normalizeUrl(url) {
+            if (typeof url !== 'string') {
+                throw _createError('Invalid url value. Must be an string.');
+            }
+
+            return url.concat(url.lastIndexOf('/') !== url.length - 1 ? '/' : '');
+        }
+        
+        /**
          * Make a registry Url
          * 
          * @param {object} entry - Registry entry object
@@ -595,12 +609,7 @@ let lib =
                     throw _createError('Unable to determine the URL for registry "' + registryName + '"');
                 }
             
-                // Normalize lock URL
-                let registryLockURL = registryURL.concat(
-                    registryURL.lastIndexOf('/') !== registryURL.length - 1
-                        ? '/' + TOOL_REGISTRY_LOCKFILE
-                        : TOOL_REGISTRY_LOCKFILE
-                    );
+                let registryLockURL = lib.normalizeUrl(registryURL).concat(TOOL_REGISTRY_LOCKFILE); 
             
                 // Download LOCK file
                 if (!registryContent.lock && !_fs.existsSync(registryLockFilePath)) {
@@ -617,12 +626,7 @@ let lib =
                 }
 
                 if (-1 < registryContent.lock.indexOf(uriData.urlSufix)) {
-                    // Normalize lock URL
-                    registryFileUrl = registryURL.concat(
-                        registryURL.lastIndexOf('/') !== registryURL.length - 1
-                            ? '/' + uriData.urlSufix
-                            : uriData.urlSufix
-                        );
+                    registryFileUrl = lib.normalizeUrl(registryURL).concat(uriData.urlSufix);
                     break;
                 }
             }
