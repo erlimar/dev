@@ -537,8 +537,7 @@ let lib =
             }
 
             if (!lib.__registry_cache__) {
-                let registry_text = _fs.readFileSync(registryPath, 'utf8');
-                lib.__registry_cache__ = JSON.parse(registry_text);
+                lib.__registry_cache__ = require(registryPath);
             }
 
             if (typeof lib.__registry_cache__ !== 'object') {
@@ -699,12 +698,12 @@ class DevToolCommandLine {
      */
     usage() {
         lib.printf([
-            '%s v%s',
-            '%s',
-            '',
-            'Usage: %s [devcom] [options]',
-            '',
-            'DevCom:']
+                '%s v%s',
+                '%s',
+                '',
+                'Usage: %s [devcom] [options]',
+                '',
+                'DevCom:']
             .join(_os.EOL),
 
             TOOL_TITLE, TOOL_VERSION,
@@ -907,6 +906,9 @@ class Setup extends lib.DevCom {
         lib.printf('Set-up completed!');
     }
 }
+
+/** @hack: No circular reference */
+lib.DevTool = DevToolCommandLine;
 
 exports = module.exports = lib;
 
