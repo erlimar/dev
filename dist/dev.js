@@ -82,48 +82,6 @@ let _path = require('path'),
     };
 
 /**
- * Logger dispatcher
- * @class
- * 
- * @property {object} verbose
- * @property {object} debug
- * @property {object} warning
- * @property {object} error
- */
-class Logger {
-    
-    /**
-     * Print verbose messages
-     */
-    get verbose() {
-        return console.info;
-    }
-    
-    /**
-     * Print messages if environment variable NODE_DEBUG=E5RDEV
-     */
-    get debug() {
-        if (!this._debug) {
-            this._debug = _util.debuglog(DEBUG_IDENTIFY);
-        }
-        return this._debug;
-    }
-    /**
-     * Print warning messages
-     */
-    get warning() {
-        return console.warn;
-    }
-    
-    /**
-     * Print error messages
-     */
-    get error() {
-        return console.error;
-    }
-}
-
-/**
  * Create a Error instance
  * 
  * @param {string} msg - Message of error
@@ -289,6 +247,63 @@ function parseArgOptions(args) {
     return _options;
 }
 
+/**
+ * Logger dispatcher
+ * @class
+ * 
+ * @property {object} verbose
+ * @property {object} debug
+ * @property {object} warning
+ * @property {object} error
+ */
+class Logger {
+    
+    /**
+     * Print verbose messages
+     */
+    get verbose() {
+        return console.info;
+    }
+    
+    /**
+     * Print messages if environment variable NODE_DEBUG=E5RDEV
+     */
+    get debug() {
+        if (!this._debug) {
+            this._debug = _util.debuglog(DEBUG_IDENTIFY);
+        }
+        return this._debug;
+    }
+    /**
+     * Print warning messages
+     */
+    get warning() {
+        return console.warn;
+    }
+    
+    /**
+     * Print error messages
+     */
+    get error() {
+        return console.error;
+    }
+}
+
+/**
+ * Base type for DevCom's
+ */
+class DevCom {
+    /**
+    * Run the builtin command
+    * 
+    * @param {object} devTool - Instance of DevToolCommandLine
+    * @param {object} options - Options for arguments of command
+    */
+    run(devTool, options) {
+        throw _createError('Built-in [run()] not implemented.');
+    }
+}
+
 /** @instance */
 let lib = 
 
@@ -346,21 +361,7 @@ let lib =
          * @return {DevCom}
          */
         get DevCom() {
-            if (!this._DevComType_) {
-                this._DevComType_ = class DevCom {
-                    /**
-                    * Run the builtin command
-                    * 
-                    * @param {object} devTool - Instance of DevToolCommandLine
-                    * @param {object} options - Options for arguments of command
-                    */
-                    run(devTool, options) {
-                        throw _createError('Built-in [run()] not implemented.');
-                    }
-                }
-            }
-
-            return this._DevComType_;
+            return DevCom;
         }
         
         /**
@@ -462,7 +463,7 @@ let lib =
                     + '  pid: ' + child.pid + _os.EOL
                     + '  cmd: ' + child.args.join(' ') + _os.EOL
                     + '  code: ' + child.status
-                );
+                    );
             }
         }
     
@@ -497,12 +498,12 @@ let lib =
                 if (lib.__require_cache__.length >= CACHE_MAX_FILE) {
                     lib.__require_cache__.splice(0, 1);
                 }
-                
+
                 lib.__require_cache__.push({
                     name: uriData.urlSufix,
                     file: file
                 });
-                
+
                 return file;
             }
         
