@@ -196,5 +196,5 @@ try {
     
     "Exit code: $ExitCode" | Write-Verbose
     
-    Exit $ExitCode
+    $LastExitCode = $ExitCode
 }
