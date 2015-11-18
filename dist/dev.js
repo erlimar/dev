@@ -28,13 +28,22 @@ const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/dev/dev
  * @constant {string}
  * @see "dist/registry.json"
 */
-const TOOL_DEFAULT_SCOPE = 'e5r-devcom'; // 
+const TOOL_DEFAULT_SCOPE = 'e5r-devcom'; 
 
 /** @constant {string} */
 const TOOL_REGISTRY_FILE = 'registry.json';
 
 /** @constant {string} */
 const REQUIRE_URI_REGEX = '^(cmd|lib|doc)://(([a-z0-9]|\-|_)+)$';
+
+/** @constant {string} */
+const PARAM_KEYVALUE_REGEX1 = '^[-]{2}([a-zA-Z0-9-_]+)[=]{1}([^=]+)$';
+
+/** @constant {string} */
+const PARAM_KEYVALUE_REGEX2 = '^[-]{2}([a-zA-Z0-9-_]+)$';
+
+/** @constant {string} */
+const PARAM_FLAG_REGEX = '^[-]{1}([a-zA-Z0-9-_]+)$';
 
 /** @constant {number} */
 const CACHE_MAX_FILE = 2;
@@ -70,17 +79,7 @@ let _path = require('path'),
         lib: _path.join(_rootPath, 'lib'),
         cmd: _path.join(_rootPath, 'lib', 'cmd'),
         doc: _path.join(_rootPath, 'doc')
-    },
-
-    /**
-     * Create a Error instance
-     * 
-     * @param {string} msg - Message of error
-     * @return {object} Instance of Error
-     */
-    _createError = (msg) => {
-        return new Error(msg);
-    }
+    };
 
 /**
  * Logger dispatcher
@@ -122,6 +121,16 @@ class Logger {
     get error() {
         return console.error;
     }
+}
+
+/**
+ * Create a Error instance
+ * 
+ * @param {string} msg - Message of error
+ * @return {object} Instance of Error
+ */
+function _createError(msg) {
+    return new Error(msg);
 }
 
 /**
@@ -204,6 +213,82 @@ function resolveCamelCaseName(name) {
     return buffer.join('');
 }
 
+/**
+ * Transform argument list in object key value pair
+ * 
+ * @example
+ * // input: install --scope MY_SCOPE -flag1 -flag2 "Other value" -flag3  
+ * // output = {
+ * //   args: ['install', 'Other value'],
+ * //   scope: 'MY_SCOPE',
+ * //   flag1: true,
+ * //   flag2: true,
+ * //   flag3: true
+ * // }
+ * 
+ * @param {array} args - Argument list
+ * @return {object} Object options
+ */
+function parseArgOptions(args) {
+    if (!Array.isArray(args)) {
+        throw _createError('Invalid @param type for "args". Must be an array.');
+    }
+
+    let _options = { args: [] },
+        _nextParams = [],
+        regexKV1 = new RegExp(PARAM_KEYVALUE_REGEX1),
+        regexKV2 = new RegExp(PARAM_KEYVALUE_REGEX2),
+        regexFlag = new RegExp(PARAM_FLAG_REGEX);
+
+    args.map((value) => {
+        if (value.toLowerCase() === 'args') {
+            throw _createError('Reserved word found. Not use "args" in arguments list!');
+        }
+
+        let kv1Result = regexKV1.exec(value),
+            kv2Result = regexKV2.exec(value),
+            flagResult = regexFlag.exec(value);
+
+        // --param_key=Value
+        if (kv1Result) {
+            let paramName = kv1Result[1].toLowerCase(),
+                paramValue = kv1Result[2];
+            _options[paramName] = paramValue;
+            return;
+        }
+
+        // --param_key "Value" part 1
+        if (kv2Result) {
+            let paramName = kv2Result[1].toLowerCase();
+            _nextParams.push(paramName);
+            return;
+        }
+
+        // -param-flag
+        if (flagResult) {
+            let paramName = flagResult[1].toLowerCase();
+            _options[paramName] = true;
+            return;
+        }
+
+        // --param_key "Value" part 2
+        if (0 < _nextParams.length) {
+            let paramName = _nextParams.shift();
+            _options[paramName] = value;
+            return;
+        }
+
+        // options.args
+        _options.args.push(value);
+    });
+
+    _nextParams.map((value) => {
+        _options[value] = null;
+    });
+
+    return _options;
+}
+
 /** @instance */
 let lib = 
 
@@ -263,15 +348,15 @@ let lib =
         get DevCom() {
             if (!this._DevComType_) {
                 this._DevComType_ = class DevCom {
-                /**
-                * Run the builtin command
-                * 
-                * @param {DevToolCommandLine} toolInstance - Instance of DevToolCommandLine
-                * @param {Array} args - Arguments of command
-                */
-                run(toolInstance, args) {
-                    throw _createError('Built-in [run()] not implemented.');
-                }
+                    /**
+                    * Run the builtin command
+                    * 
+                    * @param {object} devTool - Instance of DevToolCommandLine
+                    * @param {object} options - Options for arguments of command
+                    */
+                    run(devTool, options) {
+                        throw _createError('Built-in [run()] not implemented.');
+                    }
                 }
             }
 
@@ -590,12 +675,18 @@ class DevToolCommandLine {
         self._cmd = (this._args.shift() || '').toLowerCase();
         self._builtin = new Object;
 
-        self.registry(builtins)
-            .then(self.run)
-            .catch(function (error) {
-                lib.logger.error(error);
-                self.exit(error.code || 1);
+        try {
+            // Registry Built-in Functions.
+            builtins.map((value) => {
+                self.builtin = value;
             });
+            
+            // Start DevCom
+            self.run();
+        } catch (error) {
+            lib.logger.error(error);
+            self.exit(error.code || 1);
+        }
     }
     
     /**
@@ -649,42 +740,26 @@ class DevToolCommandLine {
     }
     
     /**
-     * Registry Built-in Functions.
-     * 
-     * @param {Array} builtins - List of built-in functions
-     * 
-     * @return {Promise}
-     */
-    registry(builtins) {
-        let self = this;
-        return new Promise(function (resolve, reject) {
-            try {
-                for (let b in builtins) {
-                    self.builtin = builtins[b];
-                }
-                resolve(self);
-            } catch (error) {
-                reject(error);
-            }
-        });
-    }
-    
-    /**
      * Run the tool
      */
-    run(self) {
-        if (!self._cmd) {
-            self.usage();
-            self.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
+    run() {
+        if (!this._cmd) {
+            this.usage();
+            this.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
         }
 
-        let devcom = self.builtin[self._cmd];
+        let devcom = this.builtin[this._cmd];
+
+        /** @todo: Load dynamic devcom */
+        // if (!devcom) {
+        //     devcom = lib.require('cmd://' + this._cmd);
+        // }
 
         if (!devcom) {
-            throw _createError('DEVCOM [' + self._cmd + '] not found!');
+            throw _createError('DEVCOM [' + this._cmd + '] not found!');
         }
-
-        devcom.run(self, self._args);
+        
+        devcom.run(this, parseArgOptions(this._args));
     }
     
     /**
@@ -740,13 +815,13 @@ class Wget extends lib.DevCom {
     /**
      * Run the `wget` built-in devcom
      * 
-     * @param {DevToolCommandLine} toolInstance - Instance of DevToolCommandLine
-     * @param {Array} args - Argument list
+     * @param {object} devTool - Instance of DevToolCommandLine
+     * @param {object} options - Options for argument list
      */
-    run(toolInstance, args) {
-        if (args.length !== 2) {
+    run(devTool, options) {
+        if (options.args.length !== 2) {
             let lines = [
-                'WGet usage: ' + toolInstance.name + ' wget [url] [path]',
+                'WGet usage: ' + devTool.name + ' wget [url] [path]',
                 '  url    URL of the web file',
                 '  path   Path to save web file local'
             ];
@@ -754,11 +829,11 @@ class Wget extends lib.DevCom {
             throw _createError(lines.join(_os.EOL));
         }
 
-        let url = _url.parse(args[0]),
-            path = _path.resolve(args[1]);
+        let url = _url.parse(options.args[0]),
+            path = _path.resolve(options.args[1]);
 
         if (!url.protocol) {
-            throw _createError('Invalid URL: ' + args[0]);
+            throw _createError('Invalid URL: ' + options.args[0]);
         }
 
         lib.download(url.href, path);
@@ -778,10 +853,10 @@ class Setup extends lib.DevCom {
     /**
      * Run the `setup` built-in command
      * 
-     * @param {DevToolCommandLine} toolInstance - Instance of DevToolCommandLine
-     * @param {Array} args - Argument list
+     * @param {object} devTool - Instance of DevToolCommandLine
+     * @param {object} options - Options for argument list
      */
-    run(toolInstance, args) {
+    run(devTool, options) {
         lib.printf('Set-up E5R Tools for Development Team...');
         
         // 1> Make directory structure
@@ -824,11 +899,11 @@ class Setup extends lib.DevCom {
         // 4> InstalL binary
         let registry = lib.require('cmd://registry');
 
-        registry.run(toolInstance, [
+        registry.run(devTool, parseArgOptions([
             'install',
             '--resources=bin,doc',
             '--scope', TOOL_DEFAULT_SCOPE
-        ]);
+        ]));
         
         // 5> Show completed info
         lib.printf('Set-up completed!');
