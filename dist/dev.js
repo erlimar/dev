@@ -373,6 +373,34 @@ let lib =
         createError(msg) {
             return _createError(msg);
         }
+        
+        /**
+         * Make a registry Url
+         * 
+         * @param {object} entry - Registry entry object
+         * @return {string}
+         */
+        makeRegistryUrl(entry) {
+            if (typeof entry !== 'object') {
+                throw _createError('Invalid content type of registry.');
+            }
+
+            let registryType = entry.type.toLowerCase(),
+                url;
+
+            if (registryType === 'github' && entry.owner && entry.repository && entry.branch) {
+                url = 'https://raw.githubusercontent.com/{owner}/{repository}/{branch}/{path}'
+                    .replace('{owner}', entry.owner)
+                    .replace('{repository}', entry.repository)
+                    .replace('{branch}', entry.branch)
+                    .replace('{path}', entry.path);
+            }
+        
+            /** @todo: Implements type URL */
+            //if(registryType === 'url' && registryContent...)
+            
+            return url;
+        }
     
         /**
          * Download a web file
@@ -551,25 +579,14 @@ let lib =
                 let registryName = registryNames[r],
                     registryContent = lib.__registry_cache__[registryName],
                     registryLockFileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, registryName),
-                    registryLockFilePath = _path.resolve(lib.devHome.root, registryLockFileName),
-                    registryType = registryContent.type.toLowerCase(),
-                    registryURL;
+                    registryLockFilePath = _path.resolve(lib.devHome.root, registryLockFileName);
 
                 if (typeof registryContent.type !== 'string') {
                     throw _createError('Invalid registry type for "' + registryName + '"');
                 }
 
-                if (registryType === 'github' && registryContent.owner && registryContent.repository && registryContent.branch) {
-                    registryURL = 'https://raw.githubusercontent.com/{owner}/{repository}/{branch}/{path}'
-                        .replace('{owner}', registryContent.owner)
-                        .replace('{repository}', registryContent.repository)
-                        .replace('{branch}', registryContent.branch)
-                        .replace('{path}', registryContent.path);
-                }
-            
-                /** @todo: Implements type URL */
-                //if(registryType === 'url' && registryContent...)
-            
+                let registryURL = lib.makeRegistryUrl(registryContent);
+                
                 if (typeof registryURL !== 'string') {
                     throw _createError('Unable to determine the URL for registry "' + registryName + '"');
                 }
