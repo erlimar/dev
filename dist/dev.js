@@ -894,13 +894,16 @@ class Setup extends lib.DevCom {
         */
         
         // 4> InstalL binary
+        lib.logger.debug('4> InstalL binary');
         let registry = lib.require('cmd://registry');
 
+        lib.logger.debug('registry.run()');
         registry.run(devTool, parseArgOptions([
             'install',
             '--resources=bin,doc',
             '--scope', TOOL_DEFAULT_SCOPE
         ]));
+        lib.logger.debug('registry.run() finished!');
         
         // 5> Show completed info
         lib.printf('Set-up completed!');
