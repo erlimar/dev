@@ -22,7 +22,7 @@ const TOOL_COPYRIGHT = 'Copyright (c) E5R Development Team. All rights reserved.
 const TOOL_DEVFOLDER = '.dev';
 
 /** @constant {string} */
-const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/';
+const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/dev/develop/dist2/';
 
 /** 
  * @constant {string}
