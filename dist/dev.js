@@ -433,8 +433,6 @@ let lib =
          * 
          * @param {string} url - Url for download
          * @param {string} path - Path to save file
-         * 
-         * @return {bool}
          */
         downloadSync(url, path) {
             let jsEngine = process.execPath,
@@ -459,14 +457,13 @@ let lib =
             lib.printf(child.output[2].toString());
 
             if (child.status !== 0) {
-                lib.logger.error('======');
-                lib.logger.error('Error: Failed of exec shell command');
-                lib.logger.error('  PID:', child.pid);
-                lib.logger.error('  CMD:', child.args.join(' '));
-                lib.logger.error('======');
+                throw _createError(''
+                    + 'Download failed to "' + url + '"' + _os.EOL
+                    + '  pid: ' + child.pid + _os.EOL
+                    + '  cmd: ' + child.args.join(' ') + _os.EOL
+                    + '  code: ' + child.status
+                );
             }
-
-            return _fs.existsSync(path);
         }
     
         /**
