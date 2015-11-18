@@ -385,21 +385,25 @@ let lib =
                 throw _createError('Invalid content type of registry.');
             }
 
-            let registryType = entry.type.toLowerCase(),
-                url;
-
+            let registryType = entry.type.toLowerCase();
+    
+            // GitHub type
             if (registryType === 'github' && entry.owner && entry.repository && entry.branch) {
-                url = 'https://raw.githubusercontent.com/{owner}/{repository}/{branch}/{path}'
+                return 'https://raw.githubusercontent.com/{owner}/{repository}/{branch}/{path}'
                     .replace('{owner}', entry.owner)
                     .replace('{repository}', entry.repository)
                     .replace('{branch}', entry.branch)
-                    .replace('{path}', entry.path);
+                    .replace('{path}', entry.path ? entry.path : '');
             }
         
-            /** @todo: Implements type URL */
-            //if(registryType === 'url' && registryContent...)
-            
-            return url;
+            // URL type
+            if (registryType === 'url' && entry.url) {
+                return '{base}/{path}'
+                    .replace('{base}', entry.url)
+                    .replace('{path}', entry.path ? entry.path : '');
+            }
+
+            throw _createError('Invalid registry entry to generate URL: ' + JSON.stringify(entry, null, 2));
         }
     
         /**
