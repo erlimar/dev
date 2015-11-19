@@ -777,7 +777,7 @@ class DevToolCommandLine {
         return this._name;
     }
     
-    usage2() {
+    help() {
         let lines = [
             '',
             '________',
@@ -846,13 +846,18 @@ class DevToolCommandLine {
             this.usage();
             this.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
         }
+        
+        if(this._cmd === 'help'){
+            this.help();
+            this.exit(0);
+        }
 
         let devcom = this.builtin[this._cmd];
 
-        /** @todo: Load dynamic devcom */
-        // if (!devcom) {
-        //     devcom = lib.require('cmd://' + this._cmd);
-        // }
+        // Load dynamic devcom
+        if (!devcom) {
+            devcom = lib.require('cmd://' + this._cmd);
+        }
 
         if (!devcom) {
             throw _createError('DEVCOM [' + this._cmd + '] not found!');
