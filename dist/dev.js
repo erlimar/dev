@@ -16,7 +16,7 @@ const TOOL_TITLE = 'E5R Tools for Development Team';
 const TOOL_VERSION = '0.1.0-alpha';
 
 /** @constant {string} */
-const TOOL_COPYRIGHT = 'Copyright (c) E5R Development Team. All rights reserved.';
+const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
 
 /** @constant {string} */
 const TOOL_DEVFOLDER = '.dev';
@@ -775,6 +775,24 @@ class DevToolCommandLine {
      */
     get name() {
         return this._name;
+    }
+    
+    usage2() {
+        let lines = [
+            '',
+            '________',
+            '___  __ \_______   __',
+            '__  / / /  _ \_ | / /',
+            '_  /_/ //  __/_ |/ /',
+            '/_____/ \___/_____/  v' + TOOL_VERSION,
+            '',
+            TOOL_COPYRIGHT,
+            '',
+            TOOL_TITLE,
+            'usage: ' + this.name + ' [devcom] [options]'
+        ];
+        
+        lib.printf(lines.join(_os.EOL));
     }
     
     /**
