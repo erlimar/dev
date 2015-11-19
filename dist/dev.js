@@ -501,14 +501,36 @@ let lib =
                 path
             ]));
 
-            lib.printf(child.output[2].toString());
+            lib.printf(child.output[1].toString());
 
             if (child.status !== 0) {
+                let errorMessage;
+                
+                // Searching error message output
+                {
+                    let errorLines = child.output[2].toString().split(_os.EOL),
+                        errorRegex = new RegExp('^Error: {1}(.+)$');
+
+                    for (let l in errorLines) {
+                        let regexResult = errorRegex.exec(errorLines[l]);
+                        if (regexResult) {
+                            errorMessage = regexResult[1];
+                            break;
+                        }
+                    };
+                }
+
+                if (errorMessage) {
+                    throw _createError(errorMessage);
+                }
+
+                lib.printf(child.output[2].toString());
+
                 throw _createError(''
                     + 'Download failed to "' + url + '"' + _os.EOL
-                    + '  pid: ' + child.pid + _os.EOL
-                    + '  cmd: ' + child.args.join(' ') + _os.EOL
-                    + '  code: ' + child.status
+                    + '  PID: ' + child.pid + _os.EOL
+                    + '  Command: ' + child.args.join(' ') + _os.EOL
+                    + '  Exit Code: ' + child.status
                     );
             }
         }
