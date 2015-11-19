@@ -146,32 +146,6 @@ function compileRequireData(uri) {
 }
 
 /**
- * Resolve name in camelCase to "camel-case"
- * 
- * @param {string} name - Name in camelCase
- * 
- * @return {string} - Return a name formated to "camel-case"
- */
-function resolveCamelCaseName(name) {
-    if (typeof name !== 'string') {
-        throw _createError('Param name is not a string');
-    }
-
-    let buffer = [],
-        regex = RegExp('^[A-Z]$');
-
-    for (let c = 0; c < name.length; c++) {
-        let char = name.charAt(c);
-        if (c > 0 && regex.test(char.toString())) {
-            buffer.push('-');
-        }
-        buffer.push(char.toLowerCase());
-    }
-
-    return buffer.join('');
-}
-
-/**
  * Transform argument list in object key value pair
  * 
  * @example
@@ -418,6 +392,69 @@ let lib =
             }
 
             throw _createError('Invalid registry entry to generate URL: ' + JSON.stringify(entry, null, 2));
+        }
+        
+        /**
+         * Resolve name in camelCase to "camel-case"
+         * 
+         * @param {string} name - Name in camelCase
+         * 
+         * @return {string} - Return a name formated to "camel-case"
+         */
+        resolveCamelCaseName(name) {
+            if (typeof name !== 'string') {
+                throw _createError('Param name is not a string');
+            }
+
+            let buffer = [],
+                regex = RegExp('^[A-Z]$');
+
+            for (let c = 0; c < name.length; c++) {
+                let char = name.charAt(c);
+                if (c > 0 && regex.test(char.toString())) {
+                    buffer.push('-');
+                }
+                buffer.push(char.toLowerCase());
+            }
+
+            return buffer.join('');
+        }
+        
+        /**
+         * Make name "camel-case" from camelCase 
+         * 
+         * @param {string} name - Name
+         * 
+         * @return {string} - Return a name formated to "camelCase"
+         */
+        makeCamelCaseName(name) {
+            if (typeof name !== 'string') {
+                throw _createError('Param name is not a string');
+            }
+
+            let buffer = [],
+                regex = new RegExp('^[a-zA-Z0-9-_]+$'),
+                nextUpper = false;
+
+            if (!regex.test(name)) {
+                throw _createError('Invalid name for makeCamelCaseName.');
+            }
+
+            for (let c = 0; c < name.length; c++) {
+                let char = name.charAt(c);
+                if (char === '-' && 0 < buffer.length) {
+                    nextUpper = true;
+                    continue;
+                }
+                if (nextUpper) {
+                    buffer.push(char.toUpperCase());
+                    nextUpper = false;
+                    continue;
+                }
+                buffer.push(char.toLowerCase());
+            }
+
+            return buffer.join('');
         }
     
         /**
@@ -824,7 +861,7 @@ class DevToolCommandLine {
         }
 
         let instance = new BuiltinType,
-            name = resolveCamelCaseName(BuiltinType.name);
+            name = lib.resolveCamelCaseName(BuiltinType.name);
 
         if (!(instance instanceof lib.DevCom)) {
             throw _createError('Invalid Built-in type inheritance.');
