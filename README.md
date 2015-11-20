@@ -3,6 +3,13 @@ E5R Dev
 
 E5R Tools for Development Team.
 
+## Build
+
+```
+npm install
+gulp dist
+```
+
 ## Install on Windows
 
 Copy and paste the text on you command prompt.

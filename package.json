@@ -1,0 +1,19 @@
+{
+  "name": "e5r-dev",
+  "version": "0.1.0",
+  "description": "E5R Tools for Development Team",
+  "main": "dist/dev.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/e5r/dev.git"
+  },
+  "author": "E5R Development Team",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/e5r/dev/issues"
+  },
+  "homepage": "https://github.com/e5r/dev#readme",
+  "devDependencies": {
+    "gulp": "^3.9.0"
+  }
+}

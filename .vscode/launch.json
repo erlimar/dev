@@ -1,0 +1,32 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "dev setup",
+			"type": "node",
+			"request": "launch",
+			"program": "dist/dev.js",
+			"stopOnEntry": false,
+			"args": ["setup"],
+			"cwd": ".",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+                "--use_strict"
+			],
+			"env": {
+				"NODE_ENV": "development",
+                "NODE_DEBUG": "E5RDEV"
+			},
+			"externalConsole": false,
+			"sourceMaps": false,
+			"outDir": null
+		},
+		{
+			"name": "Attach",
+			"type": "node",
+			"request": "attach",
+			"port": 5858
+		}
+	]
+}
