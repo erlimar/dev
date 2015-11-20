@@ -149,12 +149,13 @@ function compileRequireData(uri) {
  * Transform argument list in object key value pair
  * 
  * @example
- * // input: install --scope MY_SCOPE -flag1 -flag2 "Other value" -flag3  
+ * // input: install --scope MY_SCOPE -flag1 -flag2 --key=Value "Other value" -flag3  
  * // output = {
  * //   args: ['install', 'Other value'],
  * //   scope: 'MY_SCOPE',
  * //   flag1: true,
  * //   flag2: true,
+ * //   key: 'Value',
  * //   flag3: true
  * // }
  * 
@@ -274,7 +275,7 @@ class DevCom {
     * @param {object} options - Options for arguments of command
     */
     run(devTool, options) {
-        throw _createError('Built-in [run()] not implemented.');
+        throw _createError('DevCom run() not implemented.');
     }
 }
 
@@ -285,7 +286,6 @@ let lib =
      * Library for E5R Tools for Development Team.
      * @class
      * 
-     * @property {object} printf
      * @property {object} logger
      * @property {object} devHome
      * @property {string} devHome.root
@@ -524,7 +524,7 @@ let lib =
                 jsScript = module.filename,
                 exec = _childProcess.spawnSync;
 
-            /* @hack: No crash node debug mode */
+            /* @hack: No crash in node debug mode */
             process.execArgv.map((value) => {
                 if (!value.startsWith('--debug-brk') && !value.startsWith('--nolazy')) {
                     jsEngineArgv.push(value);
@@ -742,7 +742,7 @@ class DevToolCommandLine {
     /**
      * @constructor
      * 
-     * @param {Array} builtins - List of built-in functions
+     * @param {Array} builtins - List of built-in DevCom
      */
     constructor(builtins) {
         if (!Array.isArray(builtins)) {
@@ -757,7 +757,7 @@ class DevToolCommandLine {
         self._builtin = new Object;
 
         try {
-            // Registry Built-in Functions.
+            // Registry Built-in DevCom.
             builtins.map((value) => {
                 self.builtin = value;
             });
@@ -867,14 +867,14 @@ class DevToolCommandLine {
     }
     
     /**
-     * Built-in Functions Getter
+     * Built-in DevCom Getter
      */
     get builtin() {
         return this._builtin;
     }
     
     /**
-     * Built-in Functions Setter
+     * Built-in DevCom Setter
      * 
      * @param {Builtin} BuiltinType - Class Built-in
      */
@@ -891,7 +891,7 @@ class DevToolCommandLine {
         }
 
         if (this._builtin.hasOwnProperty(name)) {
-            throw _createError('Built-in Function [' + name + '] already exists.');
+            throw _createError('Built-in DevCom [' + name + '] already exists.');
         }
 
         Object.defineProperty(instance, 'getType', {
