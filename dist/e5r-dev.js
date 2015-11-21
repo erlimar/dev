@@ -620,15 +620,46 @@ let lib =
 
             return null;
         }
-    
+        
         /**
-         * Download resource object from web
+         * Get `registry.{scope}.lock.json` content
          * 
-         * @param {string} uri - Uniform Resource Identifier
+         * @param {string} scope - Name of scope to get content
+         * @return {object}
          */
-        downloadWebObjectResource(uri) {
-            let uriData = compileRequireData(uri),
-                registryPath = _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
+        getRegistryLock(scope) {
+            let registryLockFileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, scope),
+                registryLockFilePath = _path.resolve(lib.devHome.root, registryLockFileName);
+
+            lib.loadRegistryCache();
+
+            // Download LOCK file
+            if (!_fs.existsSync(registryLockFilePath)) {
+                let registryURL = lib.makeRegistryUrl(lib.__registry_cache__[scope]);
+
+                if (typeof registryURL !== 'string') {
+                    throw _createError('Unable to determine the URL for registry "' + scope + '"');
+                }
+                
+                let registryLockURL = lib.normalizeUrl(registryURL).concat(TOOL_REGISTRY_LOCKFILE);
+                lib.downloadSync(registryLockURL, registryLockFilePath);
+            }
+        
+            // Load LOCK file
+            let lockContent = require(registryLockFilePath);
+
+            if (!Array.isArray(lockContent)) {
+                throw _createError('Invalid lock content. Must be an array of file paths.');
+            }
+
+            return lockContent;
+        }
+        
+        /**
+         * Load the `registry.json` on cache
+         */
+        loadRegistryCache(){
+            let registryPath = _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
 
             if (!lib.__registry_cache__ && !_fs.existsSync(registryPath)) {
                 throw _createError('Registry file "' + TOOL_REGISTRY_FILE + ' " not found!');
@@ -641,43 +672,41 @@ let lib =
             if (typeof lib.__registry_cache__ !== 'object') {
                 throw _createError('Invalid registry content. Must be an object.');
             }
+        }
+    
+        /**
+         * Download resource object from web
+         * 
+         * @param {string} uri - Uniform Resource Identifier
+         */
+        downloadWebObjectResource(uri) {
+            let uriData = compileRequireData(uri);
+            
+            lib.loadRegistryCache();
 
-            let registryNames = Object.getOwnPropertyNames(lib.__registry_cache__),
+            let registryScopes = Object.getOwnPropertyNames(lib.__registry_cache__),
                 registryFileUrl;
 
-            for (let r in registryNames) {
-                let registryName = registryNames[r],
-                    registryContent = lib.__registry_cache__[registryName],
-                    registryLockFileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, registryName),
-                    registryLockFilePath = _path.resolve(lib.devHome.root, registryLockFileName);
+            for (let scope in registryScopes) {
+                let registryScope = registryScopes[scope],
+                    registryContent = lib.__registry_cache__[registryScope];
 
                 if (typeof registryContent.type !== 'string') {
-                    throw _createError('Invalid registry type for "' + registryName + '"');
+                    throw _createError('Invalid registry type for "' + registryScope + '"');
                 }
 
-                let registryURL = lib.makeRegistryUrl(registryContent);
-                
-                if (typeof registryURL !== 'string') {
-                    throw _createError('Unable to determine the URL for registry "' + registryName + '"');
-                }
-            
-                let registryLockURL = lib.normalizeUrl(registryURL).concat(TOOL_REGISTRY_LOCKFILE); 
-            
-                // Download LOCK file
-                if (!registryContent.lock && !_fs.existsSync(registryLockFilePath)) {
-                    lib.downloadSync(registryLockURL, registryLockFilePath);
-                }
-            
                 // Load LOCK file
                 if (!registryContent.lock) {
-                    registryContent.lock = require(registryLockFilePath);
-
-                    if (!Array.isArray(registryContent.lock)) {
-                        throw _createError('Invalid lock content. Must be an array of file paths.');
-                    }
+                    registryContent.lock = lib.getRegistryLock(registryScope);
                 }
 
                 if (-1 < registryContent.lock.indexOf(uriData.urlSufix)) {
+                    let registryURL = lib.makeRegistryUrl(registryContent);
+
+                    if (typeof registryURL !== 'string') {
+                        throw _createError('Unable to determine the URL for registry "' + registryScope + '"');
+                    }
+                    
                     registryFileUrl = lib.normalizeUrl(registryURL).concat(uriData.urlSufix);
                     break;
                 }
