@@ -673,6 +673,16 @@ let lib =
                 throw _createError('Invalid registry content. Must be an object.');
             }
         }
+        
+        /**
+         * Get object for `registry.json`
+         * 
+         * @return {object}
+         */
+        getRegistry(){
+            lib.loadRegistryCache();
+            return lib.__registry_cache__;
+        }
     
         /**
          * Download resource object from web
