@@ -5,7 +5,7 @@
 			"name": "dev setup",
 			"type": "node",
 			"request": "launch",
-			"program": "dist/dev.js",
+			"program": "src/e5r-dev.js",
 			"stopOnEntry": false,
 			"args": ["setup"],
 			"cwd": ".",
