@@ -43,9 +43,9 @@ Set-Variable -Option Constant "DevLib" "$DevHome\lib\node_modules"
 
 Set-Variable -Option Constant "BinJSEngine" "$DevTools\jsengine.exe"
 Set-Variable -Option Constant "OptionsJSEngine" "--use_strict"
-Set-Variable -Option Constant "BinJSInstaller" "$DevLib\dev.js"
+Set-Variable -Option Constant "BinJSInstaller" "$DevLib\e5r-dev.js"
 Set-Variable -Option Constant "NodeURL" "https://nodejs.org/dist/latest-v5.x/win-$Arch/node.exe" 
-Set-Variable -Option Constant "JSInstallerURL" "https://raw.githubusercontent.com/e5r/dev/$GitBranch/dist/dev.js" 
+Set-Variable -Option Constant "JSInstallerURL" "https://raw.githubusercontent.com/e5r/dev/$GitBranch/dist/e5r-dev.js" 
 
 <#
 .SYNOPSIS

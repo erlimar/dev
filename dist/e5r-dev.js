@@ -21,13 +21,7 @@ const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
 const TOOL_DEVFOLDER = '.dev';
 
 /** @constant {string} */
-const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/';
-
-/** 
- * @constant {string}
- * @see "dist/registry.json"
-*/
-const TOOL_DEFAULT_SCOPE = 'e5r-devcom'; 
+const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/devcom/develop/dist/';
 
 /** @constant {string} */
 const TOOL_REGISTRY_FILE = 'registry.json';
@@ -751,7 +745,7 @@ class DevToolCommandLine {
         let self = this;
 
         self._args = process.argv.slice(2);
-        self._name = _path.parse(__filename).name;
+        self._name = 'dev';
         self._cmd = (this._args.shift() || '').toLowerCase();
         self._builtin = new Object;
 
@@ -1003,9 +997,7 @@ class Setup extends lib.DevCom {
         let registry = lib.require('cmd://registry');
 
         registry.run(devTool, parseArgOptions([
-            'install',
-            '--resources=bin,doc',
-            '--scope', TOOL_DEFAULT_SCOPE
+            'get-binaries'
         ]));
         
         // 5> Show completed info
