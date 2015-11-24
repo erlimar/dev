@@ -56,6 +56,9 @@ const DEBUG_IDENTIFY = 'E5RDEV';
 /** @constant {number} */
 const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
 
+/** @constant {string} */
+const WIN_REG_QUERY_REGEX = '^(.+)(REG_SZ|REG_MULTI_SZ|REG_EXPAND_SZ|REG_DWORD|REG_QWORD|REG_BINARY|REG_NONE)\\s*(.+)$';
+
 let _path = require('path'),
     _util = require('util'),
     _os = require('os'),
@@ -142,15 +145,17 @@ function compileRequireData(uri) {
  * Transform argument list in object key value pair
  * 
  * @example
- * // input: install --scope MY_SCOPE -flag1 -flag2 --key=Value "Other value" -flag3  
- * // output = {
- * //   args: ['install', 'Other value'],
- * //   scope: 'MY_SCOPE',
- * //   flag1: true,
- * //   flag2: true,
- * //   key: 'Value',
- * //   flag3: true
- * // }
+ * // $input = 'install --scope MY_SCOPE -flag1 -flag2 --key=Value "Other value" -flag3'
+ *   
+ * // $output:
+ * {
+ *   args: ['install', 'Other value'],
+ *   scope: 'MY_SCOPE',
+ *   flag1: true,
+ *   flag2: true,
+ *   key: 'Value',
+ *   flag3: true
+ * }
  * 
  * @param {array} args - Argument list
  * @return {object} Object options
@@ -213,6 +218,70 @@ function parseArgOptions(args) {
     });
 
     return _options;
+}
+
+/**
+ * Get a user environment variable value for platform win32
+ * 
+ * @param {string} varName - Variable name
+ * @return {string}
+ */ 
+function getUserEnvironmentWin32(varName) {
+    let exec = _childProcess.spawnSync,
+        value,
+        child = exec('reg', ['query', 'HKEY_CURRENT_USER\\Environment', '/v', varName]);
+
+    if (child.status === 0) {
+        let output = child.output[1].toString().split(_os.EOL),
+            regex = new RegExp(WIN_REG_QUERY_REGEX);
+
+        for (let l in output) {
+            let line = output[l].trim(),
+                result = regex.exec(line);
+
+            if (result) {
+                value = result[3];
+                break;
+            }
+        }
+    }
+
+    return value;
+}
+
+/**
+ * Get a user environment variable value for platforms ['linux', 'freebsd', 'darwin', 'sunos']
+ * 
+ * @param {string} varName - Variable name
+ * @return {string}
+ */ 
+function getUserEnvironmentUnix(varName) {
+    throw _createError('@TODO: getUserEnvironmentUnix() not implemented!');
+}
+
+/**
+ * Set a user environment variable value for platform win32
+ * 
+ * @param {string} varName - Variable name
+ * @param {string} value - Value of variable
+ */
+function setUserEnvironmentWin32(varName, value) {
+    var exec = require('child_process').spawnSync,
+        child = exec('setx', [varName, value]);
+
+    if (child.status !== 0) {
+        throw _createError('It was not possible to assign the environment variable "' + varName + '" to the user.');
+    }
+}
+
+/**
+ * Set a user environment variable value for platforms ['linux', 'freebsd', 'darwin', 'sunos']
+ * 
+ * @param {string} varName - Variable name
+ * @param {string} value - Value of variable
+ */
+function setUserEnvironmentUnix(varName, value) {
+    throw _createError('@TODO: setUserEnvironmentUnix() not implemented!');
 }
 
 /**
@@ -297,8 +366,17 @@ let lib =
             // Enable cache 
             this.__require_cache__ = [];
             this.__registry_cache__ = null;
+            
+            // Getter and Setter for user environment variables
+            if(_os.platform() === 'win32'){
+                this.__getUserEnvironment = getUserEnvironmentWin32;
+                this.__setUserEnvironment = setUserEnvironmentWin32;
+            }else{
+                this.__getUserEnvironment = getUserEnvironmentUnix;
+                this.__setUserEnvironment = setUserEnvironmentUnix;
+            }
         }
-    
+        
         /**
          * Tool folder map
          */
@@ -448,6 +526,45 @@ let lib =
             }
 
             return buffer.join('');
+        }
+        
+        /**
+         * Get a user environment variable value
+         * 
+         * @param {string} varName - Variable name
+         * @return {string}
+         */
+        getUserEnvironment(varName) {
+            return this.__getUserEnvironment(varName);
+        }
+        
+        /**
+         * Set a user environment variable value
+         * 
+         * @param {string} varName - Variable name
+         * @param {string} value - Value of variable
+         */
+        setUserEnvironment(varName, value) {
+            this.__setUserEnvironment(varName, value);
+        }
+        
+        /**
+         * Add path to environment %PATH% var
+         * 
+         * @param {string} path - Path to add to %PATH%
+         * @return {string} Return a environment %PATH% updated
+         */
+        addPathToEnvironmentPath(path){
+            let varName = _os.platform() === 'win32' ? 'Path' : 'PATH',
+                pathSep = _os.platform() === 'win32' ? ';' : ':',
+                currentProcessPathList = (process.env[varName] || '').split(pathSep),
+                currentUserPathList = (lib.getUserEnvironment(varName) || '').split(pathSep);
+                
+            // Update process environment
+            
+            /** @todo: Implements
+            
+            // Updatte user environment
         }
     
         /**
@@ -1020,6 +1137,9 @@ class Setup extends lib.DevCom {
         //   - Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%.
         //   - Ver FLAG de tipo de sessão (PS1, CMD, SH)
         /* @DOC
+            - Comando windows para obtenção de variável do usuário
+            REG QUERY HKCU\Environment /V NOME_ERLIMAR
+            
             - Comando windows para definição de variável do usuário
             SETX NOME_ERLIMAR "Erlimar Silva Campos"
             
