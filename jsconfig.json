@@ -2,5 +2,19 @@
     "compilerOptions": {
         "target": "ES6",
         "module": "commonjs"
-    }
+    },
+    "files": [
+        "src/globals.js",
+        "src/global-consts.js",
+        "src/global-vars.js",
+        "src/global-functions.js",
+        "src/devcom.js",
+        "src/logger.js",
+        "src/devtoollib.js",
+        "src/setup.js",
+        "src/wget.js",
+        "src/devtoolcommandline.js",
+        "src/main.js",
+        "dist/e5r-dev.js"
+    ]
 }

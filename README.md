@@ -3,16 +3,21 @@ E5R Dev
 
 E5R Tools for Development Team.
 
-## Build
+## Windows build
 
 ```
 npm install
-gulp dist
+make dist
+```
+
+## Unix build
+
+```
+npm install
+./make dist
 ```
 
 ## Install on Windows
-
-Copy and paste the text on you command prompt.
 
 ### CMD
 
@@ -30,25 +35,11 @@ Copy and paste the text on you command prompt.
 Copy and paste the text on you shell.
 
 ```
-$> TODO
+TODO
 ```
 
-## Usage
+## Start usage
 
 ```
-$> dev <command> [options]
-```
-
-### command
-
-Any of the [file list](dist/tools).
-
-### options
-
-Options of the command.
-
-## Help
-
-```
-$> dev help
+dev help
 ```

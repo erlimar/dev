@@ -1,0 +1,6 @@
+/*!
+ * ${ pkg.name } v${ pkg.version }
+ * ${ pkg.description } (${ pkg.homepage })
+ * Copyright (c) ${ pkg.author }. All rights reserved.
+ * Licensed under the ${ pkg.license } License. More license information in LICENSE.txt.
+ */

@@ -4,13 +4,22 @@
 /* global process, __filename, __dirname */
 
 var gulp = require('gulp'),
-    del = require('del');
+    del = require('del'),
+    fs = require('fs'),
+    concat = require('gulp-concat-util'),
+    jsconfig = require('./jsconfig.json'),
+    pkg = require('./package.json'),
+    headerTxt = fs.readFileSync('./header.txt'),
+    bannerTxt = fs.readFileSync('./banner.txt');
 
-gulp.task('clean', function(){
+gulp.task('clean', function () {
     return del('dist/*');
 });
 
-gulp.task('dist', ['clean'], function(){
-    gulp.src(['src/*'])
+gulp.task('dist', ['clean'], function () {
+    gulp.src(jsconfig.files.concat(['!src/globals.js', '!dist/e5r-dev.js']))
+        .pipe(concat.header(bannerTxt, { pkg: pkg }))
+        .pipe(concat('e5r-dev.js'))
+        .pipe(concat.header(headerTxt, { pkg: pkg }))
         .pipe(gulp.dest('dist'));
 });
