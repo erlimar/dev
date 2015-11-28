@@ -212,14 +212,25 @@ new class DevToolLib {
     addPathToEnvironmentPath(path){
         let varName = _os.platform() === 'win32' ? 'Path' : 'PATH',
             pathSep = _os.platform() === 'win32' ? ';' : ':',
-            currentProcessPathList = (process.env[varName] || '').split(pathSep),
-            currentUserPathList = (lib.getUserEnvironment(varName) || '').split(pathSep);
+            processPath = (process.env[varName] || '').split(pathSep),
+            userPath = (lib.getUserEnvironment(varName) || '').split(pathSep);
             
         // Update process environment
-        
-        /** @todo: Implements */
+        if (0 > processPath.indexOf(path)) {
+            let newPath = [path]
+                .concat(processPath)
+                .join(pathSep);
+            process.env[varName] = newPath;
+            appendUpdateEnvironmentFile(varName, newPath);
+        }
         
         // Updatte user environment
+        if (0 > userPath.indexOf(path)) {
+            let newPath = [path]
+                .concat(userPath)
+                .join(pathSep);
+            lib.setUserEnvironment(varName, newPath);
+        }
     }
 
     /**

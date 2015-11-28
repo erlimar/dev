@@ -228,7 +228,7 @@ function parseArgOptions(args) {
  * 
  * @param {string} varName - Variable name
  * @return {string}
- */ 
+ */
 function getUserEnvironmentWin32(varName) {
     let exec = _childProcess.spawnSync,
         value,
@@ -258,7 +258,7 @@ function getUserEnvironmentWin32(varName) {
  * 
  * @param {string} varName - Variable name
  * @return {string}
- */ 
+ */
 function getUserEnvironmentUnix(varName) {
     /** @todo: Not implemented! */
     throw createError('@TODO: getUserEnvironmentUnix() not implemented!');
@@ -288,6 +288,18 @@ function setUserEnvironmentWin32(varName, value) {
 function setUserEnvironmentUnix(varName, value) {
     /** @todo: Not implemented! */
     throw createError('@TODO: setUserEnvironmentUnix() not implemented!');
+}
+
+/**
+ * Append expression to update environment file
+ * 
+ * @todo: Not implemented
+ * 
+ * @param  {any} varName
+ * @param  {any} value
+ */
+function appendUpdateEnvironmentFile(varName, value) {
+    lib.logger.debug('@TODO: appendUpdateEnvironmentFile() not implemented!');
 }
 
 // ========================================================================
@@ -415,8 +427,6 @@ new class DevToolLib {
 
     /**
      * DevCom base class
-     * 
-     * @todo: Move to `src/devcom.js`
      * 
      * @return {DevCom}
      */
@@ -572,14 +582,25 @@ new class DevToolLib {
     addPathToEnvironmentPath(path){
         let varName = _os.platform() === 'win32' ? 'Path' : 'PATH',
             pathSep = _os.platform() === 'win32' ? ';' : ':',
-            currentProcessPathList = (process.env[varName] || '').split(pathSep),
-            currentUserPathList = (lib.getUserEnvironment(varName) || '').split(pathSep);
+            processPath = (process.env[varName] || '').split(pathSep),
+            userPath = (lib.getUserEnvironment(varName) || '').split(pathSep);
             
         // Update process environment
-        
-        /** @todo: Implements */
+        if (0 > processPath.indexOf(path)) {
+            let newPath = [path]
+                .concat(processPath)
+                .join(pathSep);
+            process.env[varName] = newPath;
+            appendUpdateEnvironmentFile(varName, newPath);
+        }
         
         // Updatte user environment
+        if (0 > userPath.indexOf(path)) {
+            let newPath = [path]
+                .concat(userPath)
+                .join(pathSep);
+            lib.setUserEnvironment(varName, newPath);
+        }
     }
 
     /**
@@ -867,8 +888,6 @@ new class DevToolLib {
     /**
      * Smart substitute for `require()' native function
      * 
-     * @todo: Not Implemented!
-     * 
      * @param {string} uri - Uniform Resource Identifier
      * 
      * @return {object}
@@ -897,8 +916,6 @@ new class DevToolLib {
  * @class
  * 
  * Setup the E5R Development Tool on the user home
- * 
- * @todo: Move to `src/setup.js`
  */
 class Setup extends lib.DevCom {
     
@@ -932,24 +949,9 @@ class Setup extends lib.DevCom {
             );
         
         // 3> Add /bin to PATH
-        //   - Inclui %HOME%\.dev\bin ao %PATH%
-        //   - Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%.
-        //   - Ver FLAG de tipo de sessão (PS1, CMD, SH)
-        /* @DOC
-            - Comando windows para obtenção de variável do usuário
-            REG QUERY HKCU\Environment /V NOME_ERLIMAR
-            
-            - Comando windows para definição de variável do usuário
-            SETX NOME_ERLIMAR "Erlimar Silva Campos"
-            
-            - Comando windows para definição de variável do usuário + máquina
-            SETX NOME_ERLIMAR "Erlimar Silva Campos" /M
-            
-            - Sugestões para Linux
-            ABC="123"; export ABC
-            export ABC="123"
-            echo 'export ABC="123"' >> ~/.profile
-        */
+        /** @todo: Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%. */
+        /** @todo: Ver FLAG de tipo de sessão (PS1, CMD, SH) */
+        lib.addPathToEnvironmentPath(lib.devHome.bin);
         
         // 4> InstalL binary
         let registry = lib.require('cmd://registry');
@@ -971,8 +973,6 @@ class Setup extends lib.DevCom {
  * @class
  * 
  * Download a web file
- * 
- * @todo: Move to `src/wget.js`
  */
 class Wget extends lib.DevCom {
     
@@ -1010,8 +1010,6 @@ class Wget extends lib.DevCom {
 /**
  * Command line runner for E5R Tools for Development Team.
  * @class
- * 
- * @todo: Move to `src/devtool.js`
  */
 class DevToolCommandLine {
     

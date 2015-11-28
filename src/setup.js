@@ -36,24 +36,9 @@ class Setup extends lib.DevCom {
             );
         
         // 3> Add /bin to PATH
-        //   - Inclui %HOME%\.dev\bin ao %PATH%
-        //   - Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%.
-        //   - Ver FLAG de tipo de sessão (PS1, CMD, SH)
-        /* @DOC
-            - Comando windows para obtenção de variável do usuário
-            REG QUERY HKCU\Environment /V NOME_ERLIMAR
-            
-            - Comando windows para definição de variável do usuário
-            SETX NOME_ERLIMAR "Erlimar Silva Campos"
-            
-            - Comando windows para definição de variável do usuário + máquina
-            SETX NOME_ERLIMAR "Erlimar Silva Campos" /M
-            
-            - Sugestões para Linux
-            ABC="123"; export ABC
-            export ABC="123"
-            echo 'export ABC="123"' >> ~/.profile
-        */
+        /** @todo: Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%. */
+        /** @todo: Ver FLAG de tipo de sessão (PS1, CMD, SH) */
+        lib.addPathToEnvironmentPath(lib.devHome.bin);
         
         // 4> InstalL binary
         let registry = lib.require('cmd://registry');

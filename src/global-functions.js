@@ -146,7 +146,7 @@ function parseArgOptions(args) {
  * 
  * @param {string} varName - Variable name
  * @return {string}
- */ 
+ */
 function getUserEnvironmentWin32(varName) {
     let exec = _childProcess.spawnSync,
         value,
@@ -176,7 +176,7 @@ function getUserEnvironmentWin32(varName) {
  * 
  * @param {string} varName - Variable name
  * @return {string}
- */ 
+ */
 function getUserEnvironmentUnix(varName) {
     /** @todo: Not implemented! */
     throw createError('@TODO: getUserEnvironmentUnix() not implemented!');
@@ -206,4 +206,16 @@ function setUserEnvironmentWin32(varName, value) {
 function setUserEnvironmentUnix(varName, value) {
     /** @todo: Not implemented! */
     throw createError('@TODO: setUserEnvironmentUnix() not implemented!');
+}
+
+/**
+ * Append expression to update environment file
+ * 
+ * @todo: Not implemented
+ * 
+ * @param  {any} varName
+ * @param  {any} value
+ */
+function appendUpdateEnvironmentFile(varName, value) {
+    lib.logger.debug('@TODO: appendUpdateEnvironmentFile() not implemented!');
 }
