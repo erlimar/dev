@@ -4,6 +4,8 @@
  * Copyright (c) E5R Development Team. All rights reserved.
  * Licensed under the Apache-2.0 License. More license information in LICENSE.txt.
  */
+
+"use strict";
 // ========================================================================
 // e5r-dev/global-consts.js
 // ========================================================================
