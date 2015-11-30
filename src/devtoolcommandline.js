@@ -111,7 +111,7 @@ class DevToolCommandLine {
      * Run the tool
      */
     run() {
-        if (!this._cmd) {
+        if (!this._cmd || /^[-]{1}.+$/.test(this._cmd)) {
             this.usage();
             this.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
         }
