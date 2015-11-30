@@ -22,6 +22,10 @@ class DevToolCommandLine {
         self._builtin = new Object;
 
         try {
+            lib.logger.debug('@name:', self._name);
+            lib.logger.debug('@cmd:', self._cmd);
+            lib.logger.debug('@args:', self._args);
+            
             // Registry Built-in DevCom.
             builtins.map((value) => {
                 self.builtin = value;
