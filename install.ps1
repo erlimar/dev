@@ -159,10 +159,10 @@ Function Install-Dev
     Get-WebFile -Origin $JSInstallerURL -Destination $BinJSInstaller
     
     # Invoke $> node e5r-dev.js setup
+    $ShellName = 'powershell'
+    
     if($DevShell -ne '') {
         $ShellName = $DevShell
-    } else {
-        $ShellName = 'powershell'
     }
     
     "---------------------------------------------------------------" | Write-Host
