@@ -1069,6 +1069,9 @@ class DevToolCommandLine {
         self._name = 'dev';
         self._cmd = (this._args.shift() || '').toLowerCase();
         self._builtin = new Object;
+        
+        lib.logger.debug('@cmd:', self._cmd);
+        lib.logger.debug('@args:', self._args);
 
         try {
             // Registry Built-in DevCom.
@@ -1113,20 +1116,9 @@ class DevToolCommandLine {
      * Show usage text
      */
     usage() {
-        lib.printf([
-                '%s v%s',
-                '%s',
-                '',
-                'Usage: %s [devcom] [options]',
-                '',
-                'DevCom:']
-            .join(_os.EOL),
+        this.help();
 
-            TOOL_TITLE, TOOL_VERSION,
-            TOOL_COPYRIGHT,
-            this.name
-            );
-
+        lib.printf('DevCom:');
 
         let devcomNames = Object.getOwnPropertyNames(this._builtin);
         for (let d in devcomNames) {
@@ -1184,6 +1176,8 @@ class DevToolCommandLine {
      * Get shell options
      */
     get shellOptions() {
+        lib.logger.debug('@shell:', this._shell);
+        
         let options,
             shell = (this._shell || '').toLowerCase();
 
