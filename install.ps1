@@ -159,7 +159,13 @@ Function Install-Dev
     Get-WebFile -Origin $JSInstallerURL -Destination $BinJSInstaller
     
     # Invoke $> node e5r-dev.js setup
-    iex "& `"$BinJSEngine`" `"$BinJSInstaller`" setup --shell=powershell"
+    if($DevShell -ne '') {
+        $ShellName = $DevShell
+    } else {
+        $ShellName = 'powershell'
+    }
+    "& `"$BinJSEngine`" `"$BinJSInstaller`" setup --shell=$ShellName..." | Write-Host
+    iex "& `"$BinJSEngine`" `"$BinJSInstaller`" setup --shell=$ShellName"
 }
 
 <#
