@@ -164,7 +164,7 @@ Function Install-Dev
     } else {
         $ShellName = 'powershell'
     }
-    "& `"$BinJSEngine`" `"$BinJSInstaller`" setup --shell=$ShellName..." | Write-Host
+    
     iex "& `"$BinJSEngine`" `"$BinJSInstaller`" setup --shell=$ShellName"
 }
 
