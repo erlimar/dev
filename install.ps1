@@ -165,6 +165,9 @@ Function Install-Dev
         $ShellName = 'powershell'
     }
     
+    "---------------------------------------------------------------" | Write-Host
+    "& `"$BinJSEngine`" `"$BinJSInstaller`" setup --shell=$ShellName" | Write-Host
+    "---------------------------------------------------------------" | Write-Host
     iex "& `"$BinJSEngine`" `"$BinJSInstaller`" setup --shell=$ShellName"
 }
 
