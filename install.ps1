@@ -195,7 +195,10 @@ Function Start-Script
     Install-Dev
     
     if(Test-Path $PostFile) {
-        iex "& `"$PostFile`""
+        $policy = Get-ExecutionPolicy
+        if($policy -neq "Restricted") {
+            iex "& `"$PostFile`""
+        }
         Remove-Item $PostFile
     }
 }
