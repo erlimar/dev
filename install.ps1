@@ -165,7 +165,7 @@ Function Install-Dev
     
     "@DevShell: $DevShell" | Write-Host
     
-    if(!$DevShell) {
+    if($DevShell) {
         $ShellName = $DevShell
     }
     
