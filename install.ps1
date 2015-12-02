@@ -161,9 +161,15 @@ Function Install-Dev
     # Invoke $> node e5r-dev.js setup
     $ShellName = 'powershell'
     
+    "@ShellName1: $ShellName" | Write-Host
+    
+    "@DevShell: $DevShell" | Write-Host
+    
     if($DevShell -ne '') {
         $ShellName = $DevShell
     }
+    
+    "@ShellName2: $ShellName" | Write-Host
     
     "---------------------------------------------------------------" | Write-Host
     "& `"$BinJSEngine`" `"$BinJSInstaller`" setup --shell=$ShellName" | Write-Host
