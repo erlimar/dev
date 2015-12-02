@@ -207,9 +207,10 @@ new class DevToolLib {
      * Add path to environment %PATH% var
      * 
      * @param {string} path - Path to add to %PATH%
+     * @param {object} devTool - Instance of DevToolCommandLine
      * @return {string} Return a environment %PATH% updated
      */
-    addPathToEnvironmentPath(path){
+    addPathToEnvironmentPath(path, devTool){
         let varName = _os.platform() === 'win32' ? 'Path' : 'PATH',
             pathSep = _os.platform() === 'win32' ? ';' : ':',
             processPath = (process.env[varName] || '').split(pathSep),
@@ -221,7 +222,7 @@ new class DevToolLib {
                 .concat(processPath)
                 .join(pathSep);
             process.env[varName] = newPath;
-            appendUpdateEnvironmentFile(varName, newPath);
+            appendUpdateEnvironmentFile(varName, newPath, devTool.shellOptions);
         }
         
         // Updatte user environment

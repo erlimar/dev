@@ -16,7 +16,16 @@ class DevToolCommandLine {
 
         let self = this;
 
-        self._args = process.argv.slice(2);
+        self._args = [];
+
+        process.argv.slice(2).map((arg) => {
+            if (arg.startsWith('--shell=')) {
+                self._shell = arg.split('=')[1];
+            } else {
+                self._args.push(arg);
+            }
+        });
+
         self._name = 'dev';
         self._cmd = (this._args.shift() || '').toLowerCase();
         self._builtin = new Object;
@@ -133,6 +142,52 @@ class DevToolCommandLine {
         }
         
         devcom.run(this, parseArgOptions(this._args));
+    }
+    
+    /**
+     * Get shell options
+     */
+    get shellOptions() {
+        let options,
+            shell = (this._shell || '').toLowerCase();
+
+        if (shell === 'cmd') {
+            options = {
+                /** @todo: Move filename to constant */
+                path: _path.resolve(lib.devHome.tools, 'dev-envvars.cmd'),
+                resolver: (name, value, onlyPrefix) => {
+                    let prefix = 'set ' + name + '=';
+
+                    if (onlyPrefix) {
+                        return prefix;
+                    }
+
+                    return prefix + value;
+                }
+            }
+        }
+
+        if (shell === 'powershell') {
+            options = {
+                /** @todo: Move filename to constant */
+                path: _path.resolve(lib.devHome.tools, 'dev-envvars.ps1'),
+                resolver: (name, value, onlyPrefix) => {
+                    let prefix = '$env:' + name + ' = ';
+
+                    if (onlyPrefix) {
+                        return prefix;
+                    }
+
+                    return prefix + '"' + value + '";';
+                }
+            }
+        }
+
+        if (!options) {
+            throw createError('Shell can not be identified.');
+        }
+
+        return options;
     }
     
     /**

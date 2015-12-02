@@ -9,7 +9,7 @@
 			"stopOnEntry": false,
 			"args": [
                 "setup",
-                "--shell=cmd"
+                "--shell=powershell"
             ],
 			"cwd": ".",
 			"runtimeExecutable": null,

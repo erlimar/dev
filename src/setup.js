@@ -38,7 +38,7 @@ class Setup extends lib.DevCom {
         // 3> Add /bin to PATH
         /** @todo: Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%. */
         /** @todo: Ver FLAG de tipo de sessão (PS1, CMD, SH) */
-        lib.addPathToEnvironmentPath(lib.devHome.bin);
+        lib.addPathToEnvironmentPath(lib.devHome.bin, devTool);
         
         // 4> InstalL binary
         let registry = lib.require('cmd://registry');

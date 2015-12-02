@@ -295,13 +295,41 @@ function setUserEnvironmentUnix(varName, value) {
 /**
  * Append expression to update environment file
  * 
- * @todo: Not implemented
- * 
- * @param  {any} varName
- * @param  {any} value
+ * @param {any} varName
+ * @param {any} value
+ * @param {options} options
  */
-function appendUpdateEnvironmentFile(varName, value) {
-    lib.logger.debug('@TODO: appendUpdateEnvironmentFile() not implemented!');
+function appendUpdateEnvironmentFile(varName, value, options) {
+    if (!options) {
+        throw createError('Options has required.');
+    }
+
+    if (typeof options.path !== 'string') {
+        throw createError('Options.path must be a string.');
+    }
+
+    if (typeof options.resolver !== 'function') {
+        throw createError('Options.resolver must be a function.')
+    }
+
+    let lines = [],
+        lineBegin = options.resolver(varName, value, true);
+
+    if (_fs.existsSync(options.path)) {
+        (_fs.readFileSync(options.path, 'utf8') || '')
+            .split(_os.EOL)
+            .map((lineValue) => {
+                if (!lineValue.startsWith(lineBegin)) {
+                    lines.push(lineValue);
+                }
+            });
+    }
+
+    lines.push(options.resolver(varName, value));
+
+    if (0 < lines.length) {
+        _fs.writeFileSync(options.path, lines.join(_os.EOL), 'utf8');
+    }
 }
 
 // ========================================================================
@@ -579,9 +607,10 @@ new class DevToolLib {
      * Add path to environment %PATH% var
      * 
      * @param {string} path - Path to add to %PATH%
+     * @param {object} devTool - Instance of DevToolCommandLine
      * @return {string} Return a environment %PATH% updated
      */
-    addPathToEnvironmentPath(path){
+    addPathToEnvironmentPath(path, devTool){
         let varName = _os.platform() === 'win32' ? 'Path' : 'PATH',
             pathSep = _os.platform() === 'win32' ? ';' : ':',
             processPath = (process.env[varName] || '').split(pathSep),
@@ -593,7 +622,7 @@ new class DevToolLib {
                 .concat(processPath)
                 .join(pathSep);
             process.env[varName] = newPath;
-            appendUpdateEnvironmentFile(varName, newPath);
+            appendUpdateEnvironmentFile(varName, newPath, devTool.shellOptions);
         }
         
         // Updatte user environment
@@ -953,7 +982,7 @@ class Setup extends lib.DevCom {
         // 3> Add /bin to PATH
         /** @todo: Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%. */
         /** @todo: Ver FLAG de tipo de sessão (PS1, CMD, SH) */
-        lib.addPathToEnvironmentPath(lib.devHome.bin);
+        lib.addPathToEnvironmentPath(lib.devHome.bin, devTool);
         
         // 4> InstalL binary
         let registry = lib.require('cmd://registry');
@@ -1027,7 +1056,16 @@ class DevToolCommandLine {
 
         let self = this;
 
-        self._args = process.argv.slice(2);
+        self._args = [];
+
+        process.argv.slice(2).map((arg) => {
+            if (arg.startsWith('--shell=')) {
+                self._shell = arg.split('=')[1];
+            } else {
+                self._args.push(arg);
+            }
+        });
+
         self._name = 'dev';
         self._cmd = (this._args.shift() || '').toLowerCase();
         self._builtin = new Object;
@@ -1144,6 +1182,52 @@ class DevToolCommandLine {
         }
         
         devcom.run(this, parseArgOptions(this._args));
+    }
+    
+    /**
+     * Get shell options
+     */
+    get shellOptions() {
+        let options,
+            shell = (this._shell || '').toLowerCase();
+
+        if (shell === 'cmd') {
+            options = {
+                /** @todo: Move filename to constant */
+                path: _path.resolve(lib.devHome.tools, 'dev-envvars.cmd'),
+                resolver: (name, value, onlyPrefix) => {
+                    let prefix = 'set ' + name + '=';
+
+                    if (onlyPrefix) {
+                        return prefix;
+                    }
+
+                    return prefix + value;
+                }
+            }
+        }
+
+        if (shell === 'powershell') {
+            options = {
+                /** @todo: Move filename to constant */
+                path: _path.resolve(lib.devHome.tools, 'dev-envvars.ps1'),
+                resolver: (name, value, onlyPrefix) => {
+                    let prefix = '$env:' + name + ' = ';
+
+                    if (onlyPrefix) {
+                        return prefix;
+                    }
+
+                    return prefix + '"' + value + '";';
+                }
+            }
+        }
+
+        if (!options) {
+            throw createError('Shell can not be identified.');
+        }
+
+        return options;
     }
     
     /**

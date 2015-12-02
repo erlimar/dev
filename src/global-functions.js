@@ -211,11 +211,39 @@ function setUserEnvironmentUnix(varName, value) {
 /**
  * Append expression to update environment file
  * 
- * @todo: Not implemented
- * 
- * @param  {any} varName
- * @param  {any} value
+ * @param {any} varName
+ * @param {any} value
+ * @param {options} options
  */
-function appendUpdateEnvironmentFile(varName, value) {
-    lib.logger.debug('@TODO: appendUpdateEnvironmentFile() not implemented!');
+function appendUpdateEnvironmentFile(varName, value, options) {
+    if (!options) {
+        throw createError('Options has required.');
+    }
+
+    if (typeof options.path !== 'string') {
+        throw createError('Options.path must be a string.');
+    }
+
+    if (typeof options.resolver !== 'function') {
+        throw createError('Options.resolver must be a function.')
+    }
+
+    let lines = [],
+        lineBegin = options.resolver(varName, value, true);
+
+    if (_fs.existsSync(options.path)) {
+        (_fs.readFileSync(options.path, 'utf8') || '')
+            .split(_os.EOL)
+            .map((lineValue) => {
+                if (!lineValue.startsWith(lineBegin)) {
+                    lines.push(lineValue);
+                }
+            });
+    }
+
+    lines.push(options.resolver(varName, value));
+
+    if (0 < lines.length) {
+        _fs.writeFileSync(options.path, lines.join(_os.EOL), 'utf8');
+    }
 }
