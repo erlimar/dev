@@ -196,7 +196,7 @@ Function Start-Script
     
     if(Test-Path $PostFile) {
         $policy = Get-ExecutionPolicy
-        if($policy -neq "Restricted") {
+        if($policy -ne "Restricted") {
             iex "& `"$PostFile`""
         }
         Remove-Item $PostFile
