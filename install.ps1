@@ -175,7 +175,11 @@ Function Install-Dev
 Function Start-Script
 {
     $found = Find-Installation
-    $policy = Get-ExecutionPolicy
+    #$policy = Get-ExecutionPolicy
+    
+    #if($policy -eq "Restricted") {
+    #    Install the E5R Tools for Development Team.
+    #}
     
     if($found -and $Force) {
         Clear-Dev
@@ -188,7 +192,7 @@ Function Start-Script
     
     # Update environment from postfile
     if(Test-Path $PostFile) {
-        iex "& `"$PostFile`""
+        iex (Get-Content $PostFile)
     }
     
     if(Test-Path $PostFile) {
