@@ -175,11 +175,6 @@ Function Install-Dev
 Function Start-Script
 {
     $found = Find-Installation
-    #$policy = Get-ExecutionPolicy
-    
-    #if($policy -eq "Restricted") {
-    #    Install the E5R Tools for Development Team.
-    #}
     
     if($found -and $Force) {
         Clear-Dev
