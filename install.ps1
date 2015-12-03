@@ -187,18 +187,8 @@ Function Start-Script
     Install-Dev
     
     # Update environment from postfile
-    if(Test-Path $PostFile -and $policy -ne "Restricted") {
+    if(Test-Path $PostFile) {
         iex "& `"$PostFile`""
-    }
-    
-    if(Test-Path $PostFile -and $policy -eq "Restricted") {
-        "The current execution policy of powershell blocks automatic updating " | Write-Host
-        "environment variables. You can update manually by running the " | Write-Host
-        "following commands:" | Write-Host
-        "---------------------------------------------------------------------" | Write-Host
-        Get-Content $PostFile | Write-Host
-        "---------------------------------------------------------------------" | Write-Host
-        "Or simply close and open the terminal again." | Write-Host
     }
     
     if(Test-Path $PostFile) {
