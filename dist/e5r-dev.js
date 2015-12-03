@@ -1,5 +1,5 @@
 /*!
- * e5r-dev v0.1.3-alpha
+ * e5r-dev v0.1.4-alpha
  * E5R Tools for Development Team (https://github.com/e5r/dev#readme)
  * Copyright (c) E5R Development Team. All rights reserved.
  * Licensed under the Apache-2.0 License. More license information in LICENSE.txt.
@@ -13,7 +13,7 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
-const TOOL_VERSION = '0.1.0-alpha';
+const TOOL_VERSION = '0.1.4-alpha';
 
 /** @constant {string} */
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
@@ -1070,9 +1070,6 @@ class DevToolCommandLine {
         self._cmd = (this._args.shift() || '').toLowerCase();
         self._builtin = new Object;
         
-        lib.logger.debug('@cmd:', self._cmd);
-        lib.logger.debug('@args:', self._args);
-
         try {
             // Registry Built-in DevCom.
             builtins.map((value) => {
@@ -1176,8 +1173,6 @@ class DevToolCommandLine {
      * Get shell options
      */
     get shellOptions() {
-        lib.logger.debug('@shell:', this._shell);
-        
         let options,
             shell = (this._shell || '').toLowerCase();
 

@@ -30,9 +30,6 @@ class DevToolCommandLine {
         self._cmd = (this._args.shift() || '').toLowerCase();
         self._builtin = new Object;
         
-        lib.logger.debug('@cmd:', self._cmd);
-        lib.logger.debug('@args:', self._args);
-
         try {
             // Registry Built-in DevCom.
             builtins.map((value) => {
@@ -136,8 +133,6 @@ class DevToolCommandLine {
      * Get shell options
      */
     get shellOptions() {
-        lib.logger.debug('@shell:', this._shell);
-        
         let options,
             shell = (this._shell || '').toLowerCase();
 
