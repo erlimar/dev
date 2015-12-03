@@ -161,19 +161,10 @@ Function Install-Dev
     # Invoke $> node e5r-dev.js setup
     $ShellName = 'powershell'
     
-    "@ShellName1: $ShellName" | Write-Host
-    
-    "@DevShell: $DevShell" | Write-Host
-    
     if($DevShell) {
         $ShellName = $DevShell
     }
     
-    "@ShellName2: $ShellName" | Write-Host
-    
-    "---------------------------------------------------------------" | Write-Host
-    "& `"$BinJSEngine`" `"$BinJSInstaller`" setup --shell=$ShellName" | Write-Host
-    "---------------------------------------------------------------" | Write-Host
     iex "& `"$BinJSEngine`" `"$BinJSInstaller`" setup --shell=$ShellName"
 }
 
@@ -184,6 +175,7 @@ Function Install-Dev
 Function Start-Script
 {
     $found = Find-Installation
+    $policy = Get-ExecutionPolicy
     
     if($found -and $Force) {
         Clear-Dev
@@ -194,11 +186,22 @@ Function Start-Script
 
     Install-Dev
     
+    # Update environment from postfile
+    if(Test-Path $PostFile -and $policy -ne "Restricted") {
+        iex "& `"$PostFile`""
+    }
+    
+    if(Test-Path $PostFile -and $policy -eq "Restricted") {
+        "The current execution policy of powershell blocks automatic updating " | Write-Host
+        "environment variables. You can update manually by running the " | Write-Host
+        "following commands:" | Write-Host
+        "---------------------------------------------------------------------" | Write-Host
+        Get-Content $PostFile | Write-Host
+        "---------------------------------------------------------------------" | Write-Host
+        "Or simply close and open the terminal again." | Write-Host
+    }
+    
     if(Test-Path $PostFile) {
-        $policy = Get-ExecutionPolicy
-        if($policy -ne "Restricted") {
-            iex "& `"$PostFile`""
-        }
         Remove-Item $PostFile
     }
 }
