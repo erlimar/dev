@@ -231,6 +231,7 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     let lines = [],
         lineBegin = options.resolver(varName, value, true);
 
+        /** @todo: Change to _fs.statSync(path) */
     if (_fs.existsSync(options.path)) {
         (_fs.readFileSync(options.path, 'utf8') || '')
             .split(_os.EOL)

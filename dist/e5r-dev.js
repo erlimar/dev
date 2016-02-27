@@ -28,7 +28,7 @@ const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/devcom/
 const TOOL_REGISTRY_FILE = 'registry.json';
 
 /** @constant {string} */
-const REQUIRE_URI_REGEX = '^(cmd|lib|doc)://(([a-z0-9]|\-|_)+)$';
+const REQUIRE_URI_REGEX = '^(cmd|lib|doc)://(([a-z0-9]|\-|_|/)+)$';
 
 /** @constant {string} */
 const PARAM_KEYVALUE_REGEX1 = '^[-]{2}([a-zA-Z0-9-_]+)[=]{1}([^=]+)$';
@@ -315,6 +315,7 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     let lines = [],
         lineBegin = options.resolver(varName, value, true);
 
+        /** @todo: Change to _fs.statSync(path) */
     if (_fs.existsSync(options.path)) {
         (_fs.readFileSync(options.path, 'utf8') || '')
             .split(_os.EOL)
@@ -656,6 +657,16 @@ new class DevToolLib {
                 throw createError('Response status code: ' + res.statusCode + ' ' + res.statusMessage + ' >>> ' + url);
             }
 
+            let dirname = _path.dirname(path);
+
+            try {
+                if (!_fs.statSync(dirname).isDirectory()) {
+                    throw createError('Path "' + dirname + '" already exist and not a directory!');
+                }
+            } catch (e) {
+                _fs.mkdirSync(dirname);
+            }
+
             file = _fs.createWriteStream(path);
 
             file.on('finish', function () {
@@ -670,6 +681,7 @@ new class DevToolLib {
             if (file) {
                 file.close(/* callback */);
             }
+            /** @todo: Change to _fs.statSync(path) */
             if (_fs.existsSync(path)) {
                 _fs.unlink(path);
                 // callback
@@ -760,7 +772,8 @@ new class DevToolLib {
                 return cacheObj.file;
             }
         }
-
+        
+        /** @todo: Change to _fs.statSync(path) */
         let fileExists = _fs.existsSync(uriData.path);
     
         // Load Javascript file from disk
@@ -812,6 +825,7 @@ new class DevToolLib {
         lib.loadRegistryCache();
 
         // Download LOCK file
+        /** @todo: Change to _fs.statSync(path) */
         if (!_fs.existsSync(registryLockFilePath)) {
             let registryURL = lib.makeRegistryUrl(lib.__registry_cache__[scope]);
 
@@ -839,6 +853,7 @@ new class DevToolLib {
     loadRegistryCache(){
         let registryPath = _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
 
+        /** @todo: Change to _fs.statSync(path) */
         if (!lib.__registry_cache__ && !_fs.existsSync(registryPath)) {
             throw createError('Registry file "' + TOOL_REGISTRY_FILE + ' " not found!');
         }
@@ -869,6 +884,8 @@ new class DevToolLib {
      */
     downloadWebObjectResource(uri) {
         let uriData = compileRequireData(uri);
+        
+        lib.logger.debug('#uriData:', JSON.stringify(uriData, null, 4));
         
         lib.loadRegistryCache();
 
@@ -911,6 +928,7 @@ new class DevToolLib {
 
         lib.downloadSync(registryFileUrl, uriData.path);
 
+        /** @todo: Change to _fs.statSync(path) */
         if (!_fs.existsSync(uriData.path)) {
             throw createError('Download failed to:', registryFileUrl);
         }
@@ -968,6 +986,7 @@ class Setup extends lib.DevCom {
             lib.devHome.cmd,
             lib.devHome.doc
         ].map(path => {
+            /** @todo: Change to _fs.statSync(path) */
             if (!_fs.existsSync(path)) {
                 _fs.mkdirSync(path);
             }
@@ -1095,10 +1114,10 @@ class DevToolCommandLine {
         let lines = [
             '',
             '________',
-            '___  __ \_______   __',
-            '__  / / /  _ \_ | / /',
+            '___  __ \\_______   __',
+            '__  / / /  _ \\_ | / /',
             '_  /_/ //  __/_ |/ /',
-            '/_____/ \___/_____/  v' + TOOL_VERSION,
+            '/_____/ \\___/_____/  v' + TOOL_VERSION,
             '',
             TOOL_COPYRIGHT,
             '',
