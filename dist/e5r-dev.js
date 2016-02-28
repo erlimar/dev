@@ -885,8 +885,6 @@ new class DevToolLib {
     downloadWebObjectResource(uri) {
         let uriData = compileRequireData(uri);
         
-        lib.logger.debug('#uriData:', JSON.stringify(uriData, null, 4));
-        
         lib.loadRegistryCache();
 
         let registryScopes = Object.getOwnPropertyNames(lib.__registry_cache__),
