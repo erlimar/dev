@@ -436,6 +436,17 @@ new class DevToolLib {
     }
     
     /**
+     * Computer architecture
+     */
+    get arch() {
+        if (!this._arch) {
+            this._arch = _os.arch();
+            if (this._arch !== 'x64') this._arch = 'x86';
+        }
+        return this._arch;
+    }
+    
+    /**
      * Tool folder map
      */
     get devHome() {
