@@ -76,6 +76,31 @@ new class DevToolLib {
     }
     
     /**
+     * Smart substitute for `mkdir()' native function
+     */
+    mkdir(path) {
+        let stat;
+        try {
+            stat = _fs.statSync(path);
+            if (stat.isDirectory()) return;
+            throw createError('Path "' + path + '" already exists and not a directory.');
+        } catch (error) {
+            if (error.code !== 'ENOENT') throw error;
+            try {
+                _fs.mkdirSync(path);
+            } catch (error_into) {
+                if (error_into.code !== 'ENOENT') throw error_into;
+                let dirname = _path.dirname(path);
+                if (dirname === path) {
+                    throw createError('Undefined error for path "' + path + '".');
+                }
+                this.mkdir(dirname);
+                _fs.mkdirSync(path);
+            }
+        }
+    }
+    
+    /**
      * Create a Error instance
      *
      * @param {string} msg - Message of error
@@ -267,15 +292,7 @@ new class DevToolLib {
                 throw createError('Response status code: ' + res.statusCode + ' ' + res.statusMessage + ' >>> ' + url);
             }
 
-            let dirname = _path.dirname(path);
-
-            try {
-                if (!_fs.statSync(dirname).isDirectory()) {
-                    throw createError('Path "' + dirname + '" already exist and not a directory!');
-                }
-            } catch (e) {
-                _fs.mkdirSync(dirname);
-            }
+            lib.mkdir(_path.dirname(path));
 
             file = _fs.createWriteStream(path);
 
