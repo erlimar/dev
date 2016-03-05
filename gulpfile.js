@@ -30,7 +30,7 @@ gulp.task('dist', ['clean'], function () {
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('install', ['dist'], function() {
+gulp.task('install', [], function() {
     gulp.src(jsconfig.files.concat(['!src/globals.js', '!dist/e5r-dev.js']))
         .pipe(concat.header(bannerTxt, { pkg: pkg }))
         .pipe(concat(E5R_LIB_NAME))
