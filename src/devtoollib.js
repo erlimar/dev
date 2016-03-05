@@ -24,13 +24,15 @@ new class DevToolLib {
         this.__require_cache__ = [];
         this.__registry_cache__ = null;
         
-        // Getter and Setter for user environment variables
+        // Getter and Setter for platform tools
         if(_os.platform() === 'win32'){
             this.__getUserEnvironment = getUserEnvironmentWin32;
             this.__setUserEnvironment = setUserEnvironmentWin32;
+            this.__extractFile = extractFileWin32; 
         }else{
             this.__getUserEnvironment = getUserEnvironmentUnix;
             this.__setUserEnvironment = setUserEnvironmentUnix;
+            this.__extractFile = extractFileUnix;
         }
     }
     
@@ -77,6 +79,8 @@ new class DevToolLib {
     
     /**
      * Smart substitute for `mkdir()' native function
+     * 
+     * @param {string} path
      */
     mkdir(path) {
         let stat;
@@ -98,6 +102,58 @@ new class DevToolLib {
                 _fs.mkdirSync(path);
             }
         }
+    }
+    
+    /**
+     * Smart substitute for `rmdir()` native function
+     * 
+     * @param {string} path
+     */
+    rmdir(path) {
+        /** @note: Tank you @tkihira
+         * 
+         * https://gist.github.com/tkihira/2367067
+         */
+        if (!_fs.statSync(path).isDirectory()) {
+            throw createError('Path "' + path + '" is not a directory.');
+        }
+        
+        let list = _fs.readdirSync(path);
+
+        for (let i in list) {
+            let childPath = _path.join(path, list[i]);
+            let stat = _fs.statSync(childPath);
+
+            if (childPath === "." || childPath === "..") continue;
+            if (stat.isDirectory()) {
+                this.rmdir(childPath);
+                continue;
+            }
+
+            _fs.unlinkSync(childPath);
+        }
+        
+        _fs.rmdirSync(path);
+    }
+    
+    /**
+     * Smart substitute for `fs.rename()` native function
+     * 
+     * @param {string} oldPath
+     * @param {string} newPath
+     */
+    rename(oldPath, newPath) {
+        _fs.renameSync(oldPath, newPath);
+    }
+    
+    /**
+     * Smart substitute for `fs.exists()` native function
+     * 
+     * @param {string} path
+     */
+    pathExists(path) {
+        try { _fs.statSync(path); return true; } catch (_) { /* silent */ }
+        return false;
     }
     
     /**
@@ -237,6 +293,16 @@ new class DevToolLib {
      */
     setUserEnvironment(varName, value) {
         this.__setUserEnvironment(varName, value);
+    }
+    
+    /**
+     * Extract a packaged file
+     * 
+     * @param {string} origin - Path to packaged file
+     * @param {string} destination - Path do directory destination
+     */
+    extractFile(origin, destination) {
+        this.__extractFile(origin, destination);
     }
     
     /**

@@ -25,4 +25,6 @@
 /* global getUserEnvironmentUnix = (varName) => {} */
 /* global setUserEnvironmentWin32 = (varName, value) => {} */
 /* global setUserEnvironmentUnix = (varName, value) => {} */
+/* global extractFileWin32 = (origin, destination) => {} */
+/* global extractFileUnix = (origin, destination) => {} */
 /* global appendUpdateEnvironmentFile = (varName, value, options) => {} */
