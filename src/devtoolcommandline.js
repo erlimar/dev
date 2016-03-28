@@ -167,6 +167,22 @@ class DevToolCommandLine {
                 }
             }
         }
+        
+        if (shell === 'sh') {
+            options = {
+                /** @todo: Move filename to constant */
+                path: _path.resolve(lib.devHome.tools, 'dev-envvars.sh'),
+                resolver: (name, value, onlyPrefix) => {
+                    let prefix = name + '=';
+
+                    if (onlyPrefix) {
+                        return prefix;
+                    }
+
+                    return prefix + '"' + value + '"';
+                }
+            }
+        }
 
         if (!options) {
             throw createError('Shell can not be identified.');

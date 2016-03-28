@@ -175,7 +175,7 @@ _dev_install() {
     _dev_get_webfile "${jsdev_url}" "${bin_jsdev}"
     
     # Invoke $> node e5r-dev.js setup    
-    ${bin_jsengine} "${bin_jsdev}" setup --shell=unix-shell
+    ${bin_jsengine} "${bin_jsdev}" setup --shell=sh
 }
 
 _dev_start()
