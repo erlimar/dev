@@ -116,11 +116,7 @@ temp_dir_unziped=${temp_dir}"/unziped"
 
 _dev_find_installation()
 {
-    if [ ! -d ${dev_tools} ]; then
-        return 1
-    elif [ ! -f ${bin_jsengine} ]; then
-        return 1
-    elif [ ! -f ${bin_jsdev} ]; then
+    if [ ! -d ${dev_home} ]; then
         return 1
     fi
     
@@ -186,11 +182,8 @@ _dev_start()
         found=true
     fi
     
-    if "${found}" = true && "${force}" = true; then
+    if "${found}" = true; then
         _dev_clear
-    elif "${found}" = true; then
-        _dev_show_error "An installation already exists"
-        exit 1
     fi
     
     _dev_install
