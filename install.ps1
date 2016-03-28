@@ -42,9 +42,9 @@ Set-Variable -Option Constant "DevTools" "$DevHome\tools"
 Set-Variable -Option Constant "DevLib" "$DevHome\lib\node_modules"
 
 Set-Variable -Option Constant "BinJSEngine" "$DevTools\jsengine.exe"
-Set-Variable -Option Constant "BinJSInstaller" "$DevLib\e5r-dev.js"
+Set-Variable -Option Constant "BinJSDev" "$DevLib\e5r-dev.js"
 Set-Variable -Option Constant "PostFile" "$DevTools\dev-envvars.ps1"
-Set-Variable -Option Constant "NodeURL" "https://nodejs.org/dist/latest-v5.x/win-$Arch/node.exe" 
+Set-Variable -Option Constant "NodeURL" "https://nodejs.org/dist/v5.9.0/win-$Arch/node.exe" 
 Set-Variable -Option Constant "JSInstallerURL" "https://raw.githubusercontent.com/e5r/dev/$GitBranch/dist/e5r-dev.js" 
 
 <#
@@ -101,7 +101,7 @@ Function Find-Installation
         return $false
     }
     
-    if(!(Test-Path $BinJSInstaller)) {
+    if(!(Test-Path $BinJSDev)) {
         return $false
     }
     
@@ -155,8 +155,8 @@ Function Install-Dev
     # Download NODEJS
     Get-WebFile -Origin $NodeURL -Destination $BinJSEngine
     
-    # Download "installer.js" script
-    Get-WebFile -Origin $JSInstallerURL -Destination $BinJSInstaller
+    # Download "e5r-dev.js" script
+    Get-WebFile -Origin $JSInstallerURL -Destination $BinJSDev
     
     # Invoke $> node e5r-dev.js setup
     $ShellName = 'powershell'
@@ -165,7 +165,7 @@ Function Install-Dev
         $ShellName = $DevShell
     }
     
-    iex "& `"$BinJSEngine`" `"$BinJSInstaller`" setup --shell=$ShellName"
+    iex "& `"$BinJSEngine`" `"$BinJSDev`" setup --shell=$ShellName"
 }
 
 <#
