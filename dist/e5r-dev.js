@@ -262,8 +262,7 @@ function getUserEnvironmentWin32(varName) {
  * @return {string}
  */
 function getUserEnvironmentUnix(varName) {
-    /** @todo: Not implemented! */
-    throw createError('@TODO: getUserEnvironmentUnix() not implemented!');
+    return process.env[varName];
 }
 
 /**
@@ -288,8 +287,7 @@ function setUserEnvironmentWin32(varName, value) {
  * @param {string} value - Value of variable
  */
 function setUserEnvironmentUnix(varName, value) {
-    /** @todo: Not implemented! */
-    throw createError('@TODO: setUserEnvironmentUnix() not implemented!');
+    process.env[varName] = value;
 }
 
 /**
@@ -1377,6 +1375,22 @@ class DevToolCommandLine {
                     }
 
                     return prefix + '"' + value + '";';
+                }
+            }
+        }
+        
+        if (shell === 'sh') {
+            options = {
+                /** @todo: Move filename to constant */
+                path: _path.resolve(lib.devHome.tools, 'dev-envvars.sh'),
+                resolver: (name, value, onlyPrefix) => {
+                    let prefix = name + '=';
+
+                    if (onlyPrefix) {
+                        return prefix;
+                    }
+
+                    return prefix + '"' + value + '"';
                 }
             }
         }
