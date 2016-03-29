@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Copyright (c) E5R Development Team. All rights reserved.
 # Licensed under the Apache License, Version 2.0. More license information in LICENSE.txt.
@@ -33,11 +33,11 @@ _dev_has() {
 _dev_os()
 {
     local uname=`uname`
-    if [ ${uname} == "Darwin" ]; then
+    if [ ${uname} = "Darwin" ]; then
         echo "darwin"
-    elif [ ${uname} == "FreeBSD" ]; then
+    elif [ ${uname} = "FreeBSD" ]; then
         echo "freebsd"
-    elif [ ${uname} == "Linux" ]; then
+    elif [ ${uname} = "Linux" ]; then
         echo "linux"
     else
         echo "other"
@@ -52,7 +52,7 @@ _dev_show_error()
 # -------------------
 # Check prerequisites
 # -------------------
-if [ ! `_dev_os` == "linux" ]; then
+if [ ! `_dev_os` = "linux" ]; then
     _dev_show_error "OS "`_dev_os`" is not supported"
     exit 1
 fi
@@ -84,9 +84,9 @@ fi
 
 arch=`uname -m`
 
-if [ ${arch} == 'x64' ]; then
+if [ ${arch} = 'x64' ]; then
     arch='x64'
-elif [ ${arch} == 'x86_64' ]; then
+elif [ ${arch} = 'x86_64' ]; then
     arch='x64'
 else
     arch='x86'
@@ -109,27 +109,27 @@ post_file="${dev_tools}/dev-envvars.sh"
 node_version="5.9.0"
 node_pkg="node-v${node_version}-"`_dev_os`"-${arch}"
 node_pkg_file="${node_pkg}.tar.gz"
-node_pkg_url="https://nodejs.org/dist/v${node_version}/${node_pkg_file}" 
+node_pkg_url="https://nodejs.org/dist/v${node_version}/${node_pkg_file}"
 jsdev_url="https://raw.githubusercontent.com/e5r/dev/${git_branch}/dist/e5r-dev.js"
 temp_dir=`mktemp -duq`".e5rinstall"
-temp_dir_unziped=${temp_dir}"/unziped" 
+temp_dir_unziped=${temp_dir}"/unziped"
 
 _dev_find_installation()
 {
     if [ ! -d ${dev_home} ]; then
         return 1
     fi
-    
+
     return 0
 }
 
 _dev_get_webfile() {
     local origin="${1}"
     local destination="${2}"
-    
+
     # TODO: Apply-Proxy
     echo "Downloading ${origin}..."
-    
+
     if _dev_has "curl"; then
         curl --insecure --silent -o "${destination}" "${origin}"
     elif _dev_has "wget"; then
@@ -149,18 +149,18 @@ _dev_clear()
 
 _dev_install() {
     echo "Preparing E5R Tools for Development Team Installation..."
-    
+
     # Make directory structure
     mkdir -p "${dev_tools}"
     mkdir -p "${dev_lib}"
-    
+
     # Make temporary directory structure
     mkdir -p "${temp_dir}"
     mkdir -p "${temp_dir_unziped}"
-    
+
     # Download NODEJS binary package
     _dev_get_webfile "${node_pkg_url}" "${temp_dir}/${node_pkg_file}"
-   
+
     # Extract jsengine
     tar -xf "${temp_dir}/${node_pkg_file}" -C "${temp_dir_unziped}"
     cp "${temp_dir_unziped}/${node_pkg}/bin/node" "${bin_jsengine}"
@@ -169,55 +169,63 @@ _dev_install() {
 
     # Download "e5r-dev.js" script
     _dev_get_webfile "${jsdev_url}" "${bin_jsdev}"
-    
-    # Invoke $> node e5r-dev.js setup    
+
+    # Invoke $> node e5r-dev.js setup
     ${bin_jsengine} "${bin_jsdev}" setup --shell=sh
 }
 
 _dev_start()
 {
     local found=false
-    
+
     if _dev_find_installation; then
         found=true
     fi
-    
+
     if "${found}" = true; then
         _dev_clear
     fi
-    
+
     _dev_install
-    
+
     # Update environment from postfile
     if [ -f "${post_file}" ]; then
+        echo "log: ----- POST FILE [{$post_file}] -----"
+        cat ${post_file}
+        echo "log: ---------------------------------------------------"
+        
         source "$post_file"
         rm -f "$post_file"
     fi
+    
+    
 }
 
 # Read params
-while [[ ${#} > 0 ]]; do
+while [ ${#} > 0 ]; do
     key=${1}
-
+    
     case ${key} in
         -f|--force)
             force=true
-            shift
             ;;
-        -f|--verbose)
+        -v|--verbose)
             verbose=true
-            shift
             ;;
         -b|--branch)
-            shift
-            branch=${1}
+            if [ "${2}" != "" ]; then
+                branch=${2}
+            fi
             ;;
         *)
-            break # the first non-switch we get ends parsing
             ;;
     esac
-
-    shift
+        
+    if [ "${#}" != "0" ]; then
+        shift
+    else
+        break
+    fi
 done
 
 # TODO: Try catch and by-pass exit code

@@ -30,12 +30,10 @@ npm install
 &{$wc=New-Object System.Net.WebClient;$wc.Proxy=[System.Net.WebRequest]::DefaultWebProxy;$wc.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;Invoke-Expression ($wc.DownloadString('https://raw.githubusercontent.com/e5r/dev/develop/install.ps1'))}
 ```
 
-## Install on Unix
-
-Copy and paste the text on you shell.
+## Install on Unix (_Linux only_)
 
 ```
-TODO
+curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh
 ```
 
 ## Start usage
