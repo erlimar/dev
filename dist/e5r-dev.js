@@ -287,6 +287,7 @@ function setUserEnvironmentWin32(varName, value) {
  * @param {string} value - Value of variable
  */
 function setUserEnvironmentUnix(varName, value) {
+    /** @todo: Implements appendUpdateEnvironmentFile logic */
     process.env[varName] = value;
 }
 
