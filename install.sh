@@ -197,7 +197,7 @@ _dev_start()
   
         #chmod 0755 ${post_file}
         . ${post_file}
-        rm -f "$post_file"
+        #rm -f "$post_file"
     fi
     
     
