@@ -157,6 +157,32 @@ new class DevToolLib {
     }
     
     /**
+     * Smart substitute for `fs.exists()` native function, only for files.
+     * 
+     * @param {string} path
+     */
+    fileExists(path) {
+        try {
+            let stat = _fs.statSync(path);
+            return stat.isFile() || stat.isSymbolicLink();
+        } catch (_) { /* silent */ }
+        return false;
+    }
+    
+    /**
+     * Smart substitute for `fs.exists()` native function, only for directory.
+     * 
+     * @param {string} path
+     */
+    directoryExists(path) {
+        try {
+            let stat = _fs.statSync(path);
+            return stat.isDirectory();
+        } catch (_) { /* silent */ }
+        return false;
+    }
+    
+    /**
      * Create a Error instance
      *
      * @param {string} msg - Message of error

@@ -197,14 +197,53 @@ function setUserEnvironmentWin32(varName, value) {
 }
 
 /**
+ * Return a path list of user profile files
+ * 
+ * @return {Object} Array os paths
+ */
+function getUserProfilePaths() {
+    let profiles = [],
+        bash_profile = _path.join(_os.homedir(), '.bash_profile'),
+        bashrc = _path.join(_os.homedir(), '.bashrc'),
+        profile = _path.join(_os.homedir(), 'profile'),
+        zshrc = _path.join(_os.homedir(), 'zshrc');
+
+    if (lib.fileExists(bash_profile)) profiles.push(bash_profile);
+    if (lib.fileExists(bashrc)) profiles.push(bashrc);
+    if (lib.fileExists(profile)) profiles.push(profile);
+    if (lib.fileExists(zshrc)) profiles.push(zshrc);
+
+    return profiles;
+}
+
+/**
  * Set a user environment variable value for platforms ['linux', 'freebsd', 'darwin', 'sunos']
  * 
  * @param {string} varName - Variable name
  * @param {string} value - Value of variable
+ * @param {Object} shellOptions
  */
-function setUserEnvironmentUnix(varName, value) {
-    /** @todo: Implements appendUpdateEnvironmentFile logic */
-    process.env[varName] = value;
+function setUserEnvironmentUnix(varName, value, shellOptions) {
+    getUserProfilePaths().map((path) => {
+        dev.printf('LOG: setUserEnvironmentUnix, #PROFILE: ' + path);
+
+        let lines = [],
+            lineBegin = shellOptions.resolver(varName, value, true);
+
+        (_fs.readFileSync(path, 'utf8') || '')
+            .split(_os.EOL)
+            .map((lineValue) => {
+                if (!lineValue.startsWith(lineBegin)) {
+                    lines.push(lineValue);
+                }
+            });
+
+        lines.push(shellOptions.resolver(varName, value));
+
+        if (0 < lines.length) {
+            _fs.writeFileSync(path, lines.join(_os.EOL), 'utf8');
+        }
+    });
 }
 
 /**
