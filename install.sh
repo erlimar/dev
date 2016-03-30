@@ -195,8 +195,8 @@ _dev_start()
         echo ""
         echo "log: ---------------------------------------------------"
   
-        chmod 0755 ${post_file}
-        ${post_file}
+        #chmod 0755 ${post_file}
+        . ${post_file}
         rm -f "$post_file"
     fi
     
