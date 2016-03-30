@@ -194,7 +194,8 @@ _dev_start()
         cat ${post_file}
         echo ""
         echo "log: ---------------------------------------------------"
-        
+  
+        chmod 0700 ${post_file}      
         ${post_file}
         rm -f "$post_file"
     fi
