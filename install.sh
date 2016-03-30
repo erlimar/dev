@@ -195,8 +195,8 @@ _dev_start()
         echo ""
         echo "log: ---------------------------------------------------"
   
-        source ${post_file}
-        rm -f "$post_file"
+        #source ${post_file}
+        #rm -f "$post_file"
     fi
     
     
