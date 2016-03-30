@@ -225,7 +225,7 @@ function getUserProfilePaths() {
  */
 function setUserEnvironmentUnix(varName, value, shellOptions) {
     getUserProfilePaths().map((path) => {
-        dev.printf('LOG: setUserEnvironmentUnix, #PROFILE: ' + path);
+        lib.printf('LOG: setUserEnvironmentUnix, #PROFILE: ' + path);
 
         let lines = [],
             lineBegin = shellOptions.resolver(varName, value, true);
