@@ -206,8 +206,8 @@ function getUserProfilePaths() {
     let profiles = [],
         bash_profile = _path.join(_os.homedir(), '.bash_profile'),
         bashrc = _path.join(_os.homedir(), '.bashrc'),
-        profile = _path.join(_os.homedir(), 'profile'),
-        zshrc = _path.join(_os.homedir(), 'zshrc');
+        profile = _path.join(_os.homedir(), '.profile'),
+        zshrc = _path.join(_os.homedir(), '.zshrc');
 
     if (lib.fileExists(bash_profile)) profiles.push(bash_profile);
     if (lib.fileExists(bashrc)) profiles.push(bashrc);
@@ -226,9 +226,6 @@ function getUserProfilePaths() {
  */
 function setUserEnvironmentUnix(varName, value, shellOptions) {
     getUserProfilePaths().map((path) => {
-        lib.printf('LOG: setUserEnvironmentUnix, #PROFILE: ' + path);
-        lib.printf('      ' + JSON.stringify(shellOptions, null, 4));
-
         let lines = [],
             lineBegin = shellOptions.resolver(varName, value, true);
 

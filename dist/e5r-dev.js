@@ -290,8 +290,8 @@ function getUserProfilePaths() {
     let profiles = [],
         bash_profile = _path.join(_os.homedir(), '.bash_profile'),
         bashrc = _path.join(_os.homedir(), '.bashrc'),
-        profile = _path.join(_os.homedir(), 'profile'),
-        zshrc = _path.join(_os.homedir(), 'zshrc');
+        profile = _path.join(_os.homedir(), '.profile'),
+        zshrc = _path.join(_os.homedir(), '.zshrc');
 
     if (lib.fileExists(bash_profile)) profiles.push(bash_profile);
     if (lib.fileExists(bashrc)) profiles.push(bashrc);
@@ -310,9 +310,6 @@ function getUserProfilePaths() {
  */
 function setUserEnvironmentUnix(varName, value, shellOptions) {
     getUserProfilePaths().map((path) => {
-        lib.printf('LOG: setUserEnvironmentUnix, #PROFILE: ' + path);
-        lib.printf('      ' + JSON.stringify(shellOptions, null, 4));
-
         let lines = [],
             lineBegin = shellOptions.resolver(varName, value, true);
 
@@ -822,8 +819,6 @@ new class DevToolLib {
      * @param {Object} shellOptions
      */
     setUserEnvironment(varName, value, shellOptions) {
-        lib.printf("## log: lib.setUserEnvironment()");
-        lib.printf("      " + JSON.stringify(shellOptions, null, 4));
         this.__setUserEnvironment(varName, value, shellOptions);
     }
     
@@ -859,10 +854,7 @@ new class DevToolLib {
             appendUpdateEnvironmentFile(varName, newPath, devTool.shellOptions);
         }
         
-        // Update user environment
-        lib.printf("## log: Update user environment");
-        lib.printf("      " + JSON.stringify(devTool.shellOptions, null, 4));
-        
+        // Update user environment       
         if (0 > userPath.indexOf(path)) {
             let newPath = [path]
                 .concat(userPath)
