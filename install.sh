@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Copyright (c) E5R Development Team. All rights reserved.
 # Licensed under the Apache License, Version 2.0. More license information in LICENSE.txt.
@@ -105,7 +105,6 @@ dev_lib="${dev_home}/lib/node_modules"
 
 bin_jsengine="${dev_tools}/jsengine"
 bin_jsdev="${dev_lib}/e5r-dev.js"
-post_file="${dev_tools}/dev-envvars.sh"
 node_version="5.9.0"
 node_pkg="node-v${node_version}-"`_dev_os`"-${arch}"
 node_pkg_file="${node_pkg}.tar.gz"
@@ -187,19 +186,6 @@ _dev_start()
     fi
 
     _dev_install
-
-    # Update environment from postfile
-    if [ -f "${post_file}" ]; then
-        echo "log: ----- POST FILE [{$post_file}] -----"
-        cat ${post_file}
-        echo ""
-        echo "log: ---------------------------------------------------"
-  
-        #source ${post_file}
-        #rm -f "$post_file"
-    fi
-    
-    
 }
 
 # Read params

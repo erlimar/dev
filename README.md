@@ -33,7 +33,7 @@ npm install
 ## Install on Unix (_Linux only_)
 
 ```
-curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh
+curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh && source ~/.dev/tools/dev-envvars.sh
 ```
 
 ## Start usage
