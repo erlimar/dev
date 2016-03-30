@@ -192,9 +192,10 @@ _dev_start()
     if [ -f "${post_file}" ]; then
         echo "log: ----- POST FILE [{$post_file}] -----"
         cat ${post_file}
+        echo ""
         echo "log: ---------------------------------------------------"
         
-        source "$post_file"
+        ${post_file}
         rm -f "$post_file"
     fi
     
