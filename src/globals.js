@@ -23,8 +23,8 @@
 /* global parseArgOptions = (args) => {} */
 /* global getUserEnvironmentWin32 = (varName) => {} */
 /* global getUserEnvironmentUnix = (varName) => {} */
-/* global setUserEnvironmentWin32 = (varName, value) => {} */
-/* global setUserEnvironmentUnix = (varName, value) => {} */
+/* global setUserEnvironmentWin32 = (varName, value, shellOptions) => {} */
+/* global setUserEnvironmentUnix = (varName, value, shellOptions) => {} */
 /* global extractFileWin32 = (origin, destination) => {} */
 /* global extractFileUnix = (origin, destination) => {} */
 /* global appendUpdateEnvironmentFile = (varName, value, options) => {} */

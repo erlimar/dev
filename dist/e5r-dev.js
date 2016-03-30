@@ -819,9 +819,10 @@ new class DevToolLib {
      * 
      * @param {string} varName - Variable name
      * @param {string} value - Value of variable
+     * @param {Object} shellOptions
      */
-    setUserEnvironment(varName, value) {
-        this.__setUserEnvironment(varName, value);
+    setUserEnvironment(varName, value, shellOptions) {
+        this.__setUserEnvironment(varName, value, shellOptions);
     }
     
     /**
