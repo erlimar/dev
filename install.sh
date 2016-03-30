@@ -189,7 +189,7 @@ _dev_start()
 }
 
 # Read params
-while [ ${#} > 0 ]; do
+while [ ${#} ]; do
     key=${1}
     
     case ${key} in
