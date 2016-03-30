@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Copyright (c) E5R Development Team. All rights reserved.
 # Licensed under the Apache License, Version 2.0. More license information in LICENSE.txt.
@@ -195,9 +195,8 @@ _dev_start()
         echo ""
         echo "log: ---------------------------------------------------"
   
-        #chmod 0755 ${post_file}
-        . ${post_file}
-        #rm -f "$post_file"
+        source ${post_file}
+        rm -f "$post_file"
     fi
     
     
