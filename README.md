@@ -39,5 +39,5 @@ curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh && s
 ## Start usage
 
 ```
-dev help
+dev --help
 ```
