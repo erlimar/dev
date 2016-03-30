@@ -822,6 +822,8 @@ new class DevToolLib {
      * @param {Object} shellOptions
      */
     setUserEnvironment(varName, value, shellOptions) {
+        lib.printf("## log: lib.setUserEnvironment()");
+        lib.printf("      " + JSON.stringify(shellOptions, null, 4));
         this.__setUserEnvironment(varName, value, shellOptions);
     }
     
@@ -857,7 +859,10 @@ new class DevToolLib {
             appendUpdateEnvironmentFile(varName, newPath, devTool.shellOptions);
         }
         
-        // Updatte user environment
+        // Update user environment
+        lib.printf("## log: Update user environment");
+        lib.printf("      " + JSON.stringify(devTool.shellOptions, null, 4));
+        
         if (0 > userPath.indexOf(path)) {
             let newPath = [path]
                 .concat(userPath)
