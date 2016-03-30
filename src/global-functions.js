@@ -186,8 +186,9 @@ function getUserEnvironmentUnix(varName) {
  * 
  * @param {string} varName - Variable name
  * @param {string} value - Value of variable
+ * @param {Object} shellOptions
  */
-function setUserEnvironmentWin32(varName, value) {
+function setUserEnvironmentWin32(varName, value, shellOptions) {
     var exec = require('child_process').spawnSync,
         child = exec('setx', [varName, value]);
 

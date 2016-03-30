@@ -358,7 +358,7 @@ new class DevToolLib {
             let newPath = [path]
                 .concat(userPath)
                 .join(pathSep);
-            lib.setUserEnvironment(varName, newPath);
+            lib.setUserEnvironment(varName, newPath, devTool.shellOptions);
         }
     }
 

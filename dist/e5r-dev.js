@@ -270,8 +270,9 @@ function getUserEnvironmentUnix(varName) {
  * 
  * @param {string} varName - Variable name
  * @param {string} value - Value of variable
+ * @param {Object} shellOptions
  */
-function setUserEnvironmentWin32(varName, value) {
+function setUserEnvironmentWin32(varName, value, shellOptions) {
     var exec = require('child_process').spawnSync,
         child = exec('setx', [varName, value]);
 
@@ -859,7 +860,7 @@ new class DevToolLib {
             let newPath = [path]
                 .concat(userPath)
                 .join(pathSep);
-            lib.setUserEnvironment(varName, newPath);
+            lib.setUserEnvironment(varName, newPath, devTool.shellOptions);
         }
     }
 
