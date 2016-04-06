@@ -1,6 +1,6 @@
 {
   "name": "e5r-dev",
-  "version": "0.1.4-alpha",
+  "version": "0.1.4",
   "description": "E5R Tools for Development Team",
   "main": "dist/e5r-dev.js",
   "repository": {
@@ -19,8 +19,8 @@
     "gulp-concat-util": "^0.5.4"
   },
   "scripts": {
-      "preversion": ".\\make test",
-      "version": ".\\make dist && git add -A dist",
-      "postversion": "git push && git push --tags"
+    "preversion": ".\\make test",
+    "version": ".\\make dist && git add -A dist",
+    "postversion": "git push && git push --tags"
   }
 }
