@@ -17,5 +17,10 @@
     "del": "^2.1.0",
     "gulp": "^3.9.0",
     "gulp-concat-util": "^0.5.4"
+  },
+  "scripts": {
+      "preversion": ".\\make test",
+      "version": ".\\make dist && git add -A dist",
+      "postversion": "git push && git push --tags"
   }
 }
