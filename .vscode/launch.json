@@ -2,19 +2,17 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "dev setup",
+			"name": "devtoollib.js",
 			"type": "node",
 			"request": "launch",
-			"program": "dist/e5r-dev.js",
+			"program": "${workspaceRoot}/src/devtoollib.js",
 			"stopOnEntry": false,
-			"args": [
-                "setup",
-                "--shell=powershell"
-            ],
-			"cwd": ".",
+			"args": [],
+			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
-				"--nolazy"
+				"--nolazy",
+                "--use_strict"
 			],
 			"env": {
 				"NODE_ENV": "development",

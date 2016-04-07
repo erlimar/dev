@@ -339,12 +339,12 @@ new class DevToolLib {
      * @param {object} devTool - Instance of DevToolCommandLine
      * @return {string} Return a environment %PATH% updated
      */
-    addPathToEnvironmentPath(path, devTool){
+    addPathToEnvironmentPath(path, devTool) {
         let varName = _os.platform() === 'win32' ? 'Path' : 'PATH',
             pathSep = _os.platform() === 'win32' ? ';' : ':',
             processPath = (process.env[varName] || '').split(pathSep),
             userPath = (lib.getUserEnvironment(varName) || '').split(pathSep);
-            
+
         // Update process environment
         if (0 > processPath.indexOf(path)) {
             let newPath = [path]
@@ -353,7 +353,7 @@ new class DevToolLib {
             process.env[varName] = newPath;
             appendUpdateEnvironmentFile(varName, newPath, devTool.shellOptions);
         }
-        
+
         // Update user environment       
         if (0 > userPath.indexOf(path)) {
             let newPath = [path]
@@ -361,6 +361,27 @@ new class DevToolLib {
                 .join(pathSep);
             lib.setUserEnvironment(varName, newPath, devTool.shellOptions);
         }
+        
+        let token = '';
+        if(_os.platform() == 'win'){
+            return 'a' + token + 'b';
+        }
+        
+    }
+    
+    /**
+     * Get a Token environment variable
+     * 
+     * @sample: MY_VAR
+     * @note: On *nix: $MY_VAR
+     * @node: On Windows: %MY_VAR%
+     * 
+     * @param {string} varName
+     * @return {string} 
+     */
+    getEnvironmentVarToken(varName) {
+        if (_os.platform() === 'win32') return '%' + varName + '%';
+        return '$' + varName;
     }
 
     /**
