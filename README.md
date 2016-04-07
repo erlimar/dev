@@ -17,6 +17,13 @@ npm install
 ./make dist
 ```
 
+## Generate NPM version
+
+```
+npm version major|minor|patch
+npm publish
+```
+
 ## Install on Windows
 
 ### CMD
