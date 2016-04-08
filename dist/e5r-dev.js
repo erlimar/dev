@@ -13,7 +13,7 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
-const TOOL_VERSION = '0.1.4-alpha';
+const TOOL_VERSION = '0.1.7';
 
 /** @constant {string} */
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
@@ -127,7 +127,7 @@ function compileRequireData(uri) {
     }
 
     let parts = [type, fileName];
-    
+
     // .dev/cmd -> .dev/lib/cmd
     if (type === 'cmd') {
         parts = ['lib'].concat(parts);
@@ -346,11 +346,13 @@ function extractFileWin32(origin, destination) {
         command
     ]);
 
-    lib.printf(child.output[1].toString());
+    if (Array.isArray(child.output)) {
+        lib.printf(child.output[1].toString());
+    }
 
     if (child.status !== 0) {
         let errorMessage;
-        
+
         // Searching error message output
         let errorLines = child.output[2].toString().split(_os.EOL),
             errorRegex = new RegExp('^Error: {1}(.+)$');
@@ -376,7 +378,7 @@ function extractFileWin32(origin, destination) {
             + '  PID: ' + child.pid + _os.EOL
             + '  Command: ' + child.args.join(' ') + _os.EOL
             + '  Exit Code: ' + child.status
-            );
+        );
     }
 }
 
@@ -414,7 +416,7 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     let lines = [],
         lineBegin = options.resolver(varName, value, true);
 
-        /** @todo: Change to _fs.statSync(path) */
+    /** @todo: Change to _fs.statSync(path) */
     if (_fs.existsSync(options.path)) {
         (_fs.readFileSync(options.path, 'utf8') || '')
             .split(_os.EOL)
