@@ -354,7 +354,7 @@ function extractFileWin32(origin, destination) {
         let errorMessage;
 
         // Searching error message output
-        let errorLines = child.output[2].toString().split(_os.EOL),
+        let errorLines = Array.isArray(child.output) ? child.output[2].toString().split(_os.EOL) : [],
             errorRegex = new RegExp('^Error: {1}(.+)$');
 
         for (let l in errorLines) {
@@ -369,12 +369,14 @@ function extractFileWin32(origin, destination) {
             throw createError(errorMessage);
         }
 
-        lib.printf(child.output[2].toString());
+        if (Array.isArray(child.output)) {
+            lib.printf(child.output[2].toString());
+        }
 
         throw createError(''
             + 'Extract file failed.' + _os.EOL
-            + '  From: ' + zipFile + _os.EOL
-            + '  To: ' + directory + _os.EOL
+            + '  From: ' + origin + _os.EOL
+            + '  To: ' + destination + _os.EOL
             + '  PID: ' + child.pid + _os.EOL
             + '  Command: ' + child.args.join(' ') + _os.EOL
             + '  Exit Code: ' + child.status
