@@ -820,6 +820,7 @@ new class DevToolLib {
      */
     setUserEnvironment(varName, value, shellOptions) {
         this.__setUserEnvironment(varName, value, shellOptions);
+        appendUpdateEnvironmentFile(varName, value, shellOptions);
     }
     
     /**
@@ -861,12 +862,6 @@ new class DevToolLib {
                 .join(pathSep);
             lib.setUserEnvironment(varName, newPath, devTool.shellOptions);
         }
-        
-        let token = '';
-        if(_os.platform() == 'win'){
-            return 'a' + token + 'b';
-        }
-        
     }
     
     /**
