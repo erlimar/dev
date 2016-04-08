@@ -20,7 +20,7 @@ npm install
 ## Generate NPM version
 
 ```
-npm version major|minor|patch
+npm version major|minor|patch -m "Release version %s"
 npm publish
 ```
 
