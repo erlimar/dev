@@ -6,6 +6,8 @@
     "files": [
         "src/globals.js",
         "src/global-consts.js",
+        "src/global-extensions.js",
+        "src/zipextractor.js",
         "src/global-vars.js",
         "src/global-functions.js",
         "src/devcom.js",

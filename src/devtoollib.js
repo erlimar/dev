@@ -28,11 +28,9 @@ new class DevToolLib {
         if(_os.platform() === 'win32'){
             this.__getUserEnvironment = getUserEnvironmentWin32;
             this.__setUserEnvironment = setUserEnvironmentWin32;
-            this.__extractFile = extractFileWin32; 
         }else{
             this.__getUserEnvironment = getUserEnvironmentUnix;
             this.__setUserEnvironment = setUserEnvironmentUnix;
-            this.__extractFile = extractFileUnix;
         }
     }
     
@@ -330,7 +328,8 @@ new class DevToolLib {
      * @param {string} destination - Path do directory destination
      */
     extractFile(origin, destination) {
-        this.__extractFile(origin, destination);
+        let extractor = new ZipExtractor(origin);
+        extractor.extractTo('./', destination);
     }
     
     /**
@@ -374,7 +373,8 @@ new class DevToolLib {
      * @param {string} varName
      * @return {string} 
      */
-    getEnvironmentVarToken(varName) {
+    getEnvironmentVarToken(varName, shell) {
+        lib.printf('dev.getEnvironmentVarToken(', varName, '):', shell);
         if (_os.platform() === 'win32') return '%' + varName + '%';
         return '$' + varName;
     }
