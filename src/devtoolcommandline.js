@@ -3,7 +3,7 @@
  * @class
  */
 class DevToolCommandLine {
-    
+
     /**
      * @constructor
      * 
@@ -29,13 +29,13 @@ class DevToolCommandLine {
         self._name = 'dev';
         self._cmd = (this._args.shift() || '').toLowerCase();
         self._builtin = new Object;
-        
+
         try {
             // Registry Built-in DevCom.
             builtins.map((value) => {
                 self.builtin = value;
             });
-            
+
             // Start DevCom
             self.run();
         } catch (error) {
@@ -43,14 +43,14 @@ class DevToolCommandLine {
             self.exit(error.code || 1);
         }
     }
-    
+
     /**
      * Name of the Dev Tool Command Line program
      */
     get name() {
         return this._name;
     }
-    
+
     help() {
         let lines = [
             '',
@@ -65,10 +65,10 @@ class DevToolCommandLine {
             TOOL_TITLE,
             'usage: ' + this.name + ' [devcom] [options]'
         ];
-        
+
         lib.printf(lines.join(_os.EOL));
     }
-    
+
     /**
      * Show usage text
      */
@@ -89,9 +89,9 @@ class DevToolCommandLine {
             'Options:',
             '  ???']
             .join(_os.EOL)
-            );
+        );
     }
-    
+
     /**
      * Exit process tool
      * 
@@ -100,7 +100,7 @@ class DevToolCommandLine {
     exit(code) {
         process.exit(code);
     }
-    
+
     /**
      * Run the tool
      */
@@ -109,8 +109,8 @@ class DevToolCommandLine {
             this.usage();
             this.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
         }
-        
-        if(this._cmd === 'help'){
+
+        if (this._cmd === 'help') {
             this.help();
             this.exit(0);
         }
@@ -125,10 +125,14 @@ class DevToolCommandLine {
         if (!devcom) {
             throw createError('DEVCOM [' + this._cmd + '] not found!');
         }
-        
+
         devcom.run(this, parseArgOptions(this._args));
     }
-    
+
+    get shell() {
+        return this._shell;
+    }
+
     /**
      * Get shell options
      */
@@ -167,7 +171,7 @@ class DevToolCommandLine {
                 }
             }
         }
-        
+
         if (shell === 'sh') {
             options = {
                 /** @todo: Move filename to constant */
@@ -190,14 +194,14 @@ class DevToolCommandLine {
 
         return options;
     }
-    
+
     /**
      * Built-in DevCom Getter
      */
     get builtin() {
         return this._builtin;
     }
-    
+
     /**
      * Built-in DevCom Setter
      * 
@@ -220,7 +224,7 @@ class DevToolCommandLine {
         }
 
         Object.defineProperty(instance, 'getType', {
-            value: function () {
+            value: function() {
                 return BuiltinType
             }
         })
