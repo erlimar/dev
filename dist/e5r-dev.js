@@ -1025,6 +1025,9 @@ function getUserEnvironmentWin32(varName) {
 		]);
 
     if (child.status === 0 && child.output && child.output.length > 0) {
+        /** @todo: Remove DEBUG message*/
+        lib.printf('@getUserEnvironmentWin32 =>', child.output[1].toString());
+        
 		return child.output[1].toString();
     }
 }
