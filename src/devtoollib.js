@@ -317,7 +317,7 @@ var lib =
          * @param {Object} shellOptions
          */
         setUserEnvironment(varName, value, shellOptions) {
-            lib.logger.info('[setUserEnvironment]', '-varName:', varName, '-value:', value);
+            lib.printf('[setUserEnvironment]', '-varName:', varName, '-value:', value);
             
             this.__setUserEnvironment(varName, value, shellOptions);
             appendUpdateEnvironmentFile(varName, value, shellOptions);
