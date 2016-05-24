@@ -148,6 +148,10 @@ function parseArgOptions(args) {
  * @return {string}
  */
 function getUserEnvironmentWin32(varName) {
+    
+    /** @todo: Remove DEBUG message*/
+        lib.printf('@getUserEnvironmentWin32 =>', '-varName:', varName);
+    
     let exec = _childProcess.spawnSync,
 		child = exec('@powershell', [
 			'-NoProfile',
