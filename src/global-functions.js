@@ -153,12 +153,12 @@ function getUserEnvironmentWin32(varName) {
     lib.printf('@getUserEnvironmentWin32 =>', '-varName:', varName);
     
     let exec = _childProcess.spawnSync,
-		child = exec('@powershell', [
+		child = exec('powershell', [
 			'-NoProfile',
 			'-ExecutionPolicy',
 			'unrestricted',
 			'-Command',
-			'"&{[environment]::GetEnvironmentVariable(\'' + varName + '\',\'User\')}"'
+			'[environment]::GetEnvironmentVariable(\'' + varName + '\',\'User\')'
 		]);
         
     lib.printf('@getUserEnvironmentWin32 =>', '-status:', child.status);
