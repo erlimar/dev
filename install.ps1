@@ -191,6 +191,12 @@ Function Start-Script
     }
     
     if(Test-Path $PostFile) {
+        "================================" | Write-Host
+        $PostFile | Write-Host
+        "--------------------------------" | Write-Host
+        Get-Content $PostFile | Write-Host
+        "================================" | Write-Host
+        
         Remove-Item $PostFile
     }
 }
