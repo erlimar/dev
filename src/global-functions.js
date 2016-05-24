@@ -149,7 +149,7 @@ function parseArgOptions(args) {
  */
 function getUserEnvironmentWin32(varName) {
     let exec = _childProcess.spawnSync,
-		child = exec('powershell', [
+		child = exec('@powershell', [
 			'-NoProfile',
 			'-ExecutionPolicy',
 			'unrestricted',
