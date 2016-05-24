@@ -1147,7 +1147,7 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     
     /** @todo: Remove this DEBUG message */
     for(let l in lines){
-        lib.printf('[appendUpdateEnvironmentFile] =>', l);
+        lib.printf('[appendUpdateEnvironmentFile] =>', lines[l]);
     }
 
     if (0 < lines.length) {
