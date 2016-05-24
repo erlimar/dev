@@ -317,10 +317,8 @@ var lib =
          * @param {Object} shellOptions
          */
         setUserEnvironment(varName, value, shellOptions) {
-            lib.printf('[setUserEnvironment]', '-varName:', varName, '-value:', value);
-            
             this.__setUserEnvironment(varName, value, shellOptions);
-            appendUpdateEnvironmentFile(varName, value, shellOptions);
+            //appendUpdateEnvironmentFile(varName, value, shellOptions);
         }
 
         /**
@@ -354,7 +352,7 @@ var lib =
                     .join(pathSep);
                 process.env[varName] = newPath;
                 
-                /** @todo: this really necessary? */
+                /** @todo: this really necessary? YES! Only here! */
                 appendUpdateEnvironmentFile(varName, newPath, devTool.shellOptions);
             }
 

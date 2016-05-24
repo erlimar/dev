@@ -1015,10 +1015,6 @@ function parseArgOptions(args) {
  * @return {string}
  */
 function getUserEnvironmentWin32(varName) {
-    
-    /** @todo: Remove DEBUG message*/
-    lib.printf('@getUserEnvironmentWin32 =>', '-varName:', varName);
-    
     let exec = _childProcess.spawnSync,
 		child = exec('powershell', [
 			'-NoProfile',
@@ -1028,17 +1024,7 @@ function getUserEnvironmentWin32(varName) {
 			'[environment]::GetEnvironmentVariable(\'' + varName + '\',\'User\')'
 		]);
         
-    lib.printf('@getUserEnvironmentWin32 =>', '-status:', child.status);
-    
-    if (child.sta === 0) {
-        lib.printf('@getUserEnvironmentWin32 =>', '-output.length:', child.output.length);
-        lib.printf('@getUserEnvironmentWin32 =>', '-output[0]:', child.output[0].toString());
-    }
-
     if (child.status === 0 && child.output && child.output.length > 0) {
-        /** @todo: Remove DEBUG message*/
-        lib.printf('@getUserEnvironmentWin32 =>', child.output[1].toString());
-        
 		return child.output[1].toString();
     }
 }
@@ -1067,7 +1053,7 @@ function setUserEnvironmentWin32(varName, value, shellOptions) {
 			'-ExecutionPolicy',
 			'unrestricted',
 			'-Command',
-			'"&{[environment]::SetEnvironmentVariable(\'' + varName + '\', \'' + value + '\', \'User\')}"'
+			'[environment]::SetEnvironmentVariable(\'' + varName + '\', \'' + value + '\', \'User\')'
 		]);
 
     if (child.status !== 0) {
@@ -1159,11 +1145,6 @@ function appendUpdateEnvironmentFile(varName, value, options) {
 
     lines.push(options.resolver(varName, value));
     
-    /** @todo: Remove this DEBUG message */
-    for(let l in lines){
-        lib.printf('[appendUpdateEnvironmentFile] =>', lines[l]);
-    }
-
     if (0 < lines.length) {
         _fs.writeFileSync(options.path, lines.join(_os.EOL), 'utf8');
     }
@@ -1554,10 +1535,8 @@ var lib =
          * @param {Object} shellOptions
          */
         setUserEnvironment(varName, value, shellOptions) {
-            lib.printf('[setUserEnvironment]', '-varName:', varName, '-value:', value);
-            
             this.__setUserEnvironment(varName, value, shellOptions);
-            appendUpdateEnvironmentFile(varName, value, shellOptions);
+            //appendUpdateEnvironmentFile(varName, value, shellOptions);
         }
 
         /**
@@ -1591,7 +1570,7 @@ var lib =
                     .join(pathSep);
                 process.env[varName] = newPath;
                 
-                /** @todo: this really necessary? */
+                /** @todo: this really necessary? YES! Only here! */
                 appendUpdateEnvironmentFile(varName, newPath, devTool.shellOptions);
             }
 
