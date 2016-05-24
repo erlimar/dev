@@ -149,26 +149,17 @@ function parseArgOptions(args) {
  */
 function getUserEnvironmentWin32(varName) {
     let exec = _childProcess.spawnSync,
-        value,
-        /** @todo: Move HKEY to constant */
-        child = exec('reg', ['query', 'HKEY_CURRENT_USER\\Environment', '/v', varName]);
+		child = exec('powershell', [
+			'-NoProfile',
+			'-ExecutionPolicy',
+			'unrestricted',
+			'-Command',
+			'"&{[environment]::GetEnvironmentVariable(\'' + varName + '\',\'User\')}"'
+		]);
 
-    if (child.status === 0) {
-        let output = child.output[1].toString().split(_os.EOL),
-            regex = new RegExp(WIN_REG_QUERY_REGEX);
-
-        for (let l in output) {
-            let line = output[l].trim(),
-                result = regex.exec(line);
-
-            if (result) {
-                value = result[3];
-                break;
-            }
-        }
+    if (child.status === 0 && child.output && child.output.length > 0) {
+		return child.output[1].toString();
     }
-
-    return value;
 }
 
 /**
@@ -190,7 +181,13 @@ function getUserEnvironmentUnix(varName) {
  */
 function setUserEnvironmentWin32(varName, value, shellOptions) {
     var exec = require('child_process').spawnSync,
-        child = exec('setx', [varName, value]);
+		child = exec('powershell', [
+			'-NoProfile',
+			'-ExecutionPolicy',
+			'unrestricted',
+			'-Command',
+			'"&{[environment]::SetEnvironmentVariable(\'' + varName + '\', \'' + value + '\', \'User\')}"'
+		]);
 
     if (child.status !== 0) {
         throw createError('It was not possible to assign the environment variable "' + varName + '" to the user.');
