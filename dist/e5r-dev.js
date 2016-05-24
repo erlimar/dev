@@ -1147,7 +1147,7 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     
     /** @todo: Remove this DEBUG message */
     for(let l in lines){
-        lib.logger.info('[appendUpdateEnvironmentFile] =>', l);
+        lib.printf('[appendUpdateEnvironmentFile] =>', l);
     }
 
     if (0 < lines.length) {
@@ -1540,7 +1540,7 @@ var lib =
          * @param {Object} shellOptions
          */
         setUserEnvironment(varName, value, shellOptions) {
-            lib.logger.info('[setUserEnvironment]', '-varName:', varName, '-value:', value);
+            lib.printf('[setUserEnvironment]', '-varName:', varName, '-value:', value);
             
             this.__setUserEnvironment(varName, value, shellOptions);
             appendUpdateEnvironmentFile(varName, value, shellOptions);
