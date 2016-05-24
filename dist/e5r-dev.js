@@ -1017,7 +1017,7 @@ function parseArgOptions(args) {
 function getUserEnvironmentWin32(varName) {
     
     /** @todo: Remove DEBUG message*/
-        lib.printf('@getUserEnvironmentWin32 =>', '-varName:', varName);
+    lib.printf('@getUserEnvironmentWin32 =>', '-varName:', varName);
     
     let exec = _childProcess.spawnSync,
 		child = exec('@powershell', [
@@ -1027,6 +1027,13 @@ function getUserEnvironmentWin32(varName) {
 			'-Command',
 			'"&{[environment]::GetEnvironmentVariable(\'' + varName + '\',\'User\')}"'
 		]);
+        
+    lib.printf('@getUserEnvironmentWin32 =>', '-status:', child.status);
+    
+    if (child.sta === 0) {
+        lib.printf('@getUserEnvironmentWin32 =>', '-output.length:', child.output.length);
+        lib.printf('@getUserEnvironmentWin32 =>', '-output[0]:', child.output[0].toString());
+    }
 
     if (child.status === 0 && child.output && child.output.length > 0) {
         /** @todo: Remove DEBUG message*/
