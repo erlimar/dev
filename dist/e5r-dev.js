@@ -1144,6 +1144,11 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     }
 
     lines.push(options.resolver(varName, value));
+    
+    /** @todo: Remove this DEBUG message */
+    for(let l in lines){
+        lib.logger.info('[appendUpdateEnvironmentFile] =>', l);
+    }
 
     if (0 < lines.length) {
         _fs.writeFileSync(options.path, lines.join(_os.EOL), 'utf8');
@@ -1535,6 +1540,8 @@ var lib =
          * @param {Object} shellOptions
          */
         setUserEnvironment(varName, value, shellOptions) {
+            lib.logger.info('[setUserEnvironment]', '-varName:', varName, '-value:', value);
+            
             this.__setUserEnvironment(varName, value, shellOptions);
             appendUpdateEnvironmentFile(varName, value, shellOptions);
         }
@@ -1569,6 +1576,8 @@ var lib =
                     .concat(processPath)
                     .join(pathSep);
                 process.env[varName] = newPath;
+                
+                /** @todo: this really necessary? */
                 appendUpdateEnvironmentFile(varName, newPath, devTool.shellOptions);
             }
 

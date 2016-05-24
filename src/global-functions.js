@@ -277,6 +277,11 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     }
 
     lines.push(options.resolver(varName, value));
+    
+    /** @todo: Remove this DEBUG message */
+    for(let l in lines){
+        lib.logger.info('[appendUpdateEnvironmentFile] =>', l);
+    }
 
     if (0 < lines.length) {
         _fs.writeFileSync(options.path, lines.join(_os.EOL), 'utf8');
