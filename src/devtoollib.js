@@ -181,6 +181,19 @@ var lib =
         }
 
         /**
+         * Check if directory is empty.
+         * 
+         * @param {string} path
+         */
+        directoryIsEmpty(path) {
+            try {
+                let list = _fs.readdirSync(workdir);
+                return list.length === 0;
+            } catch (_) { /* silent */ }
+            return true;
+        }
+
+        /**
          * Create a Error instance
          *
          * @param {string} msg - Message of error

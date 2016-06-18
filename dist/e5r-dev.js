@@ -13,7 +13,7 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
-const TOOL_VERSION = '0.3.0';
+const TOOL_VERSION = '0.3.1';
 
 /** @constant {string} */
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
@@ -1396,6 +1396,19 @@ var lib =
                 return stat.isDirectory();
             } catch (_) { /* silent */ }
             return false;
+        }
+
+        /**
+         * Check if directory is empty.
+         * 
+         * @param {string} path
+         */
+        directoryIsEmpty(path) {
+            try {
+                let list = _fs.readdirSync(workdir);
+                return list.length === 0;
+            } catch (_) { /* silent */ }
+            return true;
         }
 
         /**
