@@ -19,6 +19,8 @@ npm install
 
 ## Generate NPM version
 
+Change the constant `TOOL_VERSION` in `src/global-consts.js` file.
+
 ```
 npm version major|minor|patch -m "Release version %s"
 npm publish

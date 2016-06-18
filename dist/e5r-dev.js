@@ -13,7 +13,7 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
-const TOOL_VERSION = '0.2.0';
+const TOOL_VERSION = '0.3.0';
 
 /** @constant {string} */
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
@@ -1909,6 +1909,29 @@ var lib =
 
             throw createError('Unexpected result to lib.require()!');
         }
+
+        /**
+         * Transform argument list in object key value pair
+         * 
+         * @example
+         * // $input = 'install --scope MY_SCOPE -flag1 -flag2 --key=Value "Other value" -flag3'
+         *   
+         * // $output:
+         * {
+         *   args: ['install', 'Other value'],
+         *   scope: 'MY_SCOPE',
+         *   flag1: true,
+         *   flag2: true,
+         *   key: 'Value',
+         *   flag3: true
+         * }
+         * 
+         * @param {array} args - Argument list
+         * @return {object} Object options
+         */
+        parseOptions(args){
+            return parseArgOptions(args);
+        }
     }
 
 // ========================================================================
@@ -2029,6 +2052,7 @@ class DevToolCommandLine {
 
         let self = this;
 
+        self._exitCode = 0;
         self._args = [];
 
         process.argv.slice(2).map((arg) => {
@@ -2043,17 +2067,14 @@ class DevToolCommandLine {
         self._cmd = (this._args.shift() || '').toLowerCase();
         self._builtin = new Object;
 
+        // Registry Built-in DevCom.
         try {
-            // Registry Built-in DevCom.
             builtins.map((value) => {
                 self.builtin = value;
             });
-
-            // Start DevCom
-            self.run();
         } catch (error) {
             lib.logger.error(error);
-            self.exit(error.code || 1);
+            self.exitCode = error.code || 1;
         }
     }
 
@@ -2062,6 +2083,14 @@ class DevToolCommandLine {
      */
     get name() {
         return this._name;
+    }
+
+    get exitCode() {
+        return this._exitCode;
+    }
+
+    set exitCode(value) {
+        this._exitCode = value;
     }
 
     help() {
@@ -2107,39 +2136,42 @@ class DevToolCommandLine {
 
     /**
      * Exit process tool
-     * 
-     * @param {int} code - Exit code
      */
-    exit(code) {
-        process.exit(code);
+    exit() {
+        process.exit(this.exitCode);
     }
 
     /**
      * Run the tool
      */
     run() {
-        if (!this._cmd || /^[-]{1}.+$/.test(this._cmd)) {
-            this.usage();
-            this.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
+        try {
+            if (!this._cmd || /^[-]{1}.+$/.test(this._cmd)) {
+                this.usage();
+                this.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
+            }
+
+            if (this._cmd === 'help') {
+                this.help();
+                this.exit(0);
+            }
+
+            let devcom = this.builtin[this._cmd];
+
+            // Load dynamic devcom
+            if (!devcom) {
+                devcom = lib.require('cmd://' + this._cmd);
+            }
+
+            if (!devcom) {
+                throw createError('DEVCOM [' + this._cmd + '] not found!');
+            }
+
+            devcom.run(this, parseArgOptions(this._args));
+        } catch (error) {
+            lib.logger.error(error);
+            this.exitCode = error.code || 1;
         }
-
-        if (this._cmd === 'help') {
-            this.help();
-            this.exit(0);
-        }
-
-        let devcom = this.builtin[this._cmd];
-
-        // Load dynamic devcom
-        if (!devcom) {
-            devcom = lib.require('cmd://' + this._cmd);
-        }
-
-        if (!devcom) {
-            throw createError('DEVCOM [' + this._cmd + '] not found!');
-        }
-
-        devcom.run(this, parseArgOptions(this._args));
     }
 
     get shell() {
@@ -2258,13 +2290,17 @@ class DevToolCommandLine {
 
 /** @hack: No circular reference */
 lib.DevTool = DevToolCommandLine;
+lib.devToolDefaultInstance = new DevToolCommandLine([
+    Wget,
+    Setup,
+]);
 
 exports = module.exports = lib;
 
+// Run process tools
 if (!module.parent && module.filename === __filename) {
-    // Run process tools
-    new DevToolCommandLine([
-        Wget,
-        Setup,
-    ]);
+    if(lib.devToolDefaultInstance.exitCode === 0){
+        lib.devToolDefaultInstance.run();
+    }
+    lib.devToolDefaultInstance.exit();
 }

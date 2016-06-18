@@ -16,6 +16,7 @@ class DevToolCommandLine {
 
         let self = this;
 
+        self._exitCode = 0;
         self._args = [];
 
         process.argv.slice(2).map((arg) => {
@@ -30,17 +31,14 @@ class DevToolCommandLine {
         self._cmd = (this._args.shift() || '').toLowerCase();
         self._builtin = new Object;
 
+        // Registry Built-in DevCom.
         try {
-            // Registry Built-in DevCom.
             builtins.map((value) => {
                 self.builtin = value;
             });
-
-            // Start DevCom
-            self.run();
         } catch (error) {
             lib.logger.error(error);
-            self.exit(error.code || 1);
+            self.exitCode = error.code || 1;
         }
     }
 
@@ -49,6 +47,14 @@ class DevToolCommandLine {
      */
     get name() {
         return this._name;
+    }
+
+    get exitCode() {
+        return this._exitCode;
+    }
+
+    set exitCode(value) {
+        this._exitCode = value;
     }
 
     help() {
@@ -94,39 +100,42 @@ class DevToolCommandLine {
 
     /**
      * Exit process tool
-     * 
-     * @param {int} code - Exit code
      */
-    exit(code) {
-        process.exit(code);
+    exit() {
+        process.exit(this.exitCode);
     }
 
     /**
      * Run the tool
      */
     run() {
-        if (!this._cmd || /^[-]{1}.+$/.test(this._cmd)) {
-            this.usage();
-            this.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
+        try {
+            if (!this._cmd || /^[-]{1}.+$/.test(this._cmd)) {
+                this.usage();
+                this.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
+            }
+
+            if (this._cmd === 'help') {
+                this.help();
+                this.exit(0);
+            }
+
+            let devcom = this.builtin[this._cmd];
+
+            // Load dynamic devcom
+            if (!devcom) {
+                devcom = lib.require('cmd://' + this._cmd);
+            }
+
+            if (!devcom) {
+                throw createError('DEVCOM [' + this._cmd + '] not found!');
+            }
+
+            devcom.run(this, parseArgOptions(this._args));
+        } catch (error) {
+            lib.logger.error(error);
+            this.exitCode = error.code || 1;
         }
-
-        if (this._cmd === 'help') {
-            this.help();
-            this.exit(0);
-        }
-
-        let devcom = this.builtin[this._cmd];
-
-        // Load dynamic devcom
-        if (!devcom) {
-            devcom = lib.require('cmd://' + this._cmd);
-        }
-
-        if (!devcom) {
-            throw createError('DEVCOM [' + this._cmd + '] not found!');
-        }
-
-        devcom.run(this, parseArgOptions(this._args));
     }
 
     get shell() {

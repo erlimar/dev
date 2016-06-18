@@ -691,4 +691,27 @@ var lib =
 
             throw createError('Unexpected result to lib.require()!');
         }
+
+        /**
+         * Transform argument list in object key value pair
+         * 
+         * @example
+         * // $input = 'install --scope MY_SCOPE -flag1 -flag2 --key=Value "Other value" -flag3'
+         *   
+         * // $output:
+         * {
+         *   args: ['install', 'Other value'],
+         *   scope: 'MY_SCOPE',
+         *   flag1: true,
+         *   flag2: true,
+         *   key: 'Value',
+         *   flag3: true
+         * }
+         * 
+         * @param {array} args - Argument list
+         * @return {object} Object options
+         */
+        parseOptions(args){
+            return parseArgOptions(args);
+        }
     }
