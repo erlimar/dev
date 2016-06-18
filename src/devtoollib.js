@@ -187,7 +187,7 @@ var lib =
          */
         directoryIsEmpty(path) {
             try {
-                let list = _fs.readdirSync(workdir);
+                let list = _fs.readdirSync(path);
                 return list.length === 0;
             } catch (_) { /* silent */ }
             return true;

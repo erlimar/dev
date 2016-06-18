@@ -13,7 +13,7 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
-const TOOL_VERSION = '0.3.1';
+const TOOL_VERSION = '0.3.2';
 
 /** @constant {string} */
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
@@ -1405,7 +1405,7 @@ var lib =
          */
         directoryIsEmpty(path) {
             try {
-                let list = _fs.readdirSync(workdir);
+                let list = _fs.readdirSync(path);
                 return list.length === 0;
             } catch (_) { /* silent */ }
             return true;
