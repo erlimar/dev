@@ -852,6 +852,7 @@ var _fs = require('fs');
 var _url = require('url');
 var _childProcess = require('child_process');
 var _zlib = require('zlib');
+var _crypto = require('crypto');
 var _rootPath = _path.resolve(_os.homedir(), TOOL_DEVFOLDER);
 var _devPaths = {
     root: _rootPath,
@@ -1412,6 +1413,13 @@ var lib =
         }
 
         /**
+         * Generate a temporary directory name
+         */
+        generateTempDir() {
+            return _path.join(_os.tmpdir(), _crypto.randomBytes(16).toString('hex'));
+        }
+
+        /**
          * Create a Error instance
          *
          * @param {string} msg - Message of error
@@ -1582,7 +1590,7 @@ var lib =
                     .concat(processPath)
                     .join(pathSep);
                 process.env[varName] = newPath;
-                
+
                 /** @todo: this really necessary? YES! Only here! */
                 appendUpdateEnvironmentFile(varName, newPath, devTool.shellOptions);
             }
@@ -1629,7 +1637,7 @@ var lib =
 
             let file;
 
-            let req = wget(urlOptions, function(res) {
+            let req = wget(urlOptions, function (res) {
                 if (res.statusCode !== 200) {
                     throw createError('Response status code: ' + res.statusCode + ' ' + res.statusMessage + ' >>> ' + url);
                 }
@@ -1638,7 +1646,7 @@ var lib =
 
                 file = _fs.createWriteStream(path);
 
-                file.on('finish', function() {
+                file.on('finish', function () {
                     lib.logger.verbose('Download successfuly!');
                     file.close(/* callback */);
                 });
@@ -1646,7 +1654,7 @@ var lib =
                 res.pipe(file);
             });
 
-            req.on('error', function(error) {
+            req.on('error', function (error) {
                 if (file) {
                     file.close(/* callback */);
                 }
@@ -1942,7 +1950,7 @@ var lib =
          * @param {array} args - Argument list
          * @return {object} Object options
          */
-        parseOptions(args){
+        parseOptions(args) {
             return parseArgOptions(args);
         }
     }

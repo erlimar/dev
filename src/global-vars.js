@@ -5,6 +5,7 @@ var _fs = require('fs');
 var _url = require('url');
 var _childProcess = require('child_process');
 var _zlib = require('zlib');
+var _crypto = require('crypto');
 var _rootPath = _path.resolve(_os.homedir(), TOOL_DEVFOLDER);
 var _devPaths = {
     root: _rootPath,
