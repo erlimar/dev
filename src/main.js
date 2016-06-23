@@ -17,5 +17,7 @@ if (!module.parent && module.filename === __filename) {
     if(lib.devToolDefaultInstance.exitCode === 0){
         lib.devToolDefaultInstance.run();
     }
-    lib.devToolDefaultInstance.exit();
+    if(lib.devToolDefaultInstance.exitCode !== 0){
+        lib.devToolDefaultInstance.exit();
+    }
 }
