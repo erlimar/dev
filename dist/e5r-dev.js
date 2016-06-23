@@ -13,7 +13,7 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
-const TOOL_VERSION = '0.4.0';
+const TOOL_VERSION = '0.4.1';
 
 /** @constant {string} */
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
@@ -2323,5 +2323,7 @@ if (!module.parent && module.filename === __filename) {
     if(lib.devToolDefaultInstance.exitCode === 0){
         lib.devToolDefaultInstance.run();
     }
-    lib.devToolDefaultInstance.exit();
+    if(lib.devToolDefaultInstance.exitCode !== 0){
+        lib.devToolDefaultInstance.exit();
+    }
 }
