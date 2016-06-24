@@ -745,4 +745,24 @@ var lib =
         parseOptions(args) {
             return parseArgOptions(args);
         }
+
+        /**
+         * Show prompt message and get a user string
+         * 
+         * @param {string} message - Prompt message
+         * @return {string} User input
+         */
+        prompt(message) {
+            let buffer = new Buffer(1),
+                input = '';
+
+            _fs.writeSync(process.stdout.fd, message, 0, 'utf-8');
+            while (true) {
+                let r = _fs.readSync(process.stdin.fd, buffer, 0, 1, 0);
+                input += buffer.toString();
+                if (1 > r || buffer[0] === 13) break;
+            }
+
+            return input;
+        }
     }
