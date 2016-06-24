@@ -15,9 +15,13 @@ class Wget extends lib.DevCom {
     run(devTool, options) {
         if (options.args.length !== 2) {
             let lines = [
-                'WGet usage: ' + devTool.name + ' wget [url] [path]',
-                '  url    URL of the web file',
-                '  path   Path to save web file local'
+                'WGet usage: ' + devTool.name + ' wget [url] [path] [options]',
+                '  url           URL of the web file',
+                '  path          Path to save web file local',
+                '',
+                'Options:',
+                '  -quiet        No print messages',
+                '  --timeout [t] Set timeout in seconds'
             ];
 
             throw createError(lines.join(_os.EOL));
@@ -30,6 +34,6 @@ class Wget extends lib.DevCom {
             throw createError('Invalid URL: ' + options.args[0]);
         }
 
-        lib.download(url.href, path);
+        lib.download(url.href, path, options);
     }
 }

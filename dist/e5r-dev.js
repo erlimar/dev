@@ -13,7 +13,7 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
-const TOOL_VERSION = '0.4.1';
+const TOOL_VERSION = '0.5.0';
 
 /** @constant {string} */
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
@@ -1625,9 +1625,14 @@ var lib =
          * 
          * @param {string} url - Url for download
          * @param {string} path - Path to save file
+         * @param {object} options - Options object
          */
-        download(url, path) {
-            lib.logger.verbose('Downloading "' + url + '"...');
+        download(url, path, options) {
+            options = options || {};
+
+            if (!options.quiet || false) {
+                lib.logger.verbose('Downloading "' + url + '"...');
+            }
 
             let urlOptions = _url.parse(url),
                 protocol = urlOptions.protocol.split(':')[0],
@@ -1647,7 +1652,9 @@ var lib =
                 file = _fs.createWriteStream(path);
 
                 file.on('finish', function () {
-                    lib.logger.verbose('Download successfuly!');
+                    if (!options.quiet || false) {
+                        lib.logger.verbose('Download successfuly!');
+                    }
                     file.close(/* callback */);
                 });
 
@@ -1666,10 +1673,11 @@ var lib =
                 throw createError('Download error:', error);
             });
 
-            /** @todo: Add timeout */
-            // req.setTimeout(12000, function () {
-            //     req.abort();
-            // });
+            if (Number.isInteger(options.timeout) && options.timeout > 0) {
+                req.setTimeout(options.timeout * 1000, function () {
+                    req.abort();
+                });
+            }
 
             req.end();
         }
@@ -1679,8 +1687,9 @@ var lib =
          * 
          * @param {string} url - Url for download
          * @param {string} path - Path to save file
+         * @param {object} options - Options object
          */
-        downloadSync(url, path) {
+        downloadSync(url, path, options) {
             let jsEngine = process.execPath,
                 jsEngineArgv = [],
                 jsScript = module.filename,
@@ -1700,7 +1709,9 @@ var lib =
                 path
             ]));
 
-            lib.printf(child.output[1].toString());
+            if (!options.quiet || false) {
+                lib.printf(child.output[1].toString());
+            }
 
             if (child.status !== 0) {
                 let errorMessage;
@@ -2033,9 +2044,13 @@ class Wget extends lib.DevCom {
     run(devTool, options) {
         if (options.args.length !== 2) {
             let lines = [
-                'WGet usage: ' + devTool.name + ' wget [url] [path]',
-                '  url    URL of the web file',
-                '  path   Path to save web file local'
+                'WGet usage: ' + devTool.name + ' wget [url] [path] [options]',
+                '  url           URL of the web file',
+                '  path          Path to save web file local',
+                '',
+                'Options:',
+                '  -quiet        No print messages',
+                '  --timeout [t] Set timeout in seconds'
             ];
 
             throw createError(lines.join(_os.EOL));
@@ -2048,7 +2063,7 @@ class Wget extends lib.DevCom {
             throw createError('Invalid URL: ' + options.args[0]);
         }
 
-        lib.download(url.href, path);
+        lib.download(url.href, path, options);
     }
 }
 

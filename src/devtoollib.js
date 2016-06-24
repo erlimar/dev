@@ -406,9 +406,14 @@ var lib =
          * 
          * @param {string} url - Url for download
          * @param {string} path - Path to save file
+         * @param {object} options - Options object
          */
-        download(url, path) {
-            lib.logger.verbose('Downloading "' + url + '"...');
+        download(url, path, options) {
+            options = options || {};
+
+            if (!options.quiet || false) {
+                lib.logger.verbose('Downloading "' + url + '"...');
+            }
 
             let urlOptions = _url.parse(url),
                 protocol = urlOptions.protocol.split(':')[0],
@@ -428,7 +433,9 @@ var lib =
                 file = _fs.createWriteStream(path);
 
                 file.on('finish', function () {
-                    lib.logger.verbose('Download successfuly!');
+                    if (!options.quiet || false) {
+                        lib.logger.verbose('Download successfuly!');
+                    }
                     file.close(/* callback */);
                 });
 
@@ -447,10 +454,11 @@ var lib =
                 throw createError('Download error:', error);
             });
 
-            /** @todo: Add timeout */
-            // req.setTimeout(12000, function () {
-            //     req.abort();
-            // });
+            if (Number.isInteger(options.timeout) && options.timeout > 0) {
+                req.setTimeout(options.timeout * 1000, function () {
+                    req.abort();
+                });
+            }
 
             req.end();
         }
@@ -460,8 +468,9 @@ var lib =
          * 
          * @param {string} url - Url for download
          * @param {string} path - Path to save file
+         * @param {object} options - Options object
          */
-        downloadSync(url, path) {
+        downloadSync(url, path, options) {
             let jsEngine = process.execPath,
                 jsEngineArgv = [],
                 jsScript = module.filename,
@@ -481,7 +490,9 @@ var lib =
                 path
             ]));
 
-            lib.printf(child.output[1].toString());
+            if (!options.quiet || false) {
+                lib.printf(child.output[1].toString());
+            }
 
             if (child.status !== 0) {
                 let errorMessage;
