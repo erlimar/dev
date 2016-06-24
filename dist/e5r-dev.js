@@ -13,7 +13,7 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
-const TOOL_VERSION = '0.6.0';
+const TOOL_VERSION = '0.6.1';
 
 /** @constant {string} */
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
@@ -1978,8 +1978,8 @@ var lib =
             _fs.writeSync(process.stdout.fd, message, 0, 'utf-8');
             while (true) {
                 let r = _fs.readSync(process.stdin.fd, buffer, 0, 1, 0);
-                input += buffer.toString();
                 if (1 > r || buffer[0] === 13) break;
+                input += buffer.toString();
             }
 
             return input;
