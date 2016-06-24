@@ -760,7 +760,8 @@ var lib =
             _fs.writeSync(process.stdout.fd, message, 0, 'utf-8');
             while (true) {
                 let r = _fs.readSync(process.stdin.fd, buffer, 0, 1, 0);
-                if (1 > r || buffer[0] === 13 || buffer[0] === 10) break;
+                if (1 > r || buffer[0] === 13) break;
+                if (buffer[0] === 10) continue;
                 input += buffer.toString();
             }
 
