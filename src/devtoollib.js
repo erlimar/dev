@@ -754,6 +754,7 @@ var lib =
          */
         prompt(message) {
             let buffer = new Buffer(1),
+            /** @todo: Use Buffer */
                 input = '';
 
             _fs.writeSync(process.stdout.fd, message, 0, 'utf-8');
