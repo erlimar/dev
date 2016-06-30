@@ -1,5 +1,5 @@
 /*!
- * e5r-dev v0.6.3
+ * e5r-dev v0.6.4
  * E5R Tools for Development Team (https://github.com/e5r/dev#readme)
  * Copyright (c) E5R Development Team. All rights reserved.
  * Licensed under the Apache-2.0 License. More license information in LICENSE.txt.
