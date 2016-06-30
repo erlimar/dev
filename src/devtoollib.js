@@ -411,7 +411,7 @@ var lib =
         download(url, path, options) {
             options = options || {};
 
-            if (!options.quiet || false) {
+            if (!(options.quiet || false)) {
                 lib.logger.verbose('Downloading "' + url + '"...');
             }
 
@@ -433,7 +433,7 @@ var lib =
                 file = _fs.createWriteStream(path);
 
                 file.on('finish', function () {
-                    if (!options.quiet || false) {
+                    if (!(options.quiet || false)) {
                         lib.logger.verbose('Download successfuly!');
                     }
                     file.close(/* callback */);
@@ -490,7 +490,7 @@ var lib =
                 path
             ]));
 
-            if (!options.quiet || false) {
+            if (!(options.quiet || false)) {
                 lib.printf(child.output[1].toString());
             }
 
