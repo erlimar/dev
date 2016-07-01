@@ -472,7 +472,7 @@ var lib =
          */
         downloadSync(url, path, options) {
             options = options || {};
-            
+
             let jsEngine = process.execPath,
                 jsEngineArgv = [],
                 jsScript = module.filename,
@@ -589,13 +589,20 @@ var lib =
          * @param {string} scope - Name of scope to get content
          * @return {object}
          */
-        getRegistryLock(scope) {
+        getRegistryLock(scope, force) {
+            force = !!force;
+
             let registryLockFileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, scope),
                 registryLockFilePath = _path.resolve(lib.devHome.root, registryLockFileName);
 
             lib.loadRegistryCache();
 
             // Download LOCK file
+            /** @todo: Change to _fs.statSync(path) */
+            if (force && _fs.existsSync(registryLockFilePath)) {
+                _fs.unlinkSync(registryLockFilePath);
+            }
+
             /** @todo: Change to _fs.statSync(path) */
             if (!_fs.existsSync(registryLockFilePath)) {
                 let registryURL = lib.makeRegistryUrl(lib.__registry_cache__[scope]);
