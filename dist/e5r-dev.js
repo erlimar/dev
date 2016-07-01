@@ -1726,7 +1726,10 @@ var lib =
             ]));
 
             if (!(options.quiet || false)) {
-                lib.printf(child.output[1].toString());
+                let output = child.output[1].toString();
+                if (typeof output === 'string' && 0 < output.trim().length) {
+                    lib.printf();
+                }
             }
 
             if (child.status !== 0) {
@@ -1748,7 +1751,12 @@ var lib =
                     throw createError(errorMessage);
                 }
 
-                lib.printf(child.output[2].toString());
+                if (!(options.quiet || false)) {
+                    let output = child.output[2].toString();
+                    if (typeof output === 'string' && 0 < output.trim().length) {
+                        lib.printf(output);
+                    }
+                }
 
                 throw createError(''
                     + 'Download failed to "' + url + '"' + _os.EOL
