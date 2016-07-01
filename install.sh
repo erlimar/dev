@@ -126,7 +126,7 @@ _dev_get_webfile() {
     local origin="${1}"
     local destination="${2}"
 
-    # TODO: Apply-Proxy
+    # @todo: Apply-Proxy
     echo "Downloading ${origin}..."
 
     if _dev_has "curl"; then
@@ -215,7 +215,7 @@ while [ ${#} ]; do
     fi
 done
 
-# TODO: Try catch and by-pass exit code
+# @todo: Try catch and by-pass exit code
 _dev_start
 
 exit $?

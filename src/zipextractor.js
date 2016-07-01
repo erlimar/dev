@@ -634,7 +634,7 @@ ZipExtractor.prototype.extractDirectory = function(entry, destination) {
         this.extractDirectory(child, child_destination);
     }
 
-    // TODO: Apply directory date, time and attributes
+    /** @todo: Apply directory date, time and attributes */
 }
 
 ZipExtractor.prototype.extractFile = function(entry, destination) {
@@ -695,7 +695,7 @@ ZipExtractor.prototype.extractFile = function(entry, destination) {
         _fs.writeFileSync(filePath, _zlib.inflateRawSync(file._fileData));
     }
 
-    // TODO: Apply file date, time and attributes
+    /** @todo: Apply file date, time and attributes */
 }
 
 /**

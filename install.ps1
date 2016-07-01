@@ -125,7 +125,7 @@ Function Get-WebFile
     )
     
     $wc = New-Object System.Net.WebClient
-    # TODO: Apply-Proxy $wc
+    # @todo: Apply-Proxy $wc
     "Downloading $Origin..." | Write-Verbose
     
     $wc.DownloadFile($Origin, $Destination)
