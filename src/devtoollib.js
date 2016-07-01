@@ -583,6 +583,16 @@ var lib =
         }
 
         /**
+         * Make a registry lock file path
+         * 
+         * @param {string} scope - Name of scope to get content
+         */
+        makeRegistryLockFilePath(scope) {
+            let fileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, scope),
+            return _path.resolve(lib.devHome.root, fileName);
+        }
+
+        /**
          * Get `registry.{scope}.lock.json` content
          * 
          * @param {string} scope - Name of scope to get content
@@ -592,8 +602,7 @@ var lib =
             force = !!force;
             options = options || {};
 
-            let registryLockFileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, scope),
-                registryLockFilePath = _path.resolve(lib.devHome.root, registryLockFileName);
+            let registryLockFilePath = this.makeRegistryLockFilePath(scope);
 
             lib.loadRegistryCache();
 
