@@ -1666,9 +1666,6 @@ var lib =
                 file = _fs.createWriteStream(path);
 
                 file.on('finish', function () {
-                    if (!(options.quiet || false)) {
-                        lib.logger.verbose('Download successfuly!');
-                    }
                     file.close(/* callback */);
                 });
 
