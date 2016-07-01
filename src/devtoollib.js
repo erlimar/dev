@@ -588,8 +588,9 @@ var lib =
          * @param {string} scope - Name of scope to get content
          * @return {object}
          */
-        getRegistryLock(scope, force) {
+        getRegistryLock(scope, force, options) {
             force = !!force;
+            options = options || {};
 
             let registryLockFileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, scope),
                 registryLockFilePath = _path.resolve(lib.devHome.root, registryLockFileName);
@@ -609,7 +610,7 @@ var lib =
                 }
 
                 let registryLockURL = lib.normalizeUrl(registryURL).concat(TOOL_REGISTRY_LOCKFILE);
-                lib.downloadSync(registryLockURL, registryLockFilePath);
+                lib.downloadSync(registryLockURL, registryLockFilePath, options);
             }
 
             // Load LOCK file
