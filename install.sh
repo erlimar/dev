@@ -105,7 +105,7 @@ dev_lib="${dev_home}/lib/node_modules"
 
 bin_jsengine="${dev_tools}/jsengine"
 bin_jsdev="${dev_lib}/e5r-dev.js"
-node_version="5.9.0"
+node_version="6.2.2"
 node_pkg="node-v${node_version}-"`_dev_os`"-${arch}"
 node_pkg_file="${node_pkg}.tar.gz"
 node_pkg_url="https://nodejs.org/dist/v${node_version}/${node_pkg_file}"
