@@ -489,6 +489,11 @@ var lib =
                 path
             ]));
 
+            lib.printf('-----------@-----------');
+            lib.printf('@typeof child.output[1]:', typeof child.output[1].toString());
+            lib.printf('@typeof child.output[1].trim().length:', child.output[1].toString().trim().length);
+            lib.printf('-----------@-----------');
+
             if (!(options.quiet || false)) {
                 let output = child.output[1].toString();
                 if (typeof output === 'string' && 0 < output.trim().length) {
@@ -514,6 +519,11 @@ var lib =
                 if (errorMessage) {
                     throw createError(errorMessage);
                 }
+
+                lib.printf('-----------#-----------');
+                lib.printf('#typeof child.output[2]:', typeof child.output[2].toString());
+                lib.printf('#typeof child.output[2].trim().length:', child.output[2].toString().trim().length);
+                lib.printf('-----------#-----------');
 
                 if (!(options.quiet || false)) {
                     let output = child.output[2].toString();
