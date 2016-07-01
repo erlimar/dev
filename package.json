@@ -1,6 +1,6 @@
 {
   "name": "e5r-dev",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "E5R Tools for Development Team",
   "main": "dist/e5r-dev.js",
   "repository": {
