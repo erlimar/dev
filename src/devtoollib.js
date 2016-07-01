@@ -471,6 +471,8 @@ var lib =
          * @param {object} options - Options object
          */
         downloadSync(url, path, options) {
+            options = options || {};
+            
             let jsEngine = process.execPath,
                 jsEngineArgv = [],
                 jsScript = module.filename,
