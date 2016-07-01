@@ -1722,10 +1722,11 @@ var lib =
                 path
             ]));
 
-            lib.printf('-----------@-----------');
-            lib.printf('@typeof child.output[1]:', typeof child.output[1].toString());
-            lib.printf('@typeof child.output[1].trim().length:', child.output[1].toString().trim().length);
-            lib.printf('-----------@-----------');
+            lib.logger.debug('-----------@-----------');
+            lib.logger.debug('@typeof child.output[1]:', typeof child.output[1].toString());
+            lib.logger.debug('@typeof child.output[1].trim().length:', child.output[1].toString().trim().length);
+            lib.logger.debug(child.output[1].toString().trim());
+            lib.logger.debug('-----------@-----------');
 
             if (!(options.quiet || false)) {
                 let output = child.output[1].toString();
@@ -1753,10 +1754,11 @@ var lib =
                     throw createError(errorMessage);
                 }
 
-                lib.printf('-----------#-----------');
-                lib.printf('#typeof child.output[2]:', typeof child.output[2].toString());
-                lib.printf('#typeof child.output[2].trim().length:', child.output[2].toString().trim().length);
-                lib.printf('-----------#-----------');
+                lib.logger.debug('-----------#-----------');
+                lib.logger.debug('#typeof child.output[2]:', typeof child.output[2].toString());
+                lib.logger.debug('#typeof child.output[2].trim().length:', child.output[2].toString().trim().length);
+                lib.logger.debug(child.output[2].toString().trim());
+                lib.logger.debug('-----------#-----------');
 
                 if (!(options.quiet || false)) {
                     let output = child.output[2].toString();
