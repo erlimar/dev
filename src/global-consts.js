@@ -2,7 +2,7 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
-const TOOL_VERSION = '0.6.3';
+const TOOL_VERSION = '0.6.4';
 
 /** @constant {string} */
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
@@ -29,7 +29,7 @@ const PARAM_KEYVALUE_REGEX2 = '^[-]{2}([a-zA-Z0-9-_]+)$';
 const PARAM_FLAG_REGEX = '^[-]{1}([a-zA-Z0-9-_]+)$';
 
 /** @constant {number} */
-const CACHE_MAX_FILE = 2;
+const CACHE_MAX_FILE = 20;
 
 /** @constant {string} */
 const TOOL_REGISTRY_LOCKFILE = 'registry.lock.json';

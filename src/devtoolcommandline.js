@@ -120,12 +120,7 @@ class DevToolCommandLine {
                 this.exit(0);
             }
 
-            let devcom = this.builtin[this._cmd];
-
-            // Load dynamic devcom
-            if (!devcom) {
-                devcom = lib.require('cmd://' + this._cmd);
-            }
+            let devcom = this.builtin[this._cmd] || lib.require('cmd://' + this._cmd);
 
             if (!devcom) {
                 throw createError('DEVCOM [' + this._cmd + '] not found!');
@@ -233,7 +228,7 @@ class DevToolCommandLine {
         }
 
         Object.defineProperty(instance, 'getType', {
-            value: function() {
+            value: function () {
                 return BuiltinType
             }
         })
