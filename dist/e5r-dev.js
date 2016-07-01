@@ -1835,7 +1835,7 @@ var lib =
             force = !!force;
             options = options || {};
 
-            let registryLockFilePath = this.makeRegistryLockFilePath(scope);
+            let registryLockFilePath = lib.makeRegistryLockFilePath(scope);
 
             lib.loadRegistryCache();
 
