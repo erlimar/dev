@@ -1821,7 +1821,7 @@ var lib =
          * @param {string} scope - Name of scope to get content
          */
         makeRegistryLockFilePath(scope) {
-            let fileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, scope),
+            let fileName = TOOL_REGISTRY_LOCAL_LOCKFILE.replace(MAGIC_REGISTRY_LOCKNAME, scope);
             return _path.resolve(lib.devHome.root, fileName);
         }
 
