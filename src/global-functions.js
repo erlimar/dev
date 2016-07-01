@@ -149,16 +149,16 @@ function parseArgOptions(args) {
  */
 function getUserEnvironmentWin32(varName) {
     let exec = _childProcess.spawnSync,
-		child = exec('powershell', [
-			'-NoProfile',
-			'-ExecutionPolicy',
-			'unrestricted',
-			'-Command',
-			'[environment]::GetEnvironmentVariable(\'' + varName + '\',\'User\')'
-		]);
-        
+        child = exec('powershell', [
+            '-NoProfile',
+            '-ExecutionPolicy',
+            'unrestricted',
+            '-Command',
+            '[environment]::GetEnvironmentVariable(\'' + varName + '\',\'User\')'
+        ]);
+
     if (child.status === 0 && child.output && child.output.length > 0) {
-		return child.output[1].toString();
+        return child.output[1].toString();
     }
 }
 
@@ -181,13 +181,13 @@ function getUserEnvironmentUnix(varName) {
  */
 function setUserEnvironmentWin32(varName, value, shellOptions) {
     var exec = require('child_process').spawnSync,
-		child = exec('powershell', [
-			'-NoProfile',
-			'-ExecutionPolicy',
-			'unrestricted',
-			'-Command',
-			'[environment]::SetEnvironmentVariable(\'' + varName + '\', \'' + value + '\', \'User\')'
-		]);
+        child = exec('powershell', [
+            '-NoProfile',
+            '-ExecutionPolicy',
+            'unrestricted',
+            '-Command',
+            '[environment]::SetEnvironmentVariable(\'' + varName + '\', \'' + value + '\', \'User\')'
+        ]);
 
     if (child.status !== 0) {
         throw createError('It was not possible to assign the environment variable "' + varName + '" to the user.');
@@ -263,10 +263,15 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     }
 
     let lines = [],
-        lineBegin = options.resolver(varName, value, true);
+        lineBegin = options.resolver(varName, value, true),
+        fileExists = false;
 
-    /** @todo: Change to _fs.statSync(path) */
-    if (_fs.existsSync(options.path)) {
+    try {
+        let stat = _fs.statSync(options.path);
+        fileExists = stat.isFile() || stat.isSymbolicLink()
+    } catch (_) { /* quiet */ }
+
+    if (fileExists) {
         (_fs.readFileSync(options.path, 'utf8') || '')
             .split(_os.EOL)
             .map((lineValue) => {
@@ -277,7 +282,7 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     }
 
     lines.push(options.resolver(varName, value));
-    
+
     if (0 < lines.length) {
         _fs.writeFileSync(options.path, lines.join(_os.EOL), 'utf8');
     }

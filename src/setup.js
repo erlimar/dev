@@ -24,8 +24,7 @@ class Setup extends lib.DevCom {
             lib.devHome.cmd,
             lib.devHome.doc
         ].map(path => {
-            /** @todo: Change to _fs.statSync(path) */
-            if (!_fs.existsSync(path)) {
+            if (!lib.fileExists(path)) {
                 _fs.mkdirSync(path);
             }
         });

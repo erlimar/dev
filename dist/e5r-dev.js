@@ -60,6 +60,15 @@ const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
 /** @constant {string} */
 const WIN_REG_QUERY_REGEX = '^(.+)(REG_SZ|REG_MULTI_SZ|REG_EXPAND_SZ|REG_DWORD|REG_QWORD|REG_BINARY|REG_NONE)\\s*(.+)$';
 
+/** @constant {string} */
+const TOOL_ENVVARS_CMD = 'dev-envvars.cmd';
+
+/** @constant {string} */
+const TOOL_ENVVARS_PS1 = 'dev-envvars.ps1';
+
+/** @constant {string} */
+const TOOL_ENVVARS_SH = 'dev-envvars.sh';
+
 // ========================================================================
 // e5r-dev/global-extensions.js
 // ========================================================================
@@ -1017,16 +1026,16 @@ function parseArgOptions(args) {
  */
 function getUserEnvironmentWin32(varName) {
     let exec = _childProcess.spawnSync,
-		child = exec('powershell', [
-			'-NoProfile',
-			'-ExecutionPolicy',
-			'unrestricted',
-			'-Command',
-			'[environment]::GetEnvironmentVariable(\'' + varName + '\',\'User\')'
-		]);
-        
+        child = exec('powershell', [
+            '-NoProfile',
+            '-ExecutionPolicy',
+            'unrestricted',
+            '-Command',
+            '[environment]::GetEnvironmentVariable(\'' + varName + '\',\'User\')'
+        ]);
+
     if (child.status === 0 && child.output && child.output.length > 0) {
-		return child.output[1].toString();
+        return child.output[1].toString();
     }
 }
 
@@ -1049,13 +1058,13 @@ function getUserEnvironmentUnix(varName) {
  */
 function setUserEnvironmentWin32(varName, value, shellOptions) {
     var exec = require('child_process').spawnSync,
-		child = exec('powershell', [
-			'-NoProfile',
-			'-ExecutionPolicy',
-			'unrestricted',
-			'-Command',
-			'[environment]::SetEnvironmentVariable(\'' + varName + '\', \'' + value + '\', \'User\')'
-		]);
+        child = exec('powershell', [
+            '-NoProfile',
+            '-ExecutionPolicy',
+            'unrestricted',
+            '-Command',
+            '[environment]::SetEnvironmentVariable(\'' + varName + '\', \'' + value + '\', \'User\')'
+        ]);
 
     if (child.status !== 0) {
         throw createError('It was not possible to assign the environment variable "' + varName + '" to the user.');
@@ -1131,10 +1140,15 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     }
 
     let lines = [],
-        lineBegin = options.resolver(varName, value, true);
+        lineBegin = options.resolver(varName, value, true),
+        fileExists = false;
 
-    /** @todo: Change to _fs.statSync(path) */
-    if (_fs.existsSync(options.path)) {
+    try {
+        let stat = _fs.statSync(options.path);
+        fileExists = stat.isFile() || stat.isSymbolicLink()
+    } catch (_) { /* quiet */ }
+
+    if (fileExists) {
         (_fs.readFileSync(options.path, 'utf8') || '')
             .split(_os.EOL)
             .map((lineValue) => {
@@ -1145,7 +1159,7 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     }
 
     lines.push(options.resolver(varName, value));
-    
+
     if (0 < lines.length) {
         _fs.writeFileSync(options.path, lines.join(_os.EOL), 'utf8');
     }
@@ -1665,8 +1679,8 @@ var lib =
                 if (file) {
                     file.close(/* callback */);
                 }
-                /** @todo: Change to _fs.statSync(path) */
-                if (_fs.existsSync(path)) {
+
+                if (lib.fileExists(path)) {
                     _fs.unlink(path);
                     // callback
                 }
@@ -1763,8 +1777,7 @@ var lib =
                 }
             }
 
-            /** @todo: Change to _fs.statSync(path) */
-            let fileExists = _fs.existsSync(uriData.path);
+            let fileExists = lib.fileExists(uriData.path);
 
             // Load Javascript file from disk
             if (fileExists && uriData.isJS) {
@@ -1817,13 +1830,11 @@ var lib =
             lib.loadRegistryCache();
 
             // Download LOCK file
-            /** @todo: Change to _fs.statSync(path) */
-            if (force && _fs.existsSync(registryLockFilePath)) {
+            if (force && lib.fileExists(registryLockFilePath)) {
                 _fs.unlinkSync(registryLockFilePath);
             }
 
-            /** @todo: Change to _fs.statSync(path) */
-            if (!_fs.existsSync(registryLockFilePath)) {
+            if (!lib.fileExists(registryLockFilePath)) {
                 let registryURL = lib.makeRegistryUrl(lib.__registry_cache__[scope]);
 
                 if (typeof registryURL !== 'string') {
@@ -1850,8 +1861,7 @@ var lib =
         loadRegistryCache() {
             let registryPath = _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
 
-            /** @todo: Change to _fs.statSync(path) */
-            if (!lib.__registry_cache__ && !_fs.existsSync(registryPath)) {
+            if (!lib.__registry_cache__ && !lib.fileExists(registryPath)) {
                 throw createError('Registry file "' + TOOL_REGISTRY_FILE + ' " not found!');
             }
 
@@ -1923,8 +1933,7 @@ var lib =
 
             lib.downloadSync(registryFileUrl, uriData.path);
 
-            /** @todo: Change to _fs.statSync(path) */
-            if (!_fs.existsSync(uriData.path)) {
+            if (!lib.fileExists(uriData.path)) {
                 throw createError('Download failed to:', registryFileUrl);
             }
         }
@@ -2026,8 +2035,7 @@ class Setup extends lib.DevCom {
             lib.devHome.cmd,
             lib.devHome.doc
         ].map(path => {
-            /** @todo: Change to _fs.statSync(path) */
-            if (!_fs.existsSync(path)) {
+            if (!lib.fileExists(path)) {
                 _fs.mkdirSync(path);
             }
         });
@@ -2249,8 +2257,7 @@ class DevToolCommandLine {
 
         if (shell === 'cmd') {
             options = {
-                /** @todo: Move filename to constant */
-                path: _path.resolve(lib.devHome.tools, 'dev-envvars.cmd'),
+                path: _path.resolve(lib.devHome.tools, TOOL_ENVVARS_CMD),
                 resolver: (name, value, onlyPrefix) => {
                     let prefix = 'set ' + name + '=';
 
@@ -2265,8 +2272,7 @@ class DevToolCommandLine {
 
         if (shell === 'powershell') {
             options = {
-                /** @todo: Move filename to constant */
-                path: _path.resolve(lib.devHome.tools, 'dev-envvars.ps1'),
+                path: _path.resolve(lib.devHome.tools, TOOL_ENVVARS_PS1),
                 resolver: (name, value, onlyPrefix) => {
                     let prefix = '$env:' + name + ' = ';
 
@@ -2281,8 +2287,7 @@ class DevToolCommandLine {
 
         if (shell === 'sh') {
             options = {
-                /** @todo: Move filename to constant */
-                path: _path.resolve(lib.devHome.tools, 'dev-envvars.sh'),
+                path: _path.resolve(lib.devHome.tools, TOOL_ENVVARS_SH),
                 resolver: (name, value, onlyPrefix) => {
                     let prefix = name + '=';
 

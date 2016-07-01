@@ -48,3 +48,12 @@ const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
 
 /** @constant {string} */
 const WIN_REG_QUERY_REGEX = '^(.+)(REG_SZ|REG_MULTI_SZ|REG_EXPAND_SZ|REG_DWORD|REG_QWORD|REG_BINARY|REG_NONE)\\s*(.+)$';
+
+/** @constant {string} */
+const TOOL_ENVVARS_CMD = 'dev-envvars.cmd';
+
+/** @constant {string} */
+const TOOL_ENVVARS_PS1 = 'dev-envvars.ps1';
+
+/** @constant {string} */
+const TOOL_ENVVARS_SH = 'dev-envvars.sh';

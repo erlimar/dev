@@ -446,8 +446,8 @@ var lib =
                 if (file) {
                     file.close(/* callback */);
                 }
-                /** @todo: Change to _fs.statSync(path) */
-                if (_fs.existsSync(path)) {
+
+                if (lib.fileExists(path)) {
                     _fs.unlink(path);
                     // callback
                 }
@@ -544,8 +544,7 @@ var lib =
                 }
             }
 
-            /** @todo: Change to _fs.statSync(path) */
-            let fileExists = _fs.existsSync(uriData.path);
+            let fileExists = lib.fileExists(uriData.path);
 
             // Load Javascript file from disk
             if (fileExists && uriData.isJS) {
@@ -598,13 +597,11 @@ var lib =
             lib.loadRegistryCache();
 
             // Download LOCK file
-            /** @todo: Change to _fs.statSync(path) */
-            if (force && _fs.existsSync(registryLockFilePath)) {
+            if (force && lib.fileExists(registryLockFilePath)) {
                 _fs.unlinkSync(registryLockFilePath);
             }
 
-            /** @todo: Change to _fs.statSync(path) */
-            if (!_fs.existsSync(registryLockFilePath)) {
+            if (!lib.fileExists(registryLockFilePath)) {
                 let registryURL = lib.makeRegistryUrl(lib.__registry_cache__[scope]);
 
                 if (typeof registryURL !== 'string') {
@@ -631,8 +628,7 @@ var lib =
         loadRegistryCache() {
             let registryPath = _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
 
-            /** @todo: Change to _fs.statSync(path) */
-            if (!lib.__registry_cache__ && !_fs.existsSync(registryPath)) {
+            if (!lib.__registry_cache__ && !lib.fileExists(registryPath)) {
                 throw createError('Registry file "' + TOOL_REGISTRY_FILE + ' " not found!');
             }
 
@@ -704,8 +700,7 @@ var lib =
 
             lib.downloadSync(registryFileUrl, uriData.path);
 
-            /** @todo: Change to _fs.statSync(path) */
-            if (!_fs.existsSync(uriData.path)) {
+            if (!lib.fileExists(uriData.path)) {
                 throw createError('Download failed to:', registryFileUrl);
             }
         }

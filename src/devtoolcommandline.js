@@ -146,8 +146,7 @@ class DevToolCommandLine {
 
         if (shell === 'cmd') {
             options = {
-                /** @todo: Move filename to constant */
-                path: _path.resolve(lib.devHome.tools, 'dev-envvars.cmd'),
+                path: _path.resolve(lib.devHome.tools, TOOL_ENVVARS_CMD),
                 resolver: (name, value, onlyPrefix) => {
                     let prefix = 'set ' + name + '=';
 
@@ -162,8 +161,7 @@ class DevToolCommandLine {
 
         if (shell === 'powershell') {
             options = {
-                /** @todo: Move filename to constant */
-                path: _path.resolve(lib.devHome.tools, 'dev-envvars.ps1'),
+                path: _path.resolve(lib.devHome.tools, TOOL_ENVVARS_PS1),
                 resolver: (name, value, onlyPrefix) => {
                     let prefix = '$env:' + name + ' = ';
 
@@ -178,8 +176,7 @@ class DevToolCommandLine {
 
         if (shell === 'sh') {
             options = {
-                /** @todo: Move filename to constant */
-                path: _path.resolve(lib.devHome.tools, 'dev-envvars.sh'),
+                path: _path.resolve(lib.devHome.tools, TOOL_ENVVARS_SH),
                 resolver: (name, value, onlyPrefix) => {
                     let prefix = name + '=';
 
