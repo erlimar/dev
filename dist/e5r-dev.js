@@ -1417,11 +1417,22 @@ var lib =
          * Check if directory is empty.
          * 
          * @param {string} path
+         * @param {array} excludes
          */
-        directoryIsEmpty(path) {
+        directoryIsEmpty(path, excludes) {
             try {
-                let list = _fs.readdirSync(path);
-                return list.length === 0;
+                let count = 0,
+                    list = _fs.readdirSync(path);
+
+                count = list.length;
+
+                if (Array.isArray(excludes) && 0 < count) {
+                    for (let idx in list) {
+                        count += (0 > excludes.indexOf(list[idx])) ? 1 : 0;
+                    }
+                }
+
+                return count === 0;
             } catch (_) { /* silent */ }
             return true;
         }
