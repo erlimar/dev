@@ -1421,18 +1421,19 @@ var lib =
          */
         directoryIsEmpty(path, excludes) {
             try {
-                let count = 0,
-                    list = _fs.readdirSync(path);
+                let list = _fs.readdirSync(path);
 
-                count = list.length;
+                if (!Array.isArray(excludes) || 1 > list.length) {
+                    return 1 > list.length;
+                }
 
-                if (Array.isArray(excludes) && 0 < count) {
-                    for (let idx in list) {
-                        count += (0 > excludes.indexOf(list[idx])) ? 1 : 0;
+                for (let idx in list) {
+                    if (0 > excludes.indexOf(list[idx])) {
+                        return false;
                     }
                 }
 
-                return count === 0;
+                return true;
             } catch (_) { /* silent */ }
             return true;
         }
