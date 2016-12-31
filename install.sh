@@ -21,11 +21,6 @@
 
 {
 
-# Default params
-branch="develop"
-force=false
-verbose=false
-
 _dev_has() {
     type "${1}" > /dev/null 2>&1
 }
@@ -52,18 +47,13 @@ _dev_show_error()
 # -------------------
 # Check prerequisites
 # -------------------
-if [ ! `_dev_os` = "linux" ]; then
+if ! _dev_has "uname"; then
+    _dev_show_error "Unix uname is required"
+    exit 1
+fi
+
+if [ ! `_dev_os` = "linux" ] && [ ! `_dev_os` = "darwin" ]; then
     _dev_show_error "OS "`_dev_os`" is not supported"
-    exit 1
-fi
-
-if ! _dev_has "basename"; then
-    _dev_show_error "Unix basename is required"
-    exit 1
-fi
-
-if ! _dev_has "readlink"; then
-    _dev_show_error "Unix readlink is required"
     exit 1
 fi
 
@@ -92,11 +82,10 @@ else
     arch='x86'
 fi
 
-script_name=`basename ${0}`
-script_file=`readlink -f "${0}"`
 git_branch="develop"
 dev_home="${HOME}/.dev"
 dev_tools="${dev_home}/tools"
+dev_bin="${dev_home}/bin"
 
 # # HACK: All libraries are installed in "/lib" or "/lib/cmd". So when these libraries
 # #       use "require('dev')" will always find the file "dist/dev.js" as a module,
@@ -131,19 +120,28 @@ _dev_get_webfile() {
 
     if _dev_has "curl"; then
         curl --insecure --silent -o "${destination}" "${origin}"
+        return $?
     elif _dev_has "wget"; then
         wget --no-check-certificate --quiet -O "${destination}" "${origin}"
+        return $?
     elif _dev_has "fetch"; then
         fetch --no-verify-peer --quiet -o "${destination}" "${origin}"
+        return $?
     else
         _dev_show_error "Tool curl, wget or fetch undetected."
+        return 1
     fi
 }
 
 _dev_clear()
 {
-    echo "Cleaning old installation..."
-    rm -rf "${dev_home}"
+    if [ -d ${dev_home} ]; then
+        rm -rf "${dev_home}"
+    fi
+
+    if [ -d ${temp_dir} ]; then
+        rm -rf "${temp_dir}"
+    fi
 }
 
 _dev_install() {
@@ -158,19 +156,39 @@ _dev_install() {
     mkdir -p "${temp_dir_unziped}"
 
     # Download NODEJS binary package
-    _dev_get_webfile "${node_pkg_url}" "${temp_dir}/${node_pkg_file}"
+    if ! _dev_get_webfile "${node_pkg_url}" "${temp_dir}/${node_pkg_file}"; then
+        _dev_show_error "On download NODEJS binary package"
+        return 1
+    fi
 
-    # Extract jsengine
-    tar -xf "${temp_dir}/${node_pkg_file}" -C "${temp_dir_unziped}"
+    # Extract JSENGINE
+    if ! tar -xf "${temp_dir}/${node_pkg_file}" -C "${temp_dir_unziped}"; then
+        _dev_show_error "On extract JSENGINE"
+        return 1
+    fi
+
     cp "${temp_dir_unziped}/${node_pkg}/bin/node" "${bin_jsengine}"
     chmod a+=x "${bin_jsengine}"
     rm -rf "${temp_dir}"
 
     # Download "e5r-dev.js" script
-    _dev_get_webfile "${jsdev_url}" "${bin_jsdev}"
+    if ! _dev_get_webfile "${jsdev_url}" "${bin_jsdev}"; then
+        _dev_show_error "On download e5r-dev.js script"
+        return 1
+    fi
 
     # Invoke $> node e5r-dev.js setup
-    ${bin_jsengine} "${bin_jsdev}" setup --shell=sh
+    if ! ${bin_jsengine} "${bin_jsdev}" setup --shell=sh; then
+        _dev_show_error "On executing e5r-dev.js setup"
+        return 1
+    fi
+
+    _dev_add_dev_to_path
+}
+
+_dev_add_dev_to_path()
+{
+    echo "export PATH=\$PATH:${dev_bin}" >> "${HOME}/.bash_profile"
 }
 
 _dev_start()
@@ -182,40 +200,17 @@ _dev_start()
     fi
 
     if "${found}" = true; then
+        echo "Cleaning old installation..."
         _dev_clear
     fi
 
-    _dev_install
+    if ! _dev_install; then
+        _dev_clear
+    fi
+
+    return 0
 }
 
-# Read params
-while [ ${#} ]; do
-    key=${1}
-    
-    case ${key} in
-        -f|--force)
-            force=true
-            ;;
-        -v|--verbose)
-            verbose=true
-            ;;
-        -b|--branch)
-            if [ "${2}" != "" ]; then
-                branch=${2}
-            fi
-            ;;
-        *)
-            ;;
-    esac
-        
-    if [ "${#}" != "0" ]; then
-        shift
-    else
-        break
-    fi
-done
-
-# @todo: Try catch and by-pass exit code
 _dev_start
 
 exit $?
