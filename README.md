@@ -39,7 +39,7 @@ npm publish
 &{$wc=New-Object System.Net.WebClient;$wc.Proxy=[System.Net.WebRequest]::DefaultWebProxy;$wc.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;Invoke-Expression ($wc.DownloadString('https://raw.githubusercontent.com/e5r/dev/develop/install.ps1'))}
 ```
 
-## Install on Unix (_Linux only_)
+## Install on Unix (_Linux and macOS_)
 
 ```
 curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh && source ~/.dev/tools/dev-envvars.sh
