@@ -1502,7 +1502,7 @@ var lib =
         }
 
         /**
-         * Resolve name in camelCase to "camel-case"
+         * Convert from camelCase to "camel-case"
          * 
          * @param {string} name - Name in camelCase
          * 
@@ -1528,7 +1528,7 @@ var lib =
         }
 
         /**
-         * Make name "camel-case" from camelCase 
+         * Convert from "camel-case" to camelCase 
          * 
          * @param {string} name - Name
          * 
