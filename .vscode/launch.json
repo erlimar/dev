@@ -5,9 +5,15 @@
 			"name": "devtoollib.js",
 			"type": "node",
 			"request": "launch",
-			"program": "${workspaceRoot}/src/devtoollib.js",
+			"program": "${workspaceRoot}/src/devtoolcommandline.js",
 			"stopOnEntry": false,
-			"args": [],
+			"args": [
+				"-devmode",
+				"env",
+				"install",
+				"node",
+				"--shell=sh"
+			],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
 			"runtimeArgs": [

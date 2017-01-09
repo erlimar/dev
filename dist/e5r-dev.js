@@ -2164,19 +2164,10 @@ class DevToolCommandLine {
 
         let self = this;
 
-        self._exitCode = 0;
-        self._args = [];
-
-        process.argv.slice(2).map((arg) => {
-            if (arg.startsWith('--shell=')) {
-                self._shell = arg.split('=')[1];
-            } else {
-                self._args.push(arg);
-            }
-        });
-
         self._name = 'dev';
-        self._cmd = (this._args.shift() || '').toLowerCase();
+        self._exitCode = 0;
+        self._options = parseArgOptions(process.argv.slice(2));
+        self._cmd = (this._options.args.shift() || '').toLowerCase();
         self._builtin = new Object;
 
         // Registry Built-in DevCom.
@@ -2274,7 +2265,7 @@ class DevToolCommandLine {
                 throw createError('DEVCOM [' + this._cmd + '] not found!');
             }
 
-            devcom.run(this, parseArgOptions(this._args));
+            devcom.run(this, this._options);
         } catch (error) {
             lib.logger.error(error);
             this.exitCode = error.code || 1;
@@ -2282,7 +2273,7 @@ class DevToolCommandLine {
     }
 
     get shell() {
-        return this._shell;
+        return this._options.shell;
     }
 
     /**
