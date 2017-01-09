@@ -88,7 +88,7 @@ dev_tools="${dev_home}/tools"
 dev_bin="${dev_home}/bin"
 
 # # HACK: All libraries are installed in "/lib" or "/lib/cmd". So when these libraries
-# #       use "require('dev')" will always find the file "dist/dev.js" as a module,
+# #       use "require('e5r-dev')" will always find the file "dist/e5r-dev.js" as a module,
 # #       as is the standard way of resolving NodeJS dependencies.
 dev_lib="${dev_home}/lib/node_modules"
 
