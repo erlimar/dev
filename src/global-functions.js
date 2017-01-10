@@ -287,3 +287,37 @@ function appendUpdateEnvironmentFile(varName, value, options) {
         _fs.writeFileSync(options.path, lines.join(_os.EOL), 'utf8');
     }
 }
+
+/**
+ *  Load a global configuration value from TOOL_CONFIGURATION_FILE file
+ *  and storage in _globalConfiguration variable. 
+ */
+function getGlobalConfiguration() {
+    if (_globalConfiguration) {
+        return _globalConfiguration;
+    }
+
+    let filePath = _path.join(_devPaths.root, TOOL_CONFIGURATION_FILE);
+
+    if (!lib.fileExists(filePath)) {
+        _fs.writeFileSync(filePath, JSON.stringify(TOOL_DEFAULT_CONFIGURATION, null, 4), 'utf8');
+    }
+
+    _globalConfiguration = require(filePath);
+
+    return _globalConfiguration;
+}
+
+/**
+ * Save config on TOOL_CONFIGURATION_FILE file and
+ * reset then _globalConfiguration variable.
+ * 
+ * @param {any} config - The configuration value object
+ */
+function setGlobalConfiguration(config) {
+    let filePath = _path.join(_devPaths.root, TOOL_CONFIGURATION_FILE);
+
+    _fs.writeFileSync(filePath, JSON.stringify(config, null, 4), 'utf8');
+
+    _globalConfiguration = undefined;
+}

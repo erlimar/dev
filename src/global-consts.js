@@ -17,6 +17,12 @@ const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/devcom/
 const TOOL_REGISTRY_FILE = 'registry.json';
 
 /** @constant {string} */
+const TOOL_CONFIGURATION_FILE = 'config.json';
+
+/** @constant {object} */
+const TOOL_DEFAULT_CONFIGURATION = {};
+
+/** @constant {string} */
 const REQUIRE_URI_REGEX = '^(cmd|lib|doc)://(([a-z0-9]|\-|_|/)+)$';
 
 /** @constant {string} */

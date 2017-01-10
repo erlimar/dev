@@ -810,4 +810,78 @@ var lib =
 
             return input;
         }
+
+        /**
+         * Get the configuration value
+         * 
+         * @param {string} key - Configuration key. Ex: e5r.info.author
+         * @param {any} defaultValue - Default value to return if configuration not exists
+         */
+        getConfiguration(key, defaultValue) {
+            if (typeof key !== 'string') {
+                return defaultValue;
+            }
+
+            let configData = getGlobalConfiguration(),
+                keys = key.split('.');
+
+            for (let k in keys) {
+                if (!configData) {
+                    return defaultValue;
+                }
+
+                let keyName = keys[k];
+
+                configData = configData[keyName];
+            }
+
+            return configData || defaultValue;
+        }
+
+        /**
+         * Set the configuration value
+         * 
+         * @param {string} key - Configuration key. Ex: e5r.info.author
+         * @param {any} value - The value to set
+         */
+        setConfiguration(key, value) {
+            if (typeof key !== 'string') {
+                return null;
+            }
+
+            let configData = getGlobalConfiguration(),
+                keys = key.split('.');
+
+            // Ensuring integrity of all objects in the chain
+            for (let idx = 0; idx < keys.length; idx++) {
+                let currentField = keys.slice(0, idx + 1).join('.'),
+                    ensureExpression = 'configData.{field} = configData.{field} || {};'.replace(new RegExp('{field}', 'g'), currentField);
+
+                // @todo: Use require('vm') here
+                eval(ensureExpression);
+            }
+
+            // Set the config value object
+            let valueString = JSON.stringify(value),
+                setExpression = 'configData.{field} = {value}'
+                    .replace('{field}', key)
+                    .replace('{value}', valueString),
+                getExpression = 'configData.' + key;
+
+            // @todo: Use require('vm') here
+            eval(setExpression);
+
+            setGlobalConfiguration(configData);
+
+            return eval(getExpression);
+        }
+
+        /**
+         * Remove the configuration value
+         * 
+         * @param {string} key - Configuration key. Ex: e5r.info.author
+         */
+        removeConfiguration(key) {
+            lib.setConfiguration(key);
+        }
     }

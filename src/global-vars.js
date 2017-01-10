@@ -15,3 +15,4 @@ var _devPaths = {
     cmd: _path.join(_rootPath, 'lib', 'cmd'),
     doc: _path.join(_rootPath, 'doc')
 };
+var _globalConfiguration;

@@ -28,6 +28,12 @@ const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/devcom/
 const TOOL_REGISTRY_FILE = 'registry.json';
 
 /** @constant {string} */
+const TOOL_CONFIGURATION_FILE = 'config.json';
+
+/** @constant {object} */
+const TOOL_DEFAULT_CONFIGURATION = {};
+
+/** @constant {string} */
 const REQUIRE_URI_REGEX = '^(cmd|lib|doc)://(([a-z0-9]|\-|_|/)+)$';
 
 /** @constant {string} */
@@ -871,6 +877,7 @@ var _devPaths = {
     cmd: _path.join(_rootPath, 'lib', 'cmd'),
     doc: _path.join(_rootPath, 'doc')
 };
+var _globalConfiguration;
 
 // ========================================================================
 // e5r-dev/global-functions.js
@@ -1163,6 +1170,40 @@ function appendUpdateEnvironmentFile(varName, value, options) {
     if (0 < lines.length) {
         _fs.writeFileSync(options.path, lines.join(_os.EOL), 'utf8');
     }
+}
+
+/**
+ *  Load a global configuration value from TOOL_CONFIGURATION_FILE file
+ *  and storage in _globalConfiguration variable. 
+ */
+function getGlobalConfiguration() {
+    if (_globalConfiguration) {
+        return _globalConfiguration;
+    }
+
+    let filePath = _path.join(_devPaths.root, TOOL_CONFIGURATION_FILE);
+
+    if (!lib.fileExists(filePath)) {
+        _fs.writeFileSync(filePath, JSON.stringify(TOOL_DEFAULT_CONFIGURATION, null, 4), 'utf8');
+    }
+
+    _globalConfiguration = require(filePath);
+
+    return _globalConfiguration;
+}
+
+/**
+ * Save config on TOOL_CONFIGURATION_FILE file and
+ * reset then _globalConfiguration variable.
+ * 
+ * @param {any} config - The configuration value object
+ */
+function setGlobalConfiguration(config) {
+    let filePath = _path.join(_devPaths.root, TOOL_CONFIGURATION_FILE);
+
+    _fs.writeFileSync(filePath, JSON.stringify(config, null, 4), 'utf8');
+
+    _globalConfiguration = undefined;
 }
 
 // ========================================================================
@@ -2042,6 +2083,80 @@ var lib =
             }
 
             return input;
+        }
+
+        /**
+         * Get the configuration value
+         * 
+         * @param {string} key - Configuration key. Ex: e5r.info.author
+         * @param {any} defaultValue - Default value to return if configuration not exists
+         */
+        getConfiguration(key, defaultValue) {
+            if (typeof key !== 'string') {
+                return defaultValue;
+            }
+
+            let configData = getGlobalConfiguration(),
+                keys = key.split('.');
+
+            for (let k in keys) {
+                if (!configData) {
+                    return defaultValue;
+                }
+
+                let keyName = keys[k];
+
+                configData = configData[keyName];
+            }
+
+            return configData || defaultValue;
+        }
+
+        /**
+         * Set the configuration value
+         * 
+         * @param {string} key - Configuration key. Ex: e5r.info.author
+         * @param {any} value - The value to set
+         */
+        setConfiguration(key, value) {
+            if (typeof key !== 'string') {
+                return null;
+            }
+
+            let configData = getGlobalConfiguration(),
+                keys = key.split('.');
+
+            // Ensuring integrity of all objects in the chain
+            for (let idx = 0; idx < keys.length; idx++) {
+                let currentField = keys.slice(0, idx + 1).join('.'),
+                    ensureExpression = 'configData.{field} = configData.{field} || {};'.replace(new RegExp('{field}', 'g'), currentField);
+
+                // @todo: Use require('vm') here
+                eval(ensureExpression);
+            }
+
+            // Set the config value object
+            let valueString = JSON.stringify(value),
+                setExpression = 'configData.{field} = {value}'
+                    .replace('{field}', key)
+                    .replace('{value}', valueString),
+                getExpression = 'configData.' + key;
+
+            // @todo: Use require('vm') here
+            eval(setExpression);
+
+            setGlobalConfiguration(configData);
+
+            return eval(getExpression);
+        }
+
+        /**
+         * Remove the configuration value
+         * 
+         * @param {string} key - Configuration key. Ex: e5r.info.author
+         */
+        removeConfiguration(key) {
+            lib.setConfiguration(key);
         }
     }
 
