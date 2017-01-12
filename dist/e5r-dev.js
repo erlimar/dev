@@ -1480,6 +1480,61 @@ var lib =
         }
 
         /**
+         * Copy file
+         * 
+         * @param {string} src - Path to origin file
+         * @param {string} dest - Path to destination file
+         */
+        copyFile(src, dest) {
+            const BUF_LENGTH = 64 * 1024;
+            let buff = new Buffer(BUF_LENGTH),
+                fdr = _fs.openSync(src, 'r'),
+                fdw = _fs.openSync(dest, 'w'),
+                bytesRead = 1,
+                pos = 0;
+
+            while (bytesRead > 0) {
+                bytesRead = _fs.readSync(fdr, buff, 0, BUF_LENGTH, pos);
+                _fs.writeSync(fdw, buff, 0, bytesRead);
+                pos += bytesRead;
+            }
+
+            _fs.closeSync(fdr);
+            _fs.closeSync(fdw);
+        }
+
+        /**
+         * Copy all content folder
+         * 
+         * @param {string} src - Path to origin folder
+         * @param {string} dest - Path to destination folder
+         */
+        copyDirectory(src, dest) {
+            if (!lib.directoryExists(src)) {
+                throw lib.createError('Directory "' + src + '" not exists.');
+            }
+
+            lib.mkdir(dest);
+
+            let files = _fs.readdirSync(src);
+
+            for (let idx = 0; idx < files.length; idx++) {
+                let filePath = _path.join(src, files[idx]),
+                    filePathDest = _path.join(dest, files[idx]),
+                    fileStat = _fs.lstatSync(filePath);
+
+                if (fileStat.isDirectory()) {
+                    lib.copyDirectory(filePath, filePathDest);
+                } else if (fileStat.isSymbolicLink()) {
+                    var symlink = _fs.readlinkSync(filePath);
+                    _fs.symlinkSync(symlink, filePathDest);
+                } else {
+                    lib.copyFile(filePath, filePathDest);
+                }
+            }
+        }
+
+        /**
          * Generate a temporary directory name
          */
         generateTempDir() {
