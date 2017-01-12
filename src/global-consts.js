@@ -2,7 +2,7 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
-const TOOL_VERSION = '0.11.0';
+const TOOL_VERSION = '0.12.0';
 
 /** @constant {string} */
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
