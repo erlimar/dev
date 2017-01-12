@@ -1,5 +1,5 @@
 /*!
- * e5r-dev v0.11.0
+ * e5r-dev v0.12.0
  * E5R Tools for Development Team (https://github.com/e5r/dev#readme)
  * Copyright (c) E5R Development Team. All rights reserved.
  * Licensed under the Apache-2.0 License. More license information in LICENSE.txt.
@@ -13,7 +13,7 @@
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
-const TOOL_VERSION = '0.11.0';
+const TOOL_VERSION = '0.12.0';
 
 /** @constant {string} */
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
