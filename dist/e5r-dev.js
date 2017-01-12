@@ -1634,8 +1634,78 @@ var lib =
          * @param {string} destination - Path do directory destination
          */
         extractFile(origin, destination) {
-            let extractor = new ZipExtractor(origin);
-            extractor.extractTo('./', destination);
+            // ZIP files
+            if (origin.toLowerCase().lastIndexOf('.zip') === origin.length - 4) {
+                let extractor = new ZipExtractor(origin);
+                extractor.extractTo('./', destination);
+                return;
+            }
+
+            // Unix TAR.GZ files
+            if (_os.platform() !== 'win32' && origin.toLowerCase().lastIndexOf('.tar.gz') === origin.length - 7) {
+                let exec = _childProcess.spawnSync,
+                    destinationParts = destination.split('/');
+
+                if (destinationParts.length > 0) {
+                    let originParts = origin.split('/'),
+                        fileName = (originParts[originParts.length - 1] || ''),
+                        destinationName = destinationParts[destinationParts.length - 1];
+                    fileName = fileName.substring(0, fileName.length - 7);
+
+                    if (fileName == destinationName) {
+                        destination = destination.substring(0, destination.lastIndexOf('/'));
+                    }
+                }
+
+                let child = exec('tar', [
+                    '-xzf',
+                    origin,
+                    '-C',
+                    destination
+                ]);
+
+                if (child.status !== 0) {
+                    let errorMessage;
+
+                    // Searching error message output
+                    let errorLines = child.output[2].toString().split(_os.EOL),
+                        errorRegex = new RegExp('^Error: {1}(.+)$');
+
+                    for (let l in errorLines) {
+                        let regexResult = errorRegex.exec(errorLines[l]);
+                        if (regexResult) {
+                            errorMessage = regexResult[1];
+                            break;
+                        }
+                    };
+
+                    if (errorMessage) {
+                        throw createError(errorMessage);
+                    }
+
+                    lib.logger.debug('-----------#-----------');
+                    lib.logger.debug('#typeof child.output[2]:', typeof child.output[2].toString());
+                    lib.logger.debug('#typeof child.output[2].trim().length:', child.output[2].toString().trim().length);
+                    lib.logger.debug(child.output[2].toString().trim());
+                    lib.logger.debug('-----------#-----------');
+
+                    let output = child.output[2].toString();
+                    if (typeof output === 'string' && 0 < output.trim().length) {
+                        lib.printf(output);
+                    }
+
+                    throw createError(''
+                        + 'Extract file failed from "' + origin + '"' + _os.EOL
+                        + '  PID: ' + child.pid + _os.EOL
+                        + '  Command: ' + child.args.join(' ') + _os.EOL
+                        + '  Exit Code: ' + child.status
+                    );
+                }
+
+                return;
+            }
+
+            lib.createError('Unsupported file type to extract.');
         }
 
         /**
@@ -1780,13 +1850,6 @@ var lib =
             lib.logger.debug('@typeof child.output[1].trim().length:', child.output[1].toString().trim().length);
             lib.logger.debug(child.output[1].toString().trim());
             lib.logger.debug('-----------@-----------');
-
-            if (!(options.quiet || false)) {
-                let output = child.output[1].toString();
-                if (typeof output === 'string' && 0 < output.trim().length) {
-                    lib.printf();
-                }
-            }
 
             if (child.status !== 0) {
                 let errorMessage;
