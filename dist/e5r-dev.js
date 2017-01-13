@@ -2561,7 +2561,7 @@ class DevToolCommandLine {
             options = {
                 path: _path.resolve(lib.devHome.tools, TOOL_ENVVARS_SH),
                 resolver: (name, value, onlyPrefix) => {
-                    let prefix = name + '=';
+                    let prefix = 'export ' + name + '=';
 
                     if (onlyPrefix) {
                         return prefix;
