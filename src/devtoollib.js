@@ -783,6 +783,10 @@ var lib =
          * Load the `registry.json` on cache
          */
         loadRegistryCache() {
+            lib.logger.debug('TOOL_REGISTRY_FILE:', TOOL_REGISTRY_FILE);
+            lib.logger.debug('devHome.root:', lib.devHome.root);
+            lib.logger.debug('registryPath:', _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE));
+
             let registryPath = _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
 
             if (!lib.__registry_cache__ && !lib.fileExists(registryPath)) {
