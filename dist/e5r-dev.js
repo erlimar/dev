@@ -1079,21 +1079,37 @@ function setUserEnvironmentWin32(varName, value, shellOptions) {
 }
 
 /**
+ * Return all paths of available user profile files
+ * 
+ * @return {Object} Array os paths
+ */
+function getAllUserProfilePathsAvailable() {
+    let profiles = [],
+        homedir = _os.homedir();
+
+    [
+        '.bash_profile',
+        '.bashrc',
+        '.profile',
+        '.zshrc'
+    ].map(file => {
+        profiles.push(_path.join(homedir, file));
+    });
+
+    return profiles;
+}
+
+/**
  * Return a path list of user profile files
  * 
  * @return {Object} Array os paths
  */
 function getUserProfilePaths() {
-    let profiles = [],
-        bash_profile = _path.join(_os.homedir(), '.bash_profile'),
-        bashrc = _path.join(_os.homedir(), '.bashrc'),
-        profile = _path.join(_os.homedir(), '.profile'),
-        zshrc = _path.join(_os.homedir(), '.zshrc');
+    let profiles = [];
 
-    if (lib.fileExists(bash_profile)) profiles.push(bash_profile);
-    if (lib.fileExists(bashrc)) profiles.push(bashrc);
-    if (lib.fileExists(profile)) profiles.push(profile);
-    if (lib.fileExists(zshrc)) profiles.push(zshrc);
+    getAllUserProfilePathsAvailable().map(pathProfile => {
+        if (lib.fileExists(pathProfile)) profiles.push(pathProfile);
+    })
 
     return profiles;
 }
@@ -1150,12 +1166,7 @@ function appendUpdateEnvironmentFile(varName, value, options) {
         lineBegin = options.resolver(varName, value, true),
         fileExists = false;
 
-    try {
-        let stat = _fs.statSync(options.path);
-        fileExists = stat.isFile() || stat.isSymbolicLink()
-    } catch (_) { /* quiet */ }
-
-    if (fileExists) {
+    if (lib.fileExists(options.path)) {
         (_fs.readFileSync(options.path, 'utf8') || '')
             .split(_os.EOL)
             .map((lineValue) => {
@@ -2514,7 +2525,7 @@ class DevToolCommandLine {
      */
     get shellOptions() {
         let options,
-            shell = (this._shell || '').toLowerCase();
+            shell = (this.shell || '').toLowerCase();
 
         if (shell === 'cmd') {
             options = {

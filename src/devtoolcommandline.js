@@ -133,7 +133,7 @@ class DevToolCommandLine {
      */
     get shellOptions() {
         let options,
-            shell = (this._shell || '').toLowerCase();
+            shell = (this.shell || '').toLowerCase();
 
         if (shell === 'cmd') {
             options = {
