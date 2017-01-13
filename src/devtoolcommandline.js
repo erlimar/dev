@@ -60,17 +60,11 @@ class DevToolCommandLine {
             TOOL_COPYRIGHT,
             '',
             TOOL_TITLE,
-            'usage: ' + this.name + ' [devcom] [options]'
+            ''
         ];
 
         lib.printf(lines.join(_os.EOL));
-    }
-
-    /**
-     * Show usage text
-     */
-    usage() {
-        this.help();
+        this.usage();
 
         lib.printf('DevCom:');
 
@@ -90,6 +84,13 @@ class DevToolCommandLine {
     }
 
     /**
+     * Show usage text
+     */
+    usage() {
+        lib.printf('usage: ' + this.name + ' [devcom] [options]');
+    }
+
+    /**
      * Exit process tool
      */
     exit() {
@@ -103,12 +104,13 @@ class DevToolCommandLine {
         try {
             if (!this._cmd || /^[-]{1}.+$/.test(this._cmd)) {
                 this.usage();
-                this.exit(ERROR_CODE_DEVCOM_NOTINFORMED);
+                this.exitCode = ERROR_CODE_DEVCOM_NOTINFORMED;
+                return;
             }
 
             if (this._cmd === 'help') {
                 this.help();
-                this.exit(0);
+                return;
             }
 
             let devcom = this.builtin[this._cmd] || lib.require('cmd://' + this._cmd);
@@ -122,6 +124,8 @@ class DevToolCommandLine {
             lib.logger.error(error);
             this.exitCode = error.code || 1;
         }
+
+        this.exit();
     }
 
     get shell() {

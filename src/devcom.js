@@ -9,6 +9,14 @@ class DevCom {
      * @param {object} options - Options for arguments of command
      */
     run(devTool, options) {
-        throw createError('DevCom run() not implemented.');
+        throw createError('DevCom.run() not implemented.');
+    }
+
+    get name() {
+        throw createError('DevCom.name not implemented.');
+    }
+
+    get shortDoc() {
+        throw createError('DevCom.shortDoc not implemented.');
     }
 }

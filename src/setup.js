@@ -6,6 +6,14 @@
  */
 class Setup extends lib.DevCom {
 
+    get name() {
+        return 'setup';
+    }
+
+    get shortDoc() {
+        return 'Setup a E5R Development Team Environment';
+    }
+
     /**
      * Run the `setup` built-in command
      * 
