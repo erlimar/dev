@@ -1919,11 +1919,12 @@ var lib =
                 path
             ]));
 
-            lib.logger.debug('-----------@-----------');
-            lib.logger.debug('@typeof child.output[1]:', typeof child.output[1].toString());
-            lib.logger.debug('@typeof child.output[1].trim().length:', child.output[1].toString().trim().length);
+            lib.logger.debug('    child_process status:', child.status);
+            lib.logger.debug('    output type:', typeof child.output[1].toString());
+            lib.logger.debug('    output length:', child.output[1].toString().trim().length);
+            lib.logger.debug('*** downloadSync output begin ***');
             lib.logger.debug(child.output[1].toString().trim());
-            lib.logger.debug('-----------@-----------');
+            lib.logger.debug('*** downloadSync output end ***');
 
             if (child.status !== 0) {
                 let errorMessage;
@@ -1944,11 +1945,11 @@ var lib =
                     throw createError(errorMessage);
                 }
 
-                lib.logger.debug('-----------#-----------');
-                lib.logger.debug('#typeof child.output[2]:', typeof child.output[2].toString());
-                lib.logger.debug('#typeof child.output[2].trim().length:', child.output[2].toString().trim().length);
+                lib.logger.debug('    error output type:', typeof child.output[2].toString());
+                lib.logger.debug('    error output length:', child.output[2].toString().trim().length);
+                lib.logger.debug('*** downloadSync error output begin ***');
                 lib.logger.debug(child.output[2].toString().trim());
-                lib.logger.debug('-----------#-----------');
+                lib.logger.debug('*** downloadSync error output end ***');
 
                 if (!(options.quiet || false)) {
                     let output = child.output[2].toString();
