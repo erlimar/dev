@@ -32,10 +32,17 @@ class Setup extends lib.DevCom {
             lib.devHome.cmd,
             lib.devHome.doc
         ].map(path => {
+            lib.logger.debug('mkdir:', path);
             lib.mkdir(path);
         });
 
         // 2> Download `registry.json`
+        lib.logger.debug(
+            'downloadSync:',
+            _url.resolve(TOOL_DEFAULT_REGISTRY_URL, TOOL_REGISTRY_FILE),
+            _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE)
+        );
+
         lib.downloadSync(
             _url.resolve(TOOL_DEFAULT_REGISTRY_URL, TOOL_REGISTRY_FILE),
             _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE)
@@ -44,11 +51,14 @@ class Setup extends lib.DevCom {
         // 3> Add /bin to PATH
         /** @todo: Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%. */
         /** @todo: Ver FLAG de tipo de sessão (PS1, CMD, SH) */
+        lib.logger.debug('addPathToEnvironmentPath:', lib.devHome.bin);
         lib.addPathToEnvironmentPath(lib.devHome.bin, devTool);
 
         // 4> InstalL binary
+        lib.logger.debug('Loading DEVCOM registry...');
         let registry = lib.require('cmd://registry');
 
+        lib.logger.debug('Calling DEVCOM registry get-binaries...');
         registry.run(devTool, parseArgOptions([
             'get-binaries'
         ]));
