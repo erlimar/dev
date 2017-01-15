@@ -1,0 +1,8 @@
+* Mover DEVCOM de github.com/e5r/devcom para github.com/e5r
+  - e5r/devcom/src/** -> e5r/dev/src/devcom/**
+  - e5r/devcom/dist/** -> e5r/dev/dist/devcom/**
+
+* Migrar para modelo assíncrono
+* Atualização da variável PATH em Windows e Unix
+* Revisar uso de PowerShell no Unix
+* Migrar build system para [dev builder]

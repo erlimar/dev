@@ -94,6 +94,7 @@ dev_lib="${dev_home}/lib/node_modules"
 
 bin_jsengine="${dev_tools}/jsengine"
 bin_jsdev="${dev_lib}/e5r-dev.js"
+post_file="${dev_tools}/dev-envvars.sh"
 node_version="6.2.2"
 node_pkg="node-v${node_version}-"`_dev_os`"-${arch}"
 node_pkg_file="${node_pkg}.tar.gz"
@@ -188,7 +189,12 @@ _dev_install() {
 
 _dev_add_dev_to_path()
 {
-    echo "export PATH=\$PATH:${dev_bin}" >> "${HOME}/.bash_profile"
+    if [ -f ${post_file} ]; then
+        if _dev_has "source"; then
+            source ${post_file}
+        fi
+        cat ${post_file} >> "${HOME}/.bash_profile"
+    fi
 }
 
 _dev_start()
