@@ -174,6 +174,8 @@ function saveVersionCacheInfo(envName, cache) {
 /**
  * Remove a object propertie if exists
  * 
+ * @todo: Move to env NODE
+ * 
  * @param {object[]} objList - The object list
  * @param {string[]} propList - The propertie name list
  */
@@ -191,6 +193,8 @@ function removeProperty(objList, propList) {
 
 /**
  * Prepare a platform and architecture object properties.
+ * 
+ * @todo: Move to env NODE
  * 
  * @param {object} objList - The object list
  */
@@ -261,9 +265,11 @@ function prepareVersionInfo(versionInfo, envName) {
         }
 
         // Prepare platform and architecture information
+        /** @todo: Move to env NODE */
         preparePlatformArchitectureObject([a, b]);
 
         // Remove unnecessary information. (e.g: files, openssl, npm, etc.)
+        /** @todo: Move to env NODE */
         removeProperty([a, b], [
             'date',
             'npm',
