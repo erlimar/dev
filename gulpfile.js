@@ -6,38 +6,62 @@
 var gulp = require('gulp'),
     del = require('del'),
     fs = require('fs'),
-    os = require('os'),
-    path = require('path'),
     concat = require('gulp-concat-util'),
+    glob = require('glob'),
     jsconfig = require('./jsconfig.json'),
     pkg = require('./package.json'),
     headerTxt = fs.readFileSync('./header.txt'),
     bannerTxt = fs.readFileSync('./banner.txt');
 
-var E5R_DIR = '.dev';
-var E5R_INSTALL_DIR = path.join(os.homedir(), E5R_DIR, 'lib', 'node_modules');
 var E5R_LIB_NAME = 'e5r-dev.js';
 
-gulp.task('clean', function() {
-    return del('dist/*');
+gulp.task('clean', function () {
+    return del(['dist/devcom/**/*', 'dist/**/*']);
 });
 
-gulp.task('dist', ['clean'], function() {
-    gulp.src(jsconfig.files.concat(['!src/globals.js', '!dist/e5r-dev.js']))
+gulp.task('devcom-registry', function () {
+    return glob('devcom/**/*.{js,cmd,ps1,sh}', {
+        cwd: 'src'
+    }, function (globError, files) {
+        if (globError) throw globError;
+
+        try {
+            var stat = fs.statSync('dist/devcom');
+            if (!stat.isDirectory()) {
+                throw 'dist/devcom is not a directory!';
+            }
+        } catch (_) {
+            fs.mkdirSync('dist/devcom');
+        }
+
+        files = files.map(file => file.substring('devcom/'.length));
+
+        fs.writeFile('dist/devcom/registry.lock.json', JSON.stringify(files, null, 4), {
+            encoding: 'utf8'
+        }, function (writeError) {
+            if (writeError) throw writeError;
+            console.log('registry.lock.json writed!');
+        });
+    });
+});
+
+gulp.task('dist', ['clean', 'devcom-registry'], function () {
+    // DEVCOM
+    gulp.src('src/devcom/**/*')
+        .pipe(gulp.dest('dist/devcom'));
+
+    // DEVTOOL
+    gulp.src(
+        jsconfig.files.concat([
+            // exclude dev files
+            '!src/globals.js',
+            '!dist/e5r-dev.js',
+
+            // exclude devcom files
+            '!src/devcom/**/*'
+        ]))
         .pipe(concat.header(bannerTxt, { pkg: pkg }))
         .pipe(concat(E5R_LIB_NAME))
         .pipe(concat.header(headerTxt, { pkg: pkg }))
         .pipe(gulp.dest('dist'));
-});
-
-gulp.task('install', [], function() {
-    gulp.src(jsconfig.files.concat(['!src/globals.js', '!dist/e5r-dev.js']))
-        .pipe(concat.header(bannerTxt, { pkg: pkg }))
-        .pipe(concat(E5R_LIB_NAME))
-        .pipe(concat.header(headerTxt, { pkg: pkg }))
-        .pipe(gulp.dest(E5R_INSTALL_DIR));
-});
-
-gulp.task('test', [], function() {
-    console.log('#TODO: Test not implemented!');
 });

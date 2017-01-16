@@ -17,6 +17,12 @@
         "src/wget.js",
         "src/devtoolcommandline.js",
         "src/main.js",
-        "dist/e5r-dev.js"
+        "dist/e5r-dev.js",
+
+        "src/devcom/lib/cmd/env.js",
+        "src/devcom/lib/cmd/init.js",
+        "src/devcom/lib/cmd/registry.js",
+        "src/devcom/lib/env/php.js",
+        "src/devcom/lib/env/node.js"
     ]
 }
