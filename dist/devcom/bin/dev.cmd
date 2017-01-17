@@ -16,7 +16,7 @@ if not exist "%JSENGINE%" (
 
 :: @HACK: Update environment after install
 if "%1" neq "update-devenvvars" (
-    "%JSENGINE%" "%DEVSCRIPT%" %* --shell=cmd
+    "%JSENGINE%" --harmony-async-await "%DEVSCRIPT%" %* --shell=cmd
 )
 
 if exist %POSTFILE% (

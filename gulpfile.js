@@ -8,6 +8,7 @@ var gulp = require('gulp'),
     fs = require('fs'),
     concat = require('gulp-concat-util'),
     glob = require('glob'),
+    stripCode = require('gulp-strip-code'),
     jsconfig = require('./jsconfig.json'),
     pkg = require('./package.json'),
     headerTxt = fs.readFileSync('./header.txt'),
@@ -48,6 +49,7 @@ gulp.task('devcom-registry', function () {
 
 gulp.task('dist', ['clean', 'devcom-registry'], function () {
     // DEVCOM
+    /** @todo: Implements strip-code on DEVCOM's */
     gulp.src('src/devcom/**/*')
         .pipe(gulp.dest('dist/devcom'));
 
@@ -61,6 +63,10 @@ gulp.task('dist', ['clean', 'devcom-registry'], function () {
             // exclude devcom files
             '!src/devcom/**/*'
         ]))
+        .pipe(stripCode({
+            start_comment: 'DEVCODE-BEGIN',
+            end_comment: 'DEVCODE-END'
+        }))
         .pipe(concat.header(bannerTxt, { pkg: pkg }))
         .pipe(concat(E5R_LIB_NAME))
         .pipe(concat.header(headerTxt, { pkg: pkg }))

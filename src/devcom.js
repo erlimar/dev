@@ -1,3 +1,16 @@
+/* DEVCODE-BEGIN */
+var devUtil = require('../scripts/devutils');
+
+devUtil
+    .ensureNode()
+    .requireGlobal([
+        'global-consts',
+        'global-extensions',
+        'global-functions',
+        'global-vars'
+    ]);
+/* DEVCODE-END */
+
 /**
  * Base type for DevCom's
  */
@@ -17,6 +30,15 @@ class DevCom {
     }
 
     get shortDoc() {
-        throw createError('DevCom.shortDoc not implemented.');
+        throw createError('DevCom.shortDoc not implemented for [' + this.name + '].');
     }
 }
+
+/* DEVCODE-BEGIN */
+module.exports.DevCom = DevCom;
+
+// Asserts
+var devcom = new DevCom();
+
+_assert(devcom instanceof DevCom, 'Invalid devcom instance');
+/* DEVCODE-END */

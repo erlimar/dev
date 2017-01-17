@@ -1,7 +1,20 @@
-/**
- * @todo: Add async support
- * @todo: Implements verbosity
- */
+/* DEVCODE-BEGIN */
+var devUtil = require('../scripts/devutils');
+
+devUtil
+    .ensureNode()
+    .requireGlobal([
+        'global-consts',
+        'global-extensions',
+        'global-functions',
+        'global-vars',
+
+        'devtoollib',
+        'devtoolcommandline',
+        'wget',
+        'setup'
+    ]);
+/* DEVCODE-END */
 
 /** @hack: No circular reference */
 lib.DevTool = DevToolCommandLine;

@@ -1,3 +1,16 @@
+/* DEVCODE-BEGIN */
+var devUtil = require('../scripts/devutils');
+
+devUtil
+    .ensureNode()
+    .requireGlobal([
+        'global-consts',
+        'global-extensions',
+        'global-functions',
+        'global-vars'
+    ]);
+/* DEVCODE-END */
+
 /**
  * Record structure for a directory
  * 
@@ -728,3 +741,7 @@ ZipExtractor.prototype.extractTo = function(path, destination) {
 
     throw new Error('ZIP file entry corrupted from path "' + path + '"');
 }
+
+/* DEVCODE-BEGIN */
+module.exports.ZipExtractor = ZipExtractor;
+/* DEVCODE-END */

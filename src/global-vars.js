@@ -1,3 +1,14 @@
+/* DEVCODE-BEGIN */
+var devUtil = require('../scripts/devutils');
+
+devUtil
+    .ensureNode()
+    .requireGlobal([
+        'global-consts',
+    ]);
+/* DEVCODE-END */
+
+var _assert = require('assert');
 var _path = require('path');
 var _util = require('util');
 var _os = require('os');
@@ -16,3 +27,20 @@ var _devPaths = {
     doc: _path.join(_rootPath, 'doc')
 };
 var _globalConfiguration;
+
+/* DEVCODE-BEGIN */
+module.exports = {
+    _assert: _assert,
+    _path: _path,
+    _util: _util,
+    _os: _os,
+    _fs: _fs,
+    _url: _url,
+    _childProcess: _childProcess,
+    _zlib: _zlib,
+    _crypto: _crypto,
+    _rootPath: _rootPath,
+    _devPaths: _devPaths,
+    _globalConfiguration: _globalConfiguration
+}
+/* DEVCODE-END */

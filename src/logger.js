@@ -1,3 +1,16 @@
+/* DEVCODE-BEGIN */
+var devUtil = require('../scripts/devutils');
+
+devUtil
+    .ensureNode()
+    .requireGlobal([
+        'global-consts',
+        'global-extensions',
+        'global-functions',
+        'global-vars'
+    ]);
+/* DEVCODE-END */
+
 /**
  * Logger dispatcher
  * @class
@@ -39,3 +52,7 @@ class Logger {
         return console.error;
     }
 }
+
+/* DEVCODE-BEGIN */
+module.exports.Logger = Logger;
+/* DEVCODE-END */

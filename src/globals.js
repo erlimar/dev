@@ -7,6 +7,7 @@
 // *** Global Variables *** ////////////////
 // -----------------------------------------
 /* global __filename */
+/* global _assert */
 /* global _path */
 /* global _util */
 /* global _os */

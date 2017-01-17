@@ -1,3 +1,16 @@
+/* DEVCODE-BEGIN */
+var devUtil = require('../scripts/devutils');
+
+devUtil
+    .ensureNode()
+    .requireGlobal([
+        'global-consts',
+        'global-extensions',
+        'global-functions',
+        'global-vars'
+    ]);
+/* DEVCODE-END */
+
 /**
  * Devcom `setup` command
  * @class
@@ -67,3 +80,7 @@ class Setup extends lib.DevCom {
         lib.printf('Set-up completed!');
     }
 }
+
+/* DEVCODE-BEGIN */
+module.exports.Setup = Setup;
+/* DEVCODE-END */

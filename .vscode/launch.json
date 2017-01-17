@@ -2,36 +2,236 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "devtoollib.js",
+			"name": "devcom.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/devcom.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "devtoolcommandline.js",
 			"type": "node",
 			"request": "launch",
 			"program": "${workspaceRoot}/src/devtoolcommandline.js",
 			"stopOnEntry": false,
 			"args": [
-				"-devmode",
-				"env",
-				"install",
-				"node",
-				"--shell=sh"
+				"-devmode"
 			],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
-				"--nolazy"
+				"--nolazy",
+				"--harmony-async-await"
 			],
 			"env": {
 				"NODE_ENV": "development",
-                "NODE_DEBUG": "E5RDEV"
+				"NODE_DEBUG": "E5RDEV"
 			},
-			"externalConsole": false,
+			"console": "internalConsole",
 			"sourceMaps": false,
-			"outDir": null
+			"outFiles": []
 		},
 		{
-			"name": "Attach",
+			"name": "devtoollib.js",
 			"type": "node",
-			"request": "attach",
-			"port": 5858
+			"request": "launch",
+			"program": "${workspaceRoot}/src/devtoollib.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "global-functions.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/global-functions.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "global-vars.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/global-vars.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "logger.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/logger.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "main.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/main.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "setup.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/setup.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "wget.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/wget.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode",
+				"https://github.com/e5r/dev/archive/develop.zip",
+				"~/e5r-develop.zip"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "zipextractor.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/zipextractor.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
 		}
 	]
 }

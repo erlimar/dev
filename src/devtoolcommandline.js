@@ -1,3 +1,20 @@
+/* DEVCODE-BEGIN */
+var devUtil = require('../scripts/devutils');
+
+devUtil
+    .ensureNode()
+    .requireGlobal([
+        'global-consts',
+        'global-extensions',
+        'global-functions',
+        'global-vars',
+
+        'devtoollib',
+        'wget',
+        'setup'
+    ]);
+/* DEVCODE-END */
+
 /**
  * Command line runner for E5R Tools for Development Team.
  * @class
@@ -16,7 +33,7 @@ class DevToolCommandLine {
 
         let self = this;
 
-        self._name = 'dev';
+        self._name = TOOL_NAME;
         self._exitCode = 0;
         self._options = parseArgOptions(process.argv.slice(2));
         self._cmd = (this._options.args.shift() || '').toLowerCase();
@@ -66,21 +83,29 @@ class DevToolCommandLine {
         lib.printf(lines.join(_os.EOL));
         this.usage();
 
-        lib.printf('DevCom:');
+        lib.printf('\nDevCom:');
+
+        let getNameDescription = (n, d) => {
+            let nameFill = '                          ';
+            return '  ' + n + nameFill.substr(n.length) + ' ' + d;
+        };
 
         let devcomNames = Object.getOwnPropertyNames(this._builtin);
         for (let d in devcomNames) {
-            let devcom = this._builtin[devcomNames[d]];
-            lib.printf('  %s', devcom.getType().name.toLowerCase());
+            let devcomName = devcomNames[d];
+            let devcom = this._builtin[devcomName];
+            lib.printf(getNameDescription(devcomName, devcom.shortDoc));
         }
 
+        lib.printf(getNameDescription('???', 'Something'));
+
         lib.printf([
-            '  ???',
             '',
             'Options:',
-            '  ???']
-            .join(_os.EOL)
-        );
+            getNameDescription('--shell=[name]', 'Set the shell name'),
+            getNameDescription('--workdir=[path]', 'Set the work directory. Default is ${cwd}'),
+            getNameDescription('-devmode', 'Starts the development mode')
+        ].join(_os.EOL));
     }
 
     /**
@@ -103,7 +128,7 @@ class DevToolCommandLine {
     run() {
         try {
             /** @todo: Auto DevCom Help; global help; usage;  */
-            
+
             if (!this._cmd || /^[-]{1}.+$/.test(this._cmd)) {
                 this.usage();
                 this.exitCode = ERROR_CODE_DEVCOM_NOTINFORMED;
@@ -232,3 +257,33 @@ class DevToolCommandLine {
         })
     }
 }
+
+/* DEVCODE-BEGIN */
+module.exports.DevToolCommandLine = DevToolCommandLine;
+
+// Asserts
+var cmd = new DevToolCommandLine([]);
+
+_assert(cmd.name === 'dev', 'Invalid tool name');
+_assert(typeof cmd.builtin === 'object', 'Invalid builtins');
+_assert(cmd._cmd === '', 'Invalid cmd');
+_assert(typeof cmd.builtin['wget'] === 'undefined', 'Invalid wget builtin');
+_assert(typeof cmd.builtin['setup'] === 'undefined', 'Invalid setup builtin');
+
+process.argv.push('my-command');
+process.argv.push('--shell=internal');
+
+class MyOwner extends lib.DevCom {
+    get name() { return 'my-owner' }
+    get shortDoc() { return 'Does nothing!' }
+}
+
+cmd = new DevToolCommandLine([Wget, Setup, MyOwner]);
+
+_assert(cmd.name === 'dev', 'Invalid tool name');
+_assert(typeof cmd.builtin === 'object', 'Invalid builtins');
+_assert(cmd._cmd === 'my-command', 'Invalid cmd');
+_assert(cmd.shell === 'internal', 'Invalid shell');
+_assert(cmd.builtin['wget'] instanceof Wget, 'Invalid wget builtin');
+_assert(cmd.builtin['setup'] instanceof Setup, 'Invalid setup builtin');
+/* DEVCODE-END */

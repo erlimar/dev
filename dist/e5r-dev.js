@@ -11,6 +11,9 @@
 // e5r-dev/global-consts.js
 // ========================================================================
 /** @constant {string} */
+const TOOL_NAME = 'dev';
+
+/** @constant {string} */
 const TOOL_TITLE = 'E5R Tools for Development Team';
 
 /** @constant {string} */
@@ -20,7 +23,7 @@ const TOOL_VERSION = '0.13.0';
 const TOOL_COPYRIGHT = '(c) E5R Development Team. All rights reserved.';
 
 /** @constant {string} */
-const TOOL_DEVFOLDER = '.dev';
+const TOOL_DEVFOLDER = '.' + TOOL_NAME;
 
 /** @constant {string} */
 const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/devcom/develop/dist/';
@@ -68,13 +71,14 @@ const ERROR_CODE_DEVCOM_NOTINFORMED = 9001;
 const WIN_REG_QUERY_REGEX = '^(.+)(REG_SZ|REG_MULTI_SZ|REG_EXPAND_SZ|REG_DWORD|REG_QWORD|REG_BINARY|REG_NONE)\\s*(.+)$';
 
 /** @constant {string} */
-const TOOL_ENVVARS_CMD = 'dev-envvars.cmd';
+const TOOL_ENVVARS_CMD = TOOL_NAME + '-envvars.cmd';
 
 /** @constant {string} */
-const TOOL_ENVVARS_PS1 = 'dev-envvars.ps1';
+const TOOL_ENVVARS_PS1 = TOOL_NAME + '-envvars.ps1';
 
 /** @constant {string} */
-const TOOL_ENVVARS_SH = 'dev-envvars.sh';
+const TOOL_ENVVARS_SH = TOOL_NAME + '-envvars.sh';
+
 
 // ========================================================================
 // e5r-dev/global-extensions.js
@@ -86,7 +90,7 @@ const TOOL_ENVVARS_SH = 'dev-envvars.sh';
  * 
  * @return {number} 
  */
-Buffer.prototype.readZipByte = function(position) {
+Buffer.prototype.readZipByte = function (position) {
     /** @todo: Privatize */
     if (!(this instanceof Buffer)) {
         throw new Error('This must be a Buffer instance');
@@ -101,7 +105,7 @@ Buffer.prototype.readZipByte = function(position) {
  * 
  * @return {number} 
  */
-Buffer.prototype.readZipWord = function(position) {
+Buffer.prototype.readZipWord = function (position) {
     /** @todo: Privatize */
     if (!(this instanceof Buffer)) {
         throw new Error('This must be a Buffer instance');
@@ -116,7 +120,7 @@ Buffer.prototype.readZipWord = function(position) {
  * 
  * @return {number} 
  */
-Buffer.prototype.readZipDWord = function(position) {
+Buffer.prototype.readZipDWord = function (position) {
     /** @todo: Privatize */
     if (!(this instanceof Buffer)) {
         throw new Error('This must be a Buffer instance');
@@ -124,9 +128,11 @@ Buffer.prototype.readZipDWord = function(position) {
     return this.slice(position, position + 4).readUIntLE(0, 4);
 }
 
+
 // ========================================================================
 // e5r-dev/zipextractor.js
 // ========================================================================
+
 /**
  * Record structure for a directory
  * 
@@ -858,9 +864,12 @@ ZipExtractor.prototype.extractTo = function(path, destination) {
     throw new Error('ZIP file entry corrupted from path "' + path + '"');
 }
 
+
 // ========================================================================
 // e5r-dev/global-vars.js
 // ========================================================================
+
+var _assert = require('assert');
 var _path = require('path');
 var _util = require('util');
 var _os = require('os');
@@ -880,9 +889,11 @@ var _devPaths = {
 };
 var _globalConfiguration;
 
+
 // ========================================================================
 // e5r-dev/global-functions.js
 // ========================================================================
+
 /**
  * Create a Error instance
  * 
@@ -1218,9 +1229,11 @@ function setGlobalConfiguration(config) {
     _globalConfiguration = undefined;
 }
 
+
 // ========================================================================
 // e5r-dev/devcom.js
 // ========================================================================
+
 /**
  * Base type for DevCom's
  */
@@ -1240,13 +1253,15 @@ class DevCom {
     }
 
     get shortDoc() {
-        throw createError('DevCom.shortDoc not implemented.');
+        throw createError('DevCom.shortDoc not implemented for [' + this.name + '].');
     }
 }
+
 
 // ========================================================================
 // e5r-dev/logger.js
 // ========================================================================
+
 /**
  * Logger dispatcher
  * @class
@@ -1289,9 +1304,11 @@ class Logger {
     }
 }
 
+
 // ========================================================================
 // e5r-dev/devtoollib.js
 // ========================================================================
+
 /** @instance */
 var lib =
 
@@ -2303,9 +2320,11 @@ var lib =
         }
     }
 
+
 // ========================================================================
 // e5r-dev/setup.js
 // ========================================================================
+
 /**
  * Devcom `setup` command
  * @class
@@ -2376,9 +2395,11 @@ class Setup extends lib.DevCom {
     }
 }
 
+
 // ========================================================================
 // e5r-dev/wget.js
 // ========================================================================
+
 /**
  * DevCom `wget` command
  * @class
@@ -2444,9 +2465,11 @@ class Wget extends lib.DevCom {
     }
 }
 
+
 // ========================================================================
 // e5r-dev/devtoolcommandline.js
 // ========================================================================
+
 /**
  * Command line runner for E5R Tools for Development Team.
  * @class
@@ -2465,7 +2488,7 @@ class DevToolCommandLine {
 
         let self = this;
 
-        self._name = 'dev';
+        self._name = TOOL_NAME;
         self._exitCode = 0;
         self._options = parseArgOptions(process.argv.slice(2));
         self._cmd = (this._options.args.shift() || '').toLowerCase();
@@ -2515,21 +2538,29 @@ class DevToolCommandLine {
         lib.printf(lines.join(_os.EOL));
         this.usage();
 
-        lib.printf('DevCom:');
+        lib.printf('\nDevCom:');
+
+        let getNameDescription = (n, d) => {
+            let nameFill = '                          ';
+            return '  ' + n + nameFill.substr(n.length) + ' ' + d;
+        };
 
         let devcomNames = Object.getOwnPropertyNames(this._builtin);
         for (let d in devcomNames) {
-            let devcom = this._builtin[devcomNames[d]];
-            lib.printf('  %s', devcom.getType().name.toLowerCase());
+            let devcomName = devcomNames[d];
+            let devcom = this._builtin[devcomName];
+            lib.printf(getNameDescription(devcomName, devcom.shortDoc));
         }
 
+        lib.printf(getNameDescription('???', 'Something'));
+
         lib.printf([
-            '  ???',
             '',
             'Options:',
-            '  ???']
-            .join(_os.EOL)
-        );
+            getNameDescription('--shell=[name]', 'Set the shell name'),
+            getNameDescription('--workdir=[path]', 'Set the work directory. Default is ${cwd}'),
+            getNameDescription('-devmode', 'Starts the development mode')
+        ].join(_os.EOL));
     }
 
     /**
@@ -2551,6 +2582,8 @@ class DevToolCommandLine {
      */
     run() {
         try {
+            /** @todo: Auto DevCom Help; global help; usage;  */
+
             if (!this._cmd || /^[-]{1}.+$/.test(this._cmd)) {
                 this.usage();
                 this.exitCode = ERROR_CODE_DEVCOM_NOTINFORMED;
@@ -2680,13 +2713,10 @@ class DevToolCommandLine {
     }
 }
 
+
 // ========================================================================
 // e5r-dev/main.js
 // ========================================================================
-/**
- * @todo: Add async support
- * @todo: Implements verbosity
- */
 
 /** @hack: No circular reference */
 lib.DevTool = DevToolCommandLine;

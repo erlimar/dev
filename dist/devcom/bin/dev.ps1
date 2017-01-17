@@ -23,7 +23,7 @@ if(!(test-path "$jsengine")) {
     return
 }
 
-iex "& `"$jsengine`" `"$devscript`" $args --shell=powershell"
+iex "& `"$jsengine`" --harmony-async-await `"$devscript`" $args --shell=powershell"
 
 if(test-path $postfile){
     iex "& $postfile"

@@ -1,3 +1,15 @@
+/* DEVCODE-BEGIN */
+var devUtil = require('../scripts/devutils');
+
+devUtil
+    .ensureNode()
+    .requireGlobal([
+        'global-consts',
+        'global-extensions',
+        'global-vars'
+    ]);
+/* DEVCODE-END */
+
 /**
  * Create a Error instance
  * 
@@ -332,3 +344,20 @@ function setGlobalConfiguration(config) {
 
     _globalConfiguration = undefined;
 }
+
+/* DEVCODE-BEGIN */
+module.exports = {
+    createError: createError,
+    compileRequireData: compileRequireData,
+    parseArgOptions: parseArgOptions,
+    getUserEnvironmentWin32: getUserEnvironmentWin32,
+    getUserEnvironmentUnix: getUserEnvironmentUnix,
+    setUserEnvironmentWin32: setUserEnvironmentWin32,
+    getAllUserProfilePathsAvailable: getAllUserProfilePathsAvailable,
+    getUserProfilePaths: getUserProfilePaths,
+    setUserEnvironmentUnix: setUserEnvironmentUnix,
+    appendUpdateEnvironmentFile: appendUpdateEnvironmentFile,
+    getGlobalConfiguration: getGlobalConfiguration,
+    setGlobalConfiguration: setGlobalConfiguration
+}
+/* DEVCODE-END */

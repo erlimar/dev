@@ -5,7 +5,7 @@
  * 
  * @return {number} 
  */
-Buffer.prototype.readZipByte = function(position) {
+Buffer.prototype.readZipByte = function (position) {
     /** @todo: Privatize */
     if (!(this instanceof Buffer)) {
         throw new Error('This must be a Buffer instance');
@@ -20,7 +20,7 @@ Buffer.prototype.readZipByte = function(position) {
  * 
  * @return {number} 
  */
-Buffer.prototype.readZipWord = function(position) {
+Buffer.prototype.readZipWord = function (position) {
     /** @todo: Privatize */
     if (!(this instanceof Buffer)) {
         throw new Error('This must be a Buffer instance');
@@ -35,10 +35,14 @@ Buffer.prototype.readZipWord = function(position) {
  * 
  * @return {number} 
  */
-Buffer.prototype.readZipDWord = function(position) {
+Buffer.prototype.readZipDWord = function (position) {
     /** @todo: Privatize */
     if (!(this instanceof Buffer)) {
         throw new Error('This must be a Buffer instance');
     }
     return this.slice(position, position + 4).readUIntLE(0, 4);
 }
+
+/* DEVCODE-BEGIN */
+module.exports = {}
+/* DEVCODE-END */

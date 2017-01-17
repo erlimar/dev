@@ -6,3 +6,5 @@
 * Atualização da variável PATH em Windows e Unix
 * Revisar uso de PowerShell no Unix
 * Migrar build system para [dev builder]
+* Implementar verbosidade
+* Implementar testes unitários

@@ -1,3 +1,16 @@
+/* DEVCODE-BEGIN */
+var devUtil = require('../scripts/devutils');
+
+devUtil
+    .ensureNode()
+    .requireGlobal([
+        'global-consts',
+        'global-extensions',
+        'global-functions',
+        'global-vars'
+    ]);
+/* DEVCODE-END */
+
 /**
  * DevCom `wget` command
  * @class
@@ -62,3 +75,7 @@ class Wget extends lib.DevCom {
         lib.printf('usage: ' + devTool.name + ' ' + this.name + ' [url] [path] [options]');
     }
 }
+
+/* DEVCODE-BEGIN */
+module.exports.Wget = Wget;
+/* DEVCODE-END */

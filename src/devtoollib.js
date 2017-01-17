@@ -1,3 +1,20 @@
+/* DEVCODE-BEGIN */
+var devUtil = require('../scripts/devutils');
+
+devUtil
+    .ensureNode()
+    .requireGlobal([
+        'global-consts',
+        'global-extensions',
+        'global-functions',
+        'global-vars',
+
+        'logger',
+        'devcom',
+        'zipextractor'
+    ]);
+/* DEVCODE-END */
+
 /** @instance */
 var lib =
 
@@ -1008,3 +1025,12 @@ var lib =
             lib.setConfiguration(key);
         }
     }
+
+/* DEVCODE-BEGIN */
+module.exports.lib = lib;
+
+// Asserts
+_assert(lib.DevCom === DevCom, 'Invalid lib.DevCom reference');
+_assert(lib.logger === lib._logger, 'Invalid lib.logger instance');
+_assert(lib._logger instanceof Logger, 'Invalid lib._logger instance');
+/* DEVCODE-END */
