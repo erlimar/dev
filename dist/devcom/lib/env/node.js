@@ -2,10 +2,12 @@
 // Licensed under the Apache License, Version 2.0. More license information in LICENSE.txt.
 
 /* global process, __filename, __dirname */
-"use strict";
+(async () => { "use strict";
 
-let _dev = require('e5r-dev'),
-    _path = require('path'),
+let _dev;
+if (!_dev) _dev = require('e5r-dev');
+
+let _path = require('path'),
     _fs = require('fs'),
     _os = require('os');
 
@@ -240,3 +242,5 @@ class NodeEnvironment {
 }
 
 module.exports = new NodeEnvironment();
+
+})();

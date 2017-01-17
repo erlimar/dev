@@ -15,7 +15,9 @@ var gulp = require('gulp'),
     footerTxt = fs.readFileSync('./footer.txt'),
     bannerTxt = fs.readFileSync('./banner.txt');
 
-var E5R_LIB_NAME = 'e5r-dev.js';
+var E5R_LIB_NAME = 'e5r-dev.js',
+    STRIPCODE_BEGIN = 'DEVCODE-BEGIN',
+    STRIPCODE_END = 'DEVCODE-END';
 
 gulp.task('clean', function () {
     return del(['dist/devcom/**/*', 'dist/**/*']);
@@ -49,8 +51,11 @@ gulp.task('devcom-registry', function () {
 
 gulp.task('dist', ['clean', 'devcom-registry'], function () {
     // DEVCOM
-    /** @todo: Implements strip-code on DEVCOM's */
     gulp.src('src/devcom/**/*')
+        .pipe(stripCode({
+            start_comment: STRIPCODE_BEGIN,
+            end_comment: STRIPCODE_END
+        }))
         .pipe(gulp.dest('dist/devcom'));
 
     // DEVTOOL
@@ -64,8 +69,8 @@ gulp.task('dist', ['clean', 'devcom-registry'], function () {
             '!src/devcom/**/*'
         ]))
         .pipe(stripCode({
-            start_comment: 'DEVCODE-BEGIN',
-            end_comment: 'DEVCODE-END'
+            start_comment: STRIPCODE_BEGIN,
+            end_comment: STRIPCODE_END
         }))
         .pipe(concat.header(bannerTxt, { pkg: pkg }))
         .pipe(concat(E5R_LIB_NAME))

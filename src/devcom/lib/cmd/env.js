@@ -2,10 +2,15 @@
 // Licensed under the Apache License, Version 2.0. More license information in LICENSE.txt.
 
 /* global process, __filename, __dirname */
-"use strict";
+(async () => { "use strict";
 
-let _dev = require('e5r-dev'),
-    _path = require('path'),
+let _dev;
+/* DEVCODE-BEGIN */
+_dev = require('../../../main.js');
+/* DEVCODE-END */
+if (!_dev) _dev = require('e5r-dev');
+
+let _path = require('path'),
     _url = require('url'),
     _fs = require('fs'),
     _os = require('os');
@@ -805,3 +810,8 @@ if (!module.parent && module.filename === __filename) {
 
     _devTool.exit();
 }
+
+/* DEVCODE-BEGIN */
+// Assert
+/* DEVCODE-END */
+})();

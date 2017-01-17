@@ -232,6 +232,129 @@
 			"console": "internalConsole",
 			"sourceMaps": false,
 			"outFiles": []
+		},
+		{
+			"name": "devcom/cmd/env.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/devcom/lib/cmd/env.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "devcom/cmd/init.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/devcom/lib/cmd/init.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "devcom/cmd/registry.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/devcom/lib/cmd/registry.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode",
+				"registry",
+				"show", "e5r-devcom"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "devcom/env/node.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/devcom/lib/env/node.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode",
+				"env",
+				"list",
+				"node"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
+		},
+		{
+			"name": "devcom/env/php.js",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/devcom/lib/env/php.js",
+			"stopOnEntry": false,
+			"args": [
+				"-devmode",
+				"env",
+				"list",
+				"php"
+			],
+			"cwd": "${workspaceRoot}",
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy",
+				"--harmony-async-await"
+			],
+			"env": {
+				"NODE_ENV": "development",
+				"NODE_DEBUG": "E5RDEV"
+			},
+			"console": "internalConsole",
+			"sourceMaps": false,
+			"outFiles": []
 		}
 	]
 }

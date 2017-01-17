@@ -2,13 +2,18 @@
 // Licensed under the Apache License, Version 2.0. More license information in LICENSE.txt.
 
 /* global process, __filename, __dirname */
-"use strict";
+(async () => { "use strict";
+
+let _dev;
+/* DEVCODE-BEGIN */
+_dev = require('../../../main.js');
+/* DEVCODE-END */
+if (!_dev) _dev = require('e5r-dev');
 
 let _fs = require('fs'),
     _os = require('os'),
     _path = require('path'),
-    _vm = require('vm'),
-    _dev = require('e5r-dev');
+    _vm = require('vm');
 
 const UNDEFINED = 'undefined';
 const WIZARD_FILE = '.initwizard.e5r';
@@ -525,3 +530,8 @@ if (!module.parent && module.filename === __filename) {
 
     _devTool.exit();
 }
+
+/* DEVCODE-BEGIN */
+// Assert
+/* DEVCODE-END */
+})();

@@ -2,13 +2,17 @@
 // Licensed under the Apache License, Version 2.0. More license information in LICENSE.txt.
 
 /* global process, __filename, __dirname */
-"use strict";
+(async () => { "use strict";
 
-let dev = require('e5r-dev'),
-    _os = require('os'),
+let _dev;
+if (!_dev) _dev = require('e5r-dev');
+
+let _os = require('os'),
     _fs = require('fs'),
     _url = require('url'),
     _path = require('path');
+
+throw _dev.createError('ENV PHP not implemented!');
 
 /** @constant {string} */
 const ENVIRONMENT_DIRECTORY = 'environment';
@@ -103,14 +107,14 @@ class PhpEnvironmentTool {
     downloadPackageFile(versionMetadata, options) {
         let ntsAvailable = !!versionMetadata.nts,
             ntsRequired = !!options.nts,
-            arch = (options.arch ? options.arch : dev.arch).toLowerCase();
+            arch = (options.arch ? options.arch : _dev.arch).toLowerCase();
 
         if (0 > versionMetadata.arch.indexOf(arch)) {
-            throw dev.createError('PHP v' + versionMetadata.version + ' not available for "' + arch + '" architecture.');
+            throw _dev.createError('PHP v' + versionMetadata.version + ' not available for "' + arch + '" architecture.');
         }
 
         if (ntsRequired && !ntsAvailable) {
-            throw dev.createError('PHP v'
+            throw _dev.createError('PHP v'
                 + versionMetadata.version
                 + ' not available for "Non Thread Safe" mode.')
         }
@@ -119,14 +123,14 @@ class PhpEnvironmentTool {
             fileUrl = this.makePackageUrl(versionMetadata, fileName),
             filePath = this.makePackagePath(fileName);
 
-        if (dev.pathExists(filePath)) {
+        if (_dev.pathExists(filePath)) {
             _fs.unlink(filePath);
         }
 
-        dev.downloadSync(fileUrl, filePath);
+        _dev.downloadSync(fileUrl, filePath);
 
         if (!_fs.statSync(filePath).isFile()) {
-            throw dev.createError('Error on download from ' + fileUrl);
+            throw _dev.createError('Error on download from ' + fileUrl);
         }
 
         return filePath;
@@ -138,7 +142,7 @@ class PhpEnvironmentTool {
      * @return {string}
      */
     getEnvironmentPath() {
-        return _path.join(dev.devHome.root, ENVIRONMENT_DIRECTORY, 'php');
+        return _path.join(_dev.devHome.root, ENVIRONMENT_DIRECTORY, 'php');
     }
 
     /**
@@ -192,13 +196,13 @@ class PhpEnvironmentTool {
     ensuresDirectoryVersion(version) {
         let directories = this.makeDirectoriesVersion(version);
 
-        if (dev.pathExists(directories.pathNew)) dev.rmdir(directories.pathNew);
-        if (dev.pathExists(directories.pathOld)) dev.rmdir(directories.pathOld);
+        if (_dev.pathExists(directories.pathNew)) _dev.rmdir(directories.pathNew);
+        if (_dev.pathExists(directories.pathOld)) _dev.rmdir(directories.pathOld);
 
-        dev.mkdir(directories.pathNew);
+        _dev.mkdir(directories.pathNew);
 
-        if (dev.pathExists(directories.path)) {
-            dev.rename(directories.path, directories.pathOld)
+        if (_dev.pathExists(directories.path)) {
+            _dev.rename(directories.path, directories.pathOld)
         }
 
         return directories;
@@ -211,7 +215,7 @@ class PhpEnvironmentTool {
      * @param {string} packFile
      */
     unpackFile(directory, packFile) {
-        dev.extractFile(packFile, directory);
+        _dev.extractFile(packFile, directory);
     }
 
     /**
@@ -227,19 +231,19 @@ class PhpEnvironmentTool {
                 fileName = this.makePackageFileName(metadata, options, !!options.nts),
                 filePath = this.makePackagePath(fileName);
 
-            if (dev.pathExists(directories.path) && dev.pathExists(directories.pathOld)) {
-                dev.rmdir(directories.path);
+            if (_dev.pathExists(directories.path) && _dev.pathExists(directories.pathOld)) {
+                _dev.rmdir(directories.path);
             }
 
-            if (dev.pathExists(directories.pathNew)) {
-                dev.rmdir(directories.pathNew);
+            if (_dev.pathExists(directories.pathNew)) {
+                _dev.rmdir(directories.pathNew);
             }
 
-            if (dev.pathExists(directories.pathOld)) {
-                dev.rename(directories.pathOld, directories.path);
+            if (_dev.pathExists(directories.pathOld)) {
+                _dev.rename(directories.pathOld, directories.path);
             }
 
-            if (dev.pathExists(filePath)) {
+            if (_dev.pathExists(filePath)) {
                 _fs.unlinkSync(filePath);
             }
         } catch (_) { /* quiet */ }
@@ -257,7 +261,7 @@ class PhpEnvironmentTool {
      * @return {string}
      */
     makePackageFileName(versionMetadata, options, ntsRequired) {
-        throw dev.createError('PhpEnvironmentTool->makePackageFileName() not implemented!');
+        throw _dev.createError('PhpEnvironmentTool->makePackageFileName() not implemented!');
     }
 
     /**
@@ -271,7 +275,7 @@ class PhpEnvironmentTool {
      * @return {string}
      */
     makePackageUrl(versionMetadata, packageFileName) {
-        throw dev.createError('PhpEnvironmentTool->makePackageUrl() not implemented!');
+        throw _dev.createError('PhpEnvironmentTool->makePackageUrl() not implemented!');
     }
 
     /**
@@ -284,7 +288,7 @@ class PhpEnvironmentTool {
      * @return {object}
      */
     getVersionMetadata(version) {
-        throw dev.createError('PhpEnvironmentTool->getVersionMetadata() not implemented!');
+        throw _dev.createError('PhpEnvironmentTool->getVersionMetadata() not implemented!');
     }
 
     /**
@@ -296,13 +300,13 @@ class PhpEnvironmentTool {
      */
     postInstall(version) {
         let directories = this.makeDirectoriesVersion(version),
-            pathToken = dev.getEnvironmentVarToken(ENVIRONMENT_VARNAME, this.devTool.shell);
-        dev.setUserEnvironment(ENVIRONMENT_VARNAME, directories.path, this.devTool.shellOptions);
-        dev.addPathToEnvironmentPath(pathToken, this.devTool);
+            pathToken = _dev.getEnvironmentVarToken(ENVIRONMENT_VARNAME, this.devTool.shell);
+        _dev.setUserEnvironment(ENVIRONMENT_VARNAME, directories.path, this.devTool.shellOptions);
+        _dev.addPathToEnvironmentPath(pathToken, this.devTool);
         
         if(this.devTool.shell === 'powershell'){
-            let cmdToken = dev.getEnvironmentVarToken(ENVIRONMENT_VARNAME, 'cmd');
-            dev.addPathToEnvironmentPath(cmdToken, this.devTool, true);
+            let cmdToken = _dev.getEnvironmentVarToken(ENVIRONMENT_VARNAME, 'cmd');
+            _dev.addPathToEnvironmentPath(cmdToken, this.devTool, true);
         }
     }
 
@@ -312,7 +316,7 @@ class PhpEnvironmentTool {
      * @note: Implemented only derived classes
      */
     updateMetadata() {
-        throw dev.createError('PhpEnvironmentTool->updateMetadata() not implemented!');
+        throw _dev.createError('PhpEnvironmentTool->updateMetadata() not implemented!');
     }
 }
 
@@ -338,7 +342,7 @@ class PhpEnvironmentToolWin32 extends PhpEnvironmentTool {
                 return metadata;
             }
         }
-        throw dev.createError('Metadata not found for version ' + version + '.');
+        throw _dev.createError('Metadata not found for version ' + version + '.');
     }
 
     /**
@@ -355,7 +359,7 @@ class PhpEnvironmentToolWin32 extends PhpEnvironmentTool {
             .replace('{version}', versionMetadata.version)
             .replace('{nts}', ntsRequired ? '-nts' : '')
             .replace('{vc}', versionMetadata.vc)
-            .replace('{arch}', options.arch ? options.arch : dev.arch);
+            .replace('{arch}', options.arch ? options.arch : _dev.arch);
 
         return fileName;
     }
@@ -397,7 +401,7 @@ class PhpEnvironmentToolWin32 extends PhpEnvironmentTool {
             "versions": []
         };
 
-        if (dev.fileExists(metaFilePath)) {
+        if (_dev.fileExists(metaFilePath)) {
             let stat = _fs.statSync(metaFilePath),
                 now = new Date(),
                 today = new Date(now.getFullYear(), now.getMonth(), now.getDate()),
@@ -436,7 +440,7 @@ class PhpEnvironmentToolWin32 extends PhpEnvironmentTool {
         }
 
         let delegateRun = (url, prefix, archive) => {
-            dev.downloadSync(url, tmpFilePath);
+            _dev.downloadSync(url, tmpFilePath);
 
             let _content = _fs.readFileSync(tmpFilePath).toString(),
                 _vr = '[0-9\.]{5,10}',  // Version Regex
@@ -459,7 +463,7 @@ class PhpEnvironmentToolWin32 extends PhpEnvironmentTool {
             _fs.unlinkSync(tmpFilePath);
         }
 
-        dev.mkdir(this.getEnvironmentPath());
+        _dev.mkdir(this.getEnvironmentPath());
         delegateRun(this.metadata.base_url, this.metadata.base_link_prefix, false);
         delegateRun(this.metadata.archive_url, this.metadata.archive_link_prefix, true);
 
@@ -538,7 +542,7 @@ class PhpEnvironment {
         let platform = _os.platform();
 
         if (0 > SUPPORTED_PLATFORMS.indexOf(platform)) {
-            throw dev.createError('Environment PHP does not support the ' + platform.toUpperCase() + ' platform.');
+            throw _dev.createError('Environment PHP does not support the ' + platform.toUpperCase() + ' platform.');
         }
 
         // Configure tool set
@@ -594,15 +598,15 @@ class PhpEnvironment {
         let version = this.ensuresVersion(options);
 
         if (!version && options.version) {
-            throw dev.createError('PHP v' + options.version + ' not found or invalid formated!');
+            throw _dev.createError('PHP v' + options.version + ' not found or invalid formated!');
         }
 
         if (!version) {
-            throw dev.createError('Parameter @version is required');
+            throw _dev.createError('Parameter @version is required');
         }
 
         try {
-            dev.printf('Installing PHP v' + version + '...');
+            _dev.printf('Installing PHP v' + version + '...');
 
             let versionMetadata = this._toolset.getVersionMetadata(version);
             let packageFilePath = this._toolset.downloadPackageFile(versionMetadata, options);
@@ -610,10 +614,10 @@ class PhpEnvironment {
 
             this._toolset.unpackFile(versionDirectories.pathNew, packageFilePath);
             _fs.unlinkSync(packageFilePath);
-            dev.rename(versionDirectories.pathNew, versionDirectories.path);
+            _dev.rename(versionDirectories.pathNew, versionDirectories.path);
 
-            if (dev.pathExists(versionDirectories.pathOld)) {
-                dev.rmdir(versionDirectories.pathOld);
+            if (_dev.pathExists(versionDirectories.pathOld)) {
+                _dev.rmdir(versionDirectories.pathOld);
             }
 
             this._toolset.postInstall(version);
@@ -622,7 +626,7 @@ class PhpEnvironment {
             throw error;
         }
 
-        dev.printf('PHP v' + version + ' installed successfuly!')
+        _dev.printf('PHP v' + version + ' installed successfuly!')
     }
     // 
     //     uninstall(options) {
@@ -643,3 +647,5 @@ class PhpEnvironment {
 }
 
 module.exports = new PhpEnvironment();
+
+})();

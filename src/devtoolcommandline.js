@@ -262,28 +262,10 @@ class DevToolCommandLine {
 module.exports.DevToolCommandLine = DevToolCommandLine;
 
 // Asserts
-var cmd = new DevToolCommandLine([]);
+var cmd = new DevToolCommandLine([Wget, Setup]);
 
 _assert(cmd.name === 'dev', 'Invalid tool name');
 _assert(typeof cmd.builtin === 'object', 'Invalid builtins');
-_assert(cmd._cmd === '', 'Invalid cmd');
-_assert(typeof cmd.builtin['wget'] === 'undefined', 'Invalid wget builtin');
-_assert(typeof cmd.builtin['setup'] === 'undefined', 'Invalid setup builtin');
-
-process.argv.push('my-command');
-process.argv.push('--shell=internal');
-
-class MyOwner extends lib.DevCom {
-    get name() { return 'my-owner' }
-    get shortDoc() { return 'Does nothing!' }
-}
-
-cmd = new DevToolCommandLine([Wget, Setup, MyOwner]);
-
-_assert(cmd.name === 'dev', 'Invalid tool name');
-_assert(typeof cmd.builtin === 'object', 'Invalid builtins');
-_assert(cmd._cmd === 'my-command', 'Invalid cmd');
-_assert(cmd.shell === 'internal', 'Invalid shell');
 _assert(cmd.builtin['wget'] instanceof Wget, 'Invalid wget builtin');
 _assert(cmd.builtin['setup'] instanceof Setup, 'Invalid setup builtin');
 /* DEVCODE-END */

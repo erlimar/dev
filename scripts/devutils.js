@@ -5,11 +5,17 @@ function expandsToGlobal(obj) {
     for (let p in obj) global[p] = obj[p]
 }
 
+let loaded = []
+
 module.exports.requireGlobal = (m) => {
     if (!Array.isArray(m)) m = [m]
 
-    m.map(moduleName =>
-        expandsToGlobal(require('../src/' + moduleName)))
+    m.map(moduleName => {
+        if (loaded.indexOf(moduleName) < 0) {
+            expandsToGlobal(require('../src/' + moduleName))
+            loaded.push(moduleName)
+        }
+    })
 
     return module.exports
 }
