@@ -5,4 +5,5 @@
  * Licensed under the ${ pkg.license } License. More license information in LICENSE.txt.
  */
 
-"use strict";
+(async () => { "use strict";
+

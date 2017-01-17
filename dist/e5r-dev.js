@@ -5,7 +5,8 @@
  * Licensed under the Apache-2.0 License. More license information in LICENSE.txt.
  */
 
-"use strict";
+(async () => { "use strict";
+
 // ========================================================================
 // e5r-dev/global-consts.js
 // ========================================================================
@@ -2705,3 +2706,5 @@ if (!module.parent && module.filename === __filename) {
         lib.devToolDefaultInstance.exit();
     }
 }
+
+})();

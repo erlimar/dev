@@ -44,7 +44,7 @@ Set-Variable -Option Constant "DevLib" "$DevHome\lib\node_modules"
 Set-Variable -Option Constant "BinJSEngine" "$DevTools\jsengine.exe"
 Set-Variable -Option Constant "BinJSDev" "$DevLib\e5r-dev.js"
 Set-Variable -Option Constant "PostFile" "$DevTools\dev-envvars.ps1"
-Set-Variable -Option Constant "NodeVersion" "6.2.2"
+Set-Variable -Option Constant "NodeVersion" "7.4.0"
 Set-Variable -Option Constant "NodeURL" "https://nodejs.org/dist/v$NodeVersion/win-$Arch/node.exe" 
 Set-Variable -Option Constant "JSInstallerURL" "https://raw.githubusercontent.com/e5r/dev/$GitBranch/dist/e5r-dev.js" 
 

@@ -16,7 +16,7 @@ fi
 
 # @HACK: Update environment after install
 if [ ! "${1}" = "update-devenvvars" ]; then
-    ${jsengine} "${devscript}" ${*} --shell=sh
+    ${jsengine} --harmony-async-await "${devscript}" ${*} --shell=sh
 fi
 
 # Update environment from postfile

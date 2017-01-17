@@ -11,6 +11,7 @@ var gulp = require('gulp'),
     jsconfig = require('./jsconfig.json'),
     pkg = require('./package.json'),
     headerTxt = fs.readFileSync('./header.txt'),
+    footerTxt = fs.readFileSync('./footer.txt'),
     bannerTxt = fs.readFileSync('./banner.txt');
 
 var E5R_LIB_NAME = 'e5r-dev.js';
@@ -63,5 +64,6 @@ gulp.task('dist', ['clean', 'devcom-registry'], function () {
         .pipe(concat.header(bannerTxt, { pkg: pkg }))
         .pipe(concat(E5R_LIB_NAME))
         .pipe(concat.header(headerTxt, { pkg: pkg }))
+        .pipe(concat.footer(footerTxt, { pkg: pkg }))
         .pipe(gulp.dest('dist'));
 });

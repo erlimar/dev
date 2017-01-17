@@ -102,6 +102,8 @@ class DevToolCommandLine {
      */
     run() {
         try {
+            /** @todo: Auto DevCom Help; global help; usage;  */
+            
             if (!this._cmd || /^[-]{1}.+$/.test(this._cmd)) {
                 this.usage();
                 this.exitCode = ERROR_CODE_DEVCOM_NOTINFORMED;
