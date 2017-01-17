@@ -2,12 +2,12 @@
 // Licensed under the Apache License, Version 2.0. More license information in LICENSE.txt.
 
 function expandsToGlobal(obj) {
-    for (let p in obj) {
+    for (var p in obj) {
         global[p] = obj[p];
     }
 }
 
-let loaded = []
+var loaded = []
 
 module.exports.requireGlobal = function (m) {
     if (!Array.isArray(m)) {
