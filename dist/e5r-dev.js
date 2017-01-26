@@ -2299,7 +2299,7 @@
                 let cachedFile = lib.loadCachedObjectResource(uri);
 
                 if (!cachedFile) {
-                    lib.downloadWebObjectResource(uri);
+                    await lib.downloadWebObjectResource(uri);
                     cachedFile = lib.loadCachedObjectResource(uri);
                 }
 
