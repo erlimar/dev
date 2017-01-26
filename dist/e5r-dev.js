@@ -2690,7 +2690,7 @@
         /**
          * Run the tool
          */
-        run() {
+        async run() {
             try {
                 /** @todo: Auto DevCom Help; global help; usage;  */
 
@@ -2711,7 +2711,7 @@
                     throw createError('DEVCOM [' + this._cmd + '] not found!');
                 }
 
-                devcom.run(this, this._options);
+                await devcom.run(this, this._options);
             } catch (error) {
                 lib.logger.error(error);
                 this.exitCode = error.code || 1;
@@ -2840,7 +2840,7 @@
     // Run process tools
     if (!module.parent && module.filename === __filename) {
         if (lib.devToolDefaultInstance.exitCode === 0) {
-            lib.devToolDefaultInstance.run();
+            await lib.devToolDefaultInstance.run();
         }
         if (lib.devToolDefaultInstance.exitCode !== 0) {
             lib.devToolDefaultInstance.exit();

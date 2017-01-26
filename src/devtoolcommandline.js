@@ -128,7 +128,7 @@
         /**
          * Run the tool
          */
-        run() {
+        async run() {
             try {
                 /** @todo: Auto DevCom Help; global help; usage;  */
 
@@ -149,7 +149,7 @@
                     throw createError('DEVCOM [' + this._cmd + '] not found!');
                 }
 
-                devcom.run(this, this._options);
+                await devcom.run(this, this._options);
             } catch (error) {
                 lib.logger.error(error);
                 this.exitCode = error.code || 1;

@@ -36,7 +36,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for arguments of command
          */
-        run(devTool, options) {
+        async run(devTool, options) {
             if ((process.env['DEVCOM_MODE'] || '').toUpperCase() !== 'DEVELOPMENT' && !(devTool instanceof _dev.DevTool)) {
                 throw _dev.createError('Init should be performed only via DEV command.');
             }

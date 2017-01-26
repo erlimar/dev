@@ -31,7 +31,7 @@
     // Run process tools
     if (!module.parent && module.filename === __filename) {
         if (lib.devToolDefaultInstance.exitCode === 0) {
-            lib.devToolDefaultInstance.run();
+            await lib.devToolDefaultInstance.run();
         }
         if (lib.devToolDefaultInstance.exitCode !== 0) {
             lib.devToolDefaultInstance.exit();
