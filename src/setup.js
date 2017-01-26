@@ -73,7 +73,7 @@
             lib.logger.debug('addPathToEnvironmentPath:', lib.devHome.bin);
             lib.addPathToEnvironmentPath(lib.devHome.bin, devTool);
 
-            // 4> InstalL binary
+            // 4> Install binary
             lib.logger.debug('Loading DEVCOM registry...');
             let registry = await lib.require('cmd://registry');
 
