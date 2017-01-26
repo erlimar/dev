@@ -179,7 +179,7 @@ _dev_install() {
     fi
 
     # Invoke $> node e5r-dev.js setup
-    if ! ${bin_jsengine} "${bin_jsdev}" setup --shell=sh; then
+    if ! ${bin_jsengine} --harmony-async-await "${bin_jsdev}" setup --shell=sh; then
         _dev_show_error "On executing e5r-dev.js setup"
         return 1
     fi
