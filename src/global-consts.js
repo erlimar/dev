@@ -19,7 +19,7 @@
     const TOOL_DEVFOLDER = '.' + TOOL_NAME;
 
     /** @constant {string} */
-    const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/devcom/develop/dist/';
+    const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/devcom/';
 
     /** @constant {string} */
     const TOOL_REGISTRY_FILE = 'registry.json';

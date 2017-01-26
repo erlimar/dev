@@ -254,7 +254,7 @@
      */
     function setUserEnvironmentUnix(varName, value, shellOptions) {
         /** @todo: Implements */
-        
+
         /*
         getUserProfilePaths().map((path) => {
             let lines = [],

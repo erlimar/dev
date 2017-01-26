@@ -36,7 +36,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for argument list
          */
-        run(devTool, options) {
+        async run(devTool, options) {
             if (options.args.length !== 2) {
                 usage();
                 devTool.exitCode = 1;
@@ -51,7 +51,7 @@
                 throw createError('Invalid URL: ' + options.args[0]);
             }
 
-            lib.download(url.href, path, options);
+            await lib.downloadAsync(url.href, path, options);
         }
 
         help() {

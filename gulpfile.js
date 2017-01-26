@@ -49,7 +49,7 @@ gulp.task('devcom-registry', function () {
     });
 });
 
-gulp.task('dist', ['clean', 'devcom-registry'], function () {
+gulp.task('dist', ['devcom-registry'], function () {
     // DEVCOM
     gulp.src('src/devcom/**/*')
         .pipe(stripCode({

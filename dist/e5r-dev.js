@@ -27,7 +27,7 @@
     const TOOL_DEVFOLDER = '.' + TOOL_NAME;
 
     /** @constant {string} */
-    const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/devcom/develop/dist/';
+    const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/devcom/';
 
     /** @constant {string} */
     const TOOL_REGISTRY_FILE = 'registry.json';
@@ -1137,7 +1137,7 @@
      */
     function setUserEnvironmentUnix(varName, value, shellOptions) {
         /** @todo: Implements */
-        
+
         /*
         getUserProfilePaths().map((path) => {
             let lines = [],
@@ -1992,7 +1992,7 @@
                     });
 
                     let req = wget(urlOptions, (res) => {
-                        if (res.statusCode !== 201) {
+                        if (res.statusCode !== 200) {
                             let reason = createError('Response status code: ' + res.statusCode + ' ' + res.statusMessage + ' >>> ' + url);
                             reject(reason);
                             clearAndBackupResotre();
@@ -2167,7 +2167,7 @@
              * @param {string} scope - Name of scope to get content
              * @return {object}
              */
-            getRegistryLock(scope, force, options) {
+            async getRegistryLock(scope, force, options) {
                 force = !!force;
                 options = options || {};
 
@@ -2188,7 +2188,7 @@
                     }
 
                     let registryLockURL = lib.normalizeUrl(registryURL).concat(TOOL_REGISTRY_LOCKFILE);
-                    lib.downloadSync(registryLockURL, registryLockFilePath, options);
+                    await lib.downloadAsync(registryLockURL, registryLockFilePath, options);
                 }
 
                 // Load LOCK file
@@ -2239,7 +2239,7 @@
              * 
              * @param {string} uri - Uniform Resource Identifier
              */
-            downloadWebObjectResource(uri) {
+            async downloadWebObjectResource(uri) {
                 let uriData = compileRequireData(uri);
 
                 lib.loadRegistryCache();
@@ -2257,7 +2257,7 @@
 
                     // Load LOCK file
                     if (!registryContent.lock) {
-                        registryContent.lock = lib.getRegistryLock(registryScope);
+                        registryContent.lock = await lib.getRegistryLock(registryScope);
                     }
 
                     if (-1 < registryContent.lock.indexOf(uriData.urlSufix)) {
@@ -2281,7 +2281,7 @@
                     throw createError(typeName + ' "' + uriData.name + '' + '" not found!');
                 }
 
-                lib.downloadSync(registryFileUrl, uriData.path);
+                await lib.downloadAsync(registryFileUrl, uriData.path);
 
                 if (!lib.fileExists(uriData.path)) {
                     throw createError('Download failed to:', registryFileUrl);
@@ -2457,7 +2457,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for argument list
          */
-        run(devTool, options) {
+        async run(devTool, options) {
             lib.printf('Set-up E5R Tools for Development Team...');
 
             // 1> Make directory structure
@@ -2480,10 +2480,10 @@
                 _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE)
             );
 
-            lib.downloadSync(
-                _url.resolve(TOOL_DEFAULT_REGISTRY_URL, TOOL_REGISTRY_FILE),
-                _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE)
-            );
+            let urlRegistryFile = _url.resolve(TOOL_DEFAULT_REGISTRY_URL, TOOL_REGISTRY_FILE),
+                pathRegistryFile = _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
+
+            await lib.downloadAsync(urlRegistryFile, pathRegistryFile);
 
             // 3> Add /bin to PATH
             /** @todo: Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%. */
@@ -2532,7 +2532,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for argument list
          */
-        run(devTool, options) {
+        async run(devTool, options) {
             if (options.args.length !== 2) {
                 usage();
                 devTool.exitCode = 1;
@@ -2547,7 +2547,7 @@
                 throw createError('Invalid URL: ' + options.args[0]);
             }
 
-            lib.download(url.href, path, options);
+            await lib.downloadAsync(url.href, path, options);
         }
 
         help() {

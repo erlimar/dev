@@ -10,7 +10,10 @@
             'global-consts',
             'global-extensions',
             'global-functions',
-            'global-vars'
+            'global-vars',
+            'devtoollib',
+            'devtoolcommandline',
+            'wget'
         ]);
     /* DEVCODE-END */
 
@@ -36,7 +39,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for argument list
          */
-        run(devTool, options) {
+        async run(devTool, options) {
             lib.printf('Set-up E5R Tools for Development Team...');
 
             // 1> Make directory structure
@@ -59,10 +62,10 @@
                 _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE)
             );
 
-            lib.downloadSync(
-                _url.resolve(TOOL_DEFAULT_REGISTRY_URL, TOOL_REGISTRY_FILE),
-                _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE)
-            );
+            let urlRegistryFile = _url.resolve(TOOL_DEFAULT_REGISTRY_URL, TOOL_REGISTRY_FILE),
+                pathRegistryFile = _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE);
+
+            await lib.downloadAsync(urlRegistryFile, pathRegistryFile);
 
             // 3> Add /bin to PATH
             /** @todo: Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%. */
@@ -88,6 +91,26 @@
     module.exports.Setup = Setup;
 
     if (!module.parent && module.filename === __filename && process.argv.indexOf('-devmode') >= 0) {
+        /** @hack: No circular reference and reconfigure paths */
+        _rootPath = _path.resolve(_os.homedir(), '.dev');
+        _devPaths = {
+            root: _rootPath,
+            tools: _path.join(_rootPath, 'tools'),
+            bin: _path.join(_rootPath, 'bin'),
+            lib: _path.join(_rootPath, 'lib'),
+            cmd: _path.join(_rootPath, 'lib', 'cmd'),
+            doc: _path.join(_rootPath, 'doc')
+        };
+
+        process.argv.push('--shell=' + (_os.platform() === 'win32' ? 'cmd' : 'sh'));
+
+        lib.DevTool = DevToolCommandLine;
+        lib.devToolDefaultInstance = new DevToolCommandLine([
+            Wget,
+            Setup,
+        ]);
+
+        new Setup().run(lib.devToolDefaultInstance, {});
     }
 
 })();

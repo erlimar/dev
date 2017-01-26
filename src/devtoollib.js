@@ -695,7 +695,7 @@
                     });
 
                     let req = wget(urlOptions, (res) => {
-                        if (res.statusCode !== 201) {
+                        if (res.statusCode !== 200) {
                             let reason = createError('Response status code: ' + res.statusCode + ' ' + res.statusMessage + ' >>> ' + url);
                             reject(reason);
                             clearAndBackupResotre();
@@ -870,7 +870,7 @@
              * @param {string} scope - Name of scope to get content
              * @return {object}
              */
-            getRegistryLock(scope, force, options) {
+            async getRegistryLock(scope, force, options) {
                 force = !!force;
                 options = options || {};
 
@@ -891,7 +891,7 @@
                     }
 
                     let registryLockURL = lib.normalizeUrl(registryURL).concat(TOOL_REGISTRY_LOCKFILE);
-                    lib.downloadSync(registryLockURL, registryLockFilePath, options);
+                    await lib.downloadAsync(registryLockURL, registryLockFilePath, options);
                 }
 
                 // Load LOCK file
@@ -942,7 +942,7 @@
              * 
              * @param {string} uri - Uniform Resource Identifier
              */
-            downloadWebObjectResource(uri) {
+            async downloadWebObjectResource(uri) {
                 let uriData = compileRequireData(uri);
 
                 lib.loadRegistryCache();
@@ -960,7 +960,7 @@
 
                     // Load LOCK file
                     if (!registryContent.lock) {
-                        registryContent.lock = lib.getRegistryLock(registryScope);
+                        registryContent.lock = await lib.getRegistryLock(registryScope);
                     }
 
                     if (-1 < registryContent.lock.indexOf(uriData.urlSufix)) {
@@ -984,7 +984,7 @@
                     throw createError(typeName + ' "' + uriData.name + '' + '" not found!');
                 }
 
-                lib.downloadSync(registryFileUrl, uriData.path);
+                await lib.downloadAsync(registryFileUrl, uriData.path);
 
                 if (!lib.fileExists(uriData.path)) {
                     throw createError('Download failed to:', registryFileUrl);
@@ -1141,21 +1141,6 @@
         _assert(lib.DevCom === DevCom, 'Invalid lib.DevCom reference');
         _assert(lib.logger === lib._logger, 'Invalid lib.logger instance');
         _assert(lib._logger instanceof Logger, 'Invalid lib._logger instance');
-
-        console.log('Downloading...');
-        let url = 'https://raw.githubusercontent.com/e5r/dev/develop/install.sh';
-        let file = '~/install.sh';
-        let errou = false;
-
-        try {
-            let result = await lib.downloadAsync(url, file);
-            console.log('Result:', result.path);
-        } catch (_err) {
-            errou = true;
-            console.log('Erro:', _err.message);
-        }
-
-        console.log('Downloaded', (errou ? 'com erro' : 'sem erro'));
     }
 
 })();
