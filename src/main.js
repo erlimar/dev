@@ -1,36 +1,43 @@
 /* DEVCODE-BEGIN */
-var devUtil = require('../scripts/devutils');
+(async () => {
+    "use strict";
 
-devUtil
-    .ensureNode()
-    .requireGlobal([
-        'global-consts',
-        'global-extensions',
-        'global-functions',
-        'global-vars',
+    var devUtil = require('../scripts/devutils');
 
-        'devtoollib',
-        'devtoolcommandline',
-        'wget',
-        'setup'
+    devUtil
+        .ensureNode()
+        .requireGlobal([
+            'global-consts',
+            'global-extensions',
+            'global-functions',
+            'global-vars',
+
+            'devtoollib',
+            'devtoolcommandline',
+            'wget',
+            'setup'
+        ]);
+    /* DEVCODE-END */
+
+    /** @hack: No circular reference */
+    lib.DevTool = DevToolCommandLine;
+    lib.devToolDefaultInstance = new DevToolCommandLine([
+        Wget,
+        Setup,
     ]);
+
+    exports = module.exports = lib;
+
+    // Run process tools
+    if (!module.parent && module.filename === __filename) {
+        if (lib.devToolDefaultInstance.exitCode === 0) {
+            lib.devToolDefaultInstance.run();
+        }
+        if (lib.devToolDefaultInstance.exitCode !== 0) {
+            lib.devToolDefaultInstance.exit();
+        }
+    }
+
+    /* DEVCODE-BEGIN */
+})();
 /* DEVCODE-END */
-
-/** @hack: No circular reference */
-lib.DevTool = DevToolCommandLine;
-lib.devToolDefaultInstance = new DevToolCommandLine([
-    Wget,
-    Setup,
-]);
-
-exports = module.exports = lib;
-
-// Run process tools
-if (!module.parent && module.filename === __filename) {
-    if(lib.devToolDefaultInstance.exitCode === 0){
-        lib.devToolDefaultInstance.run();
-    }
-    if(lib.devToolDefaultInstance.exitCode !== 0){
-        lib.devToolDefaultInstance.exit();
-    }
-}

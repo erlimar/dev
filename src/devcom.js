@@ -1,44 +1,51 @@
 /* DEVCODE-BEGIN */
-var devUtil = require('../scripts/devutils');
+(async () => {
+    "use strict";
 
-devUtil
-    .ensureNode()
-    .requireGlobal([
-        'global-consts',
-        'global-extensions',
-        'global-functions',
-        'global-vars'
-    ]);
-/* DEVCODE-END */
+    var devUtil = require('../scripts/devutils');
 
-/**
- * Base type for DevCom's
- */
-class DevCom {
+    devUtil
+        .ensureNode()
+        .requireGlobal([
+            'global-consts',
+            'global-extensions',
+            'global-functions',
+            'global-vars'
+        ]);
+    /* DEVCODE-END */
+
     /**
-     * Run the builtin command
-     * 
-     * @param {object} devTool - Instance of DevToolCommandLine
-     * @param {object} options - Options for arguments of command
+     * Base type for DevCom's
      */
-    run(devTool, options) {
-        throw createError('DevCom.run() not implemented.');
+    class DevCom {
+        /**
+         * Run the builtin command
+         * 
+         * @param {object} devTool - Instance of DevToolCommandLine
+         * @param {object} options - Options for arguments of command
+         */
+        run(devTool, options) {
+            throw createError('DevCom.run() not implemented.');
+        }
+
+        get name() {
+            throw createError('DevCom.name not implemented.');
+        }
+
+        get shortDoc() {
+            throw createError('DevCom.shortDoc not implemented for [' + this.name + '].');
+        }
     }
 
-    get name() {
-        throw createError('DevCom.name not implemented.');
+    /* DEVCODE-BEGIN */
+    module.exports.DevCom = DevCom;
+
+    if (!module.parent && module.filename === __filename && process.argv.indexOf('-devmode') >= 0) {
+        // Asserts
+        var devcom = new DevCom();
+
+        _assert(devcom instanceof DevCom, 'Invalid devcom instance');
     }
 
-    get shortDoc() {
-        throw createError('DevCom.shortDoc not implemented for [' + this.name + '].');
-    }
-}
-
-/* DEVCODE-BEGIN */
-module.exports.DevCom = DevCom;
-
-// Asserts
-var devcom = new DevCom();
-
-_assert(devcom instanceof DevCom, 'Invalid devcom instance');
+})();
 /* DEVCODE-END */

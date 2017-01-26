@@ -1,747 +1,755 @@
 /* DEVCODE-BEGIN */
-var devUtil = require('../scripts/devutils');
+(async () => {
+    "use strict";
 
-devUtil
-    .ensureNode()
-    .requireGlobal([
-        'global-consts',
-        'global-extensions',
-        'global-functions',
-        'global-vars'
-    ]);
-/* DEVCODE-END */
+    var devUtil = require('../scripts/devutils');
 
-/**
- * Record structure for a directory
- * 
- * @param {string} name
- * @param {Object} meta 
- */
-function ZipDirectoryEntry(name, meta) {
-    /** @todo: Privatize */
-    if (!(this instanceof ZipDirectoryEntry)) {
-        return new ZipDirectoryEntry(name, meta);
-    }
+    devUtil
+        .ensureNode()
+        .requireGlobal([
+            'global-consts',
+            'global-extensions',
+            'global-functions',
+            'global-vars'
+        ]);
+    /* DEVCODE-END */
 
-    this.name = name;
-    this.meta = meta;
-    this.files = [];
-    this.childs = [];
-}
-
-/**
- * Record structure for a file
- * 
- * @param {string} name
- * @param {Object} meta
- */
-function ZipFileEntry(name, meta) {
-    /** @todo: Privatize */
-    if (!(this instanceof ZipFileEntry)) {
-        return new ZipFileEntry(name, meta);
-    }
-
-    this.name = name;
-    this.meta = meta;
-}
-
-/**
- * Zip file end of central directory record
- * @constructor
- * 
- * @param {Object} buffer Buffer instance
- */
-function ZipEndOfCentralDirectory(buffer) {
-    /** @todo: Privatize */
-    if (!(this instanceof ZipEndOfCentralDirectory)) {
-        return new ZipEndOfCentralDirectory(buffer);
-    }
-
-    if (!(buffer instanceof Buffer)) {
-        throw new Error('Param @buffer must be a Buffer instance');
-    }
-
-    if (buffer.length != ZipEndOfCentralDirectory.RECORD_SIZE) {
-        throw new Error('Invalid buffer size');
-    }
-
-    // end of central dir signature    4 bytes  (0x06054b50)
-    this._signature = buffer.readZipDWord(0);
-
-    // number of this disk             2 bytes
-    this._diskNumber = buffer.readZipWord(4);
-
-    // number of the disk with the
-    // start of the central directory  2 bytes
-    this._distStartNumber = buffer.readZipWord(6);
-
-    // total number of entries in
-    // the central dir on this disk    2 bytes
-    this._totalEntries = buffer.readZipWord(8);
-
-    // total number of entries in
-    // the central dir                 2 bytes
-    this._totalAllEntries = buffer.readZipWord(10);
-
-    // size of the central directory   4 bytes
-    this._size = buffer.readZipDWord(12);
-
-    // offset of start of central
-    // directory with respect to
-    // the starting disk number        4 bytes
-    this._offset = buffer.readZipDWord(16);
-
-    // zipfile comment length          2 bytes
-    this._commentLength = buffer.readZipWord(20);
-
-    if (this._signature !== ZipEndOfCentralDirectory.MAGIC_SIGNATURE) {
-        throw new Error('End of central directory signature error');
-    }
-}
-
-/** @constant {number} */
-/** @todo: Privatize */
-ZipEndOfCentralDirectory.MAGIC_SIGNATURE = 0x06054b50;
-
-/** @constant {number} */
-/** @todo: Privatize */
-ZipEndOfCentralDirectory.RECORD_SIZE = 22;
-
-/**
- * Zip file header on central directory structure.
- * @constructor
- * 
- * @param {Object} buffer Buffer instance
- */
-function ZipCentralDirectoryFileHeader(buffer) {
-    /** @todo: Privatize */
-    if (!(this instanceof ZipCentralDirectoryFileHeader)) {
-        return new ZipCentralDirectoryFileHeader(buffer);
-    }
-
-    if (!(buffer instanceof Buffer)) {
-        throw new Error('Param @buffer must be a Buffer instance');
-    }
-
-    if (buffer.length != ZipCentralDirectoryFileHeader.RECORD_SIZE) {
-        throw new Error('Invalid buffer size');
-    }
-
-    // central file header signature   4 bytes  (0x02014b50)
-    this._signature = buffer.readZipDWord(0);
-
-    // version made by                 2 bytes
-    this._versionMadeBy = buffer.readZipWord(4);
-
-    // version needed to extract       2 bytes
-    this._versionNeeded = buffer.readZipWord(6);
-
-    // general purpose bit flag        2 bytes
-    this._generalFlag = buffer.readZipWord(8);
-
-    // compression method              2 bytes
-    this._compressionMethod = buffer.readZipWord(10);
-
-    // last mod file time              2 bytes
-    this._lastModifyTime = buffer.readZipWord(12);
-
-    // last mod file date              2 bytes
-    this._lastModifyDate = buffer.readZipWord(14);
-
-    // crc-32                          4 bytes
-    this._crc32 = buffer.readZipDWord(16);
-
-    // compressed size                 4 bytes
-    this._compressedSize = buffer.readZipDWord(20);
-
-    // uncompressed size               4 bytes
-    this._uncompressedSize = buffer.readZipDWord(24);
-
-    // filename length                 2 bytes
-    this._fileNameLength = buffer.readZipWord(28);
-
-    // extra field length              2 bytes
-    this._extraFieldLength = buffer.readZipWord(30);
-
-    // file comment length             2 bytes
-    this._commentLength = buffer.readZipWord(32);
-
-    // disk number start               2 bytes
-    this._distNumber = buffer.readZipWord(34);
-
-    // internal file attributes        2 bytes
-    this._internalAttributes = buffer.readZipWord(36);
-
-    // external file attributes        4 bytes
-    this._externalAttributes = buffer.readZipDWord(38);
-
-    // relative offset of local header 4 bytes
-    this._relativeOffset = buffer.readZipDWord(42);
-
-    if (this._signature !== ZipCentralDirectoryFileHeader.MAGIC_SIGNATURE) {
-        throw new Error('File header on central directory signature error');
-    }
-}
-
-/** @constant {number} */
-/** @todo: Privatize */
-ZipCentralDirectoryFileHeader.MAGIC_SIGNATURE = 0x02014b50;
-
-/** @constant {number} */
-/** @todo: Privatize */
-ZipCentralDirectoryFileHeader.RECORD_SIZE = 46;
-
-/**
- * Zip local file header structure + file data structure.
- * @constructor
- * 
- * @param {Object} buffer Buffer instance
- */
-function ZipLocalFile(buffer) {
-    /** @todo: Privatize */
-    if (!(this instanceof ZipLocalFile)) {
-        return new ZipLocalFile(buffer);
-    }
-
-    if (!(buffer instanceof Buffer)) {
-        throw new Error('Param @buffer must be a Buffer instance');
-    }
-
-    if (buffer.length != ZipLocalFile.RECORD_SIZE) {
-        throw new Error('Invalid buffer size');
-    }
-
-    // local file header signature     4 bytes  (0x04034b50)
-    this._signature = buffer.readZipDWord(0);
-
-    // version needed to extract       2 bytes
-    this._versionNeeded = buffer.readZipWord(4);
-
-    // general purpose bit flag        2 bytes
-    this._generalFlag = buffer.readZipWord(6);
-
-    // compression method              2 bytes
-    this._compressionMethod = buffer.readZipWord(8);
-
-    // last mod file time              2 bytes
-    this._lastModifyTime = buffer.readZipWord(10);
-
-    // last mod file date              2 bytes
-    this._lastModifyDate = buffer.readZipWord(12);
-
-    // crc-32                          4 bytes
-    this._crc32 = buffer.readZipDWord(14);
-
-    // compressed size                 4 bytes
-    this._compressedSize = buffer.readZipDWord(18);
-
-    // uncompressed size               4 bytes
-    this._uncompressedSize = buffer.readZipDWord(22);
-
-    // filename length                 2 bytes
-    this._fileNameLength = buffer.readZipWord(26);
-
-    // extra field length              2 bytes
-    this._extraFieldLength = buffer.readZipWord(28);
-
-    if (this._signature !== ZipLocalFile.MAGIC_SIGNATURE) {
-        throw new Error('Local file header signature error');
-    }
-}
-
-/** @constant {number} */
-/** @todo: Privatize */
-ZipLocalFile.MAGIC_SIGNATURE = 0x04034b50;
-
-/** @constant {number} */
-/** @todo: Privatize */
-ZipLocalFile.RECORD_SIZE = 30;
-
-/** @constant {number} */
-/** @todo: Privatize */
-ZipLocalFile.DATA_DESCRIPTOR_FLAG = 0x04;
-
-ZipLocalFile.prototype.checkIntegrity = function(meta) {
-    /** @note: Only for compression method 8 - The file is Deflated 
-     *  0 - The file is stored (no compression)
-	 *  1 - The file is Shrunk
-	 *  2 - The file is Reduced with compression factor 1
-	 *  3 - The file is Reduced with compression factor 2
-	 *  4 - The file is Reduced with compression factor 3
-	 *  5 - The file is Reduced with compression factor 4
-	 *  6 - The file is Imploded
-	 *  7 - Reserved for Tokenizing compression algorithm
-	 *  8 - The file is Deflated
+    /**
+     * Record structure for a directory
+     * 
+     * @param {string} name
+     * @param {Object} meta 
      */
+    function ZipDirectoryEntry(name, meta) {
+        /** @todo: Privatize */
+        if (!(this instanceof ZipDirectoryEntry)) {
+            return new ZipDirectoryEntry(name, meta);
+        }
 
-    if (this._compressionMethod !== 8 && this._compressionMethod !== 0) {
-        throw new Error('Only Deflated compression method is available')
+        this.name = name;
+        this.meta = meta;
+        this.files = [];
+        this.childs = [];
     }
-}
 
-/**
- * Zip local data descriptor structure.
- * @constructor
- * 
- * @param {Object} buffer Buffer instance
- */
-function ZipLocalDataDescriptor(buffer) {
+    /**
+     * Record structure for a file
+     * 
+     * @param {string} name
+     * @param {Object} meta
+     */
+    function ZipFileEntry(name, meta) {
+        /** @todo: Privatize */
+        if (!(this instanceof ZipFileEntry)) {
+            return new ZipFileEntry(name, meta);
+        }
+
+        this.name = name;
+        this.meta = meta;
+    }
+
+    /**
+     * Zip file end of central directory record
+     * @constructor
+     * 
+     * @param {Object} buffer Buffer instance
+     */
+    function ZipEndOfCentralDirectory(buffer) {
+        /** @todo: Privatize */
+        if (!(this instanceof ZipEndOfCentralDirectory)) {
+            return new ZipEndOfCentralDirectory(buffer);
+        }
+
+        if (!(buffer instanceof Buffer)) {
+            throw new Error('Param @buffer must be a Buffer instance');
+        }
+
+        if (buffer.length != ZipEndOfCentralDirectory.RECORD_SIZE) {
+            throw new Error('Invalid buffer size');
+        }
+
+        // end of central dir signature    4 bytes  (0x06054b50)
+        this._signature = buffer.readZipDWord(0);
+
+        // number of this disk             2 bytes
+        this._diskNumber = buffer.readZipWord(4);
+
+        // number of the disk with the
+        // start of the central directory  2 bytes
+        this._distStartNumber = buffer.readZipWord(6);
+
+        // total number of entries in
+        // the central dir on this disk    2 bytes
+        this._totalEntries = buffer.readZipWord(8);
+
+        // total number of entries in
+        // the central dir                 2 bytes
+        this._totalAllEntries = buffer.readZipWord(10);
+
+        // size of the central directory   4 bytes
+        this._size = buffer.readZipDWord(12);
+
+        // offset of start of central
+        // directory with respect to
+        // the starting disk number        4 bytes
+        this._offset = buffer.readZipDWord(16);
+
+        // zipfile comment length          2 bytes
+        this._commentLength = buffer.readZipWord(20);
+
+        if (this._signature !== ZipEndOfCentralDirectory.MAGIC_SIGNATURE) {
+            throw new Error('End of central directory signature error');
+        }
+    }
+
+    /** @constant {number} */
     /** @todo: Privatize */
-    if (!(this instanceof ZipLocalDataDescriptor)) {
-        return new ZipLocalDataDescriptor(buffer);
+    ZipEndOfCentralDirectory.MAGIC_SIGNATURE = 0x06054b50;
+
+    /** @constant {number} */
+    /** @todo: Privatize */
+    ZipEndOfCentralDirectory.RECORD_SIZE = 22;
+
+    /**
+     * Zip file header on central directory structure.
+     * @constructor
+     * 
+     * @param {Object} buffer Buffer instance
+     */
+    function ZipCentralDirectoryFileHeader(buffer) {
+        /** @todo: Privatize */
+        if (!(this instanceof ZipCentralDirectoryFileHeader)) {
+            return new ZipCentralDirectoryFileHeader(buffer);
+        }
+
+        if (!(buffer instanceof Buffer)) {
+            throw new Error('Param @buffer must be a Buffer instance');
+        }
+
+        if (buffer.length != ZipCentralDirectoryFileHeader.RECORD_SIZE) {
+            throw new Error('Invalid buffer size');
+        }
+
+        // central file header signature   4 bytes  (0x02014b50)
+        this._signature = buffer.readZipDWord(0);
+
+        // version made by                 2 bytes
+        this._versionMadeBy = buffer.readZipWord(4);
+
+        // version needed to extract       2 bytes
+        this._versionNeeded = buffer.readZipWord(6);
+
+        // general purpose bit flag        2 bytes
+        this._generalFlag = buffer.readZipWord(8);
+
+        // compression method              2 bytes
+        this._compressionMethod = buffer.readZipWord(10);
+
+        // last mod file time              2 bytes
+        this._lastModifyTime = buffer.readZipWord(12);
+
+        // last mod file date              2 bytes
+        this._lastModifyDate = buffer.readZipWord(14);
+
+        // crc-32                          4 bytes
+        this._crc32 = buffer.readZipDWord(16);
+
+        // compressed size                 4 bytes
+        this._compressedSize = buffer.readZipDWord(20);
+
+        // uncompressed size               4 bytes
+        this._uncompressedSize = buffer.readZipDWord(24);
+
+        // filename length                 2 bytes
+        this._fileNameLength = buffer.readZipWord(28);
+
+        // extra field length              2 bytes
+        this._extraFieldLength = buffer.readZipWord(30);
+
+        // file comment length             2 bytes
+        this._commentLength = buffer.readZipWord(32);
+
+        // disk number start               2 bytes
+        this._distNumber = buffer.readZipWord(34);
+
+        // internal file attributes        2 bytes
+        this._internalAttributes = buffer.readZipWord(36);
+
+        // external file attributes        4 bytes
+        this._externalAttributes = buffer.readZipDWord(38);
+
+        // relative offset of local header 4 bytes
+        this._relativeOffset = buffer.readZipDWord(42);
+
+        if (this._signature !== ZipCentralDirectoryFileHeader.MAGIC_SIGNATURE) {
+            throw new Error('File header on central directory signature error');
+        }
     }
 
-    if (!(buffer instanceof Buffer)) {
-        throw new Error('Param @buffer must be a Buffer instance');
+    /** @constant {number} */
+    /** @todo: Privatize */
+    ZipCentralDirectoryFileHeader.MAGIC_SIGNATURE = 0x02014b50;
+
+    /** @constant {number} */
+    /** @todo: Privatize */
+    ZipCentralDirectoryFileHeader.RECORD_SIZE = 46;
+
+    /**
+     * Zip local file header structure + file data structure.
+     * @constructor
+     * 
+     * @param {Object} buffer Buffer instance
+     */
+    function ZipLocalFile(buffer) {
+        /** @todo: Privatize */
+        if (!(this instanceof ZipLocalFile)) {
+            return new ZipLocalFile(buffer);
+        }
+
+        if (!(buffer instanceof Buffer)) {
+            throw new Error('Param @buffer must be a Buffer instance');
+        }
+
+        if (buffer.length != ZipLocalFile.RECORD_SIZE) {
+            throw new Error('Invalid buffer size');
+        }
+
+        // local file header signature     4 bytes  (0x04034b50)
+        this._signature = buffer.readZipDWord(0);
+
+        // version needed to extract       2 bytes
+        this._versionNeeded = buffer.readZipWord(4);
+
+        // general purpose bit flag        2 bytes
+        this._generalFlag = buffer.readZipWord(6);
+
+        // compression method              2 bytes
+        this._compressionMethod = buffer.readZipWord(8);
+
+        // last mod file time              2 bytes
+        this._lastModifyTime = buffer.readZipWord(10);
+
+        // last mod file date              2 bytes
+        this._lastModifyDate = buffer.readZipWord(12);
+
+        // crc-32                          4 bytes
+        this._crc32 = buffer.readZipDWord(14);
+
+        // compressed size                 4 bytes
+        this._compressedSize = buffer.readZipDWord(18);
+
+        // uncompressed size               4 bytes
+        this._uncompressedSize = buffer.readZipDWord(22);
+
+        // filename length                 2 bytes
+        this._fileNameLength = buffer.readZipWord(26);
+
+        // extra field length              2 bytes
+        this._extraFieldLength = buffer.readZipWord(28);
+
+        if (this._signature !== ZipLocalFile.MAGIC_SIGNATURE) {
+            throw new Error('Local file header signature error');
+        }
     }
 
-    if (buffer.length != ZipLocalDataDescriptor.RECORD_SIZE) {
-        throw new Error('Invalid buffer size');
+    /** @constant {number} */
+    /** @todo: Privatize */
+    ZipLocalFile.MAGIC_SIGNATURE = 0x04034b50;
+
+    /** @constant {number} */
+    /** @todo: Privatize */
+    ZipLocalFile.RECORD_SIZE = 30;
+
+    /** @constant {number} */
+    /** @todo: Privatize */
+    ZipLocalFile.DATA_DESCRIPTOR_FLAG = 0x04;
+
+    ZipLocalFile.prototype.checkIntegrity = function (meta) {
+        /** @note: Only for compression method 8 - The file is Deflated 
+         *  0 - The file is stored (no compression)
+         *  1 - The file is Shrunk
+         *  2 - The file is Reduced with compression factor 1
+         *  3 - The file is Reduced with compression factor 2
+         *  4 - The file is Reduced with compression factor 3
+         *  5 - The file is Reduced with compression factor 4
+         *  6 - The file is Imploded
+         *  7 - Reserved for Tokenizing compression algorithm
+         *  8 - The file is Deflated
+         */
+
+        if (this._compressionMethod !== 8 && this._compressionMethod !== 0) {
+            throw new Error('Only Deflated compression method is available')
+        }
     }
 
-    // crc-32                          4 bytes
-    this._crc32 = buffer.readZipDWord(0);
+    /**
+     * Zip local data descriptor structure.
+     * @constructor
+     * 
+     * @param {Object} buffer Buffer instance
+     */
+    function ZipLocalDataDescriptor(buffer) {
+        /** @todo: Privatize */
+        if (!(this instanceof ZipLocalDataDescriptor)) {
+            return new ZipLocalDataDescriptor(buffer);
+        }
 
-    // compressed size                 4 bytes
-    this._compressedSize = buffer.readZipDWord(4);
+        if (!(buffer instanceof Buffer)) {
+            throw new Error('Param @buffer must be a Buffer instance');
+        }
 
-    // uncompressed size               4 bytes
-    this._uncompressedSize = buffer.readZipDWord(8);
-}
+        if (buffer.length != ZipLocalDataDescriptor.RECORD_SIZE) {
+            throw new Error('Invalid buffer size');
+        }
 
-/** @constant {number} */
-/** @todo: Privatize */
-ZipLocalDataDescriptor.RECORD_SIZE = 12;
+        // crc-32                          4 bytes
+        this._crc32 = buffer.readZipDWord(0);
 
-/**
- * Extract a zip file
- * 
- * @note: http://www.fileformat.info/info/mimetype/application/zip/index.htm
- * 
- * @constructor
- * 
- * @param {string} filePath
- */
-function ZipExtractor(filePath) {
-    var stat;
+        // compressed size                 4 bytes
+        this._compressedSize = buffer.readZipDWord(4);
 
-    try {
-        stat = _fs.statSync(filePath);
-    } catch (_) {
-        throw new Error('Invalid file "' + filePath + '"');
+        // uncompressed size               4 bytes
+        this._uncompressedSize = buffer.readZipDWord(8);
     }
 
-    if (!(this instanceof ZipExtractor)) {
-        return new ZipExtractor(filePath);
+    /** @constant {number} */
+    /** @todo: Privatize */
+    ZipLocalDataDescriptor.RECORD_SIZE = 12;
+
+    /**
+     * Extract a zip file
+     * 
+     * @note: http://www.fileformat.info/info/mimetype/application/zip/index.htm
+     * 
+     * @constructor
+     * 
+     * @param {string} filePath
+     */
+    function ZipExtractor(filePath) {
+        var stat;
+
+        try {
+            stat = _fs.statSync(filePath);
+        } catch (_) {
+            throw new Error('Invalid file "' + filePath + '"');
+        }
+
+        if (!(this instanceof ZipExtractor)) {
+            return new ZipExtractor(filePath);
+        }
+
+        this._handle = _fs.openSync(filePath, 'r');
+        this._size = stat.size;
+        this._files = [];
+        this._rootDirectory = new ZipDirectoryEntry('.', null);
+
+        this.readEndOfCentralDirectory();
+        this.readCentralDirectoryFiles();
     }
 
-    this._handle = _fs.openSync(filePath, 'r');
-    this._size = stat.size;
-    this._files = [];
-    this._rootDirectory = new ZipDirectoryEntry('.', null);
+    ZipExtractor.prototype.ensureDirectoryEntry = function (parts) {
+        /*
+        Entry = {
+            "name": ".",
+            "meta": Object,
+            "files": [
+                {
+                    "name": String,
+                    "meta": Object
+                }
+            ],
+            "childs": [Entry..]
+        }
+        */
+        var entry = this._rootDirectory;
 
-    this.readEndOfCentralDirectory();
-    this.readCentralDirectoryFiles();
-}
+        for (var p in parts) {
+            var part = parts[p],
+                child,
+                index = -1;
 
-ZipExtractor.prototype.ensureDirectoryEntry = function(parts) {
-    /*
-    Entry = {
-        "name": ".",
-        "meta": Object,
-        "files": [
-            {
-                "name": String,
-                "meta": Object
+            for (var c in entry.childs) {
+                if (entry.childs[c].name === part) {
+                    index = c;
+                    break;
+                }
             }
-        ],
-        "childs": [Entry..]
+
+            if (0 > index) {
+                child = new ZipDirectoryEntry(part, null);
+                index = entry.childs.push(child) - 1;
+            }
+
+            entry = entry.childs[index];
+        }
+
+        return entry;
     }
-    */
-    var entry = this._rootDirectory;
 
-    for (var p in parts) {
-        var part = parts[p],
-            child,
-            index = -1;
+    /**
+     * Map a file to directory path
+     * 
+     * @param {Object} meta ZipCentralDirectoryFileHeader instance
+     */
+    ZipExtractor.prototype.mapFile = function (meta) {
+        /** @todo: Privatize */
+        var isDir = meta._fileName.lastIndexOf('/') === meta._fileName.length - 1,
+            dirParts = meta._fileName.split('/'),
+            fileName = dirParts[dirParts.length - 1];
 
+        dirParts = dirParts.slice(0, dirParts.length - 1);
+
+        var directoryEntry = this.ensureDirectoryEntry(dirParts);
+
+        if (isDir) {
+            directoryEntry.meta = meta;
+        } else {
+            directoryEntry.files.push(new ZipFileEntry(fileName, meta));
+        }
+    }
+
+    /**
+     * Read a file content block
+     * 
+     * @param {number} length
+     * @param {number} position
+     * 
+     * @return {Object} Content Buffer 
+     */
+    ZipExtractor.prototype.read = function (length, position) {
+        /** @todo: Privatize */
+        if (!Number.isInteger(length) || length < 1) {
+            throw new Error('Param @length must be a positive number');
+        }
+
+        if (!Number.isInteger(position) || position < 0) {
+            throw new Error('Param @position must be a integer number');
+        }
+
+        var buffer = new Buffer(length),
+            offset = 0,
+            read = 0;
+
+        while (read < length) {
+            read += _fs.readSync(this._handle, buffer, offset, length - read, position + read);
+            offset = read - 1;
+            if (offset < 0) offset = 0;
+        }
+
+        return buffer;
+    }
+
+    /**
+     * End of central dir record from zip file 
+     */
+    ZipExtractor.prototype.readEndOfCentralDirectory = function () {
+        /** @todo: Privatize */
+        var eocd_pos = this._size - 4;
+
+        while (eocd_pos > 0) {
+            var magic = this.read(4, eocd_pos).readZipDWord(0);
+            if (magic == ZipEndOfCentralDirectory.MAGIC_SIGNATURE) break;
+            --eocd_pos;
+        }
+
+        if (eocd_pos === 0) {
+            throw new Error('Invalid ZIP file. End of central directory record not found.');
+        }
+
+        var buffer = this.read(ZipEndOfCentralDirectory.RECORD_SIZE, eocd_pos);
+        var eocd = new ZipEndOfCentralDirectory(buffer);
+
+        if (eocd._commentLength > 0) {
+            var buffer_comment = this.read(eocd._commentLength, eocd_pos + ZipEndOfCentralDirectory.RECORD_SIZE);
+            eocd._comment = buffer_comment.toString();
+        } else {
+            eocd._comment = '';
+        }
+
+        /** @todo: Implement support multiple disks (files) */
+        if (eocd._diskNumber !== eocd._distStartNumber ||
+            eocd._diskNumber !== 0 ||
+            eocd._totalEntries !== eocd._totalAllEntries) {
+            throw new Error('TODO: Support multiple disks (files) not implemented.');
+        }
+
+        if (eocd_pos !== eocd._offset + eocd._size) {
+            throw new Error('ZIP file corrupted. End of central directory record not found.');
+        }
+
+        this._eocd = eocd;
+    }
+
+    /**
+     * Read a file header list from central directory structure of ZIP file
+     */
+    ZipExtractor.prototype.readCentralDirectoryFiles = function () {
+        /** @todo: Privatize */
+        if (!(this._eocd instanceof ZipEndOfCentralDirectory)) {
+            throw new Error('Invalid EOCD instance.');
+        }
+
+        var pos = this._eocd._offset;
+
+        while (this._files.length < this._eocd._totalEntries) {
+            var buffer = this.read(ZipCentralDirectoryFileHeader.RECORD_SIZE, pos);
+            var file = new ZipCentralDirectoryFileHeader(buffer);
+            pos += ZipCentralDirectoryFileHeader.RECORD_SIZE;
+
+            // filename
+            if (file._fileNameLength > 0) {
+                file._fileName = this.read(file._fileNameLength, pos).toString();
+                pos += file._fileNameLength;
+            } else {
+                file._fileName = '';
+            }
+
+            // extra fiel
+            if (file._extraFieldLength > 0) {
+                file._extraField = this.read(file._extraFieldLength, pos);
+                pos += file._extraFieldLength;
+            } else {
+                file._extraField = null;
+            }
+
+            // file comment
+            if (file._commentLength > 0) {
+                file._comment = this.read(file._commentLength, pos).toString();
+                pos += file._commentLength;
+            } else {
+                file._comment = '';
+            }
+
+            var index = this._files.push(file) - 1;
+            this.mapFile(this._files[index]);
+        }
+    }
+
+    /**
+     * Make a directory path
+     * 
+     * @param {string} path
+     */
+    ZipExtractor.prototype.makeDirectory = function (path) {
+        /** @todo: Privatize */
+        var stat;
+        try {
+            stat = _fs.statSync(path);
+            if (stat.isDirectory()) return;
+            throw new Error('Path "' + path + '" already exists and not a directory.');
+        } catch (error) {
+            if (error.code !== 'ENOENT') throw error;
+            try {
+                _fs.mkdirSync(path);
+            } catch (error_into) {
+                if (error_into.code !== 'ENOENT') throw error_into;
+                var dirname = _path.dirname(path);
+                if (dirname === path) {
+                    throw new Error('Undefined error for path "' + path + '".');
+                }
+                this.makeDirectory(dirname);
+                _fs.mkdirSync(path);
+            }
+        }
+    }
+
+    /**
+     * Return a path string of directory without slash trailing
+     * 
+     * @param {string} path
+     * @param {string} sep - Optional. Default _path.sep.
+     * 
+     * @return {string}
+     */
+    ZipExtractor.prototype.pathWithoutSlashTrailing = function (path, sep) {
+        var withoutTrailing = path.substr(path.length - 1, 1) === (sep || _path.sep)
+            ? path.substr(0, path.length - 1)
+            : path;
+
+        return withoutTrailing;
+    }
+
+    /**
+     * Get a entry on directory structure from path
+     * 
+     * @param {string} path
+     * 
+     * @return {Object}
+     */
+    ZipExtractor.prototype.getEntryFromPath = function (path) {
+        path = path.replace(_path.sep, '/');
+
+        var entry = this._rootDirectory,
+            parts = path.split('/');
+
+        for (var pidx = 0; pidx < parts.length; pidx++) {
+            var part = parts[pidx].trim(),
+                found = false;
+
+            if (part === '') break;
+            if (pidx == 0 && (part === '.' || part === './')) continue;
+
+            for (var c in entry.childs) {
+                var child = entry.childs[c];
+                if (child.name === part) {
+                    found = true;
+                    entry = child;
+                    break;
+                }
+            }
+
+            if (!found && pidx === parts.length - 1) {
+                for (var f in entry.files) {
+                    var file = entry.files[f];
+                    if (file.name === part) {
+                        found = true;
+                        entry = file;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) return null;
+        }
+
+        return entry;
+    }
+
+    ZipExtractor.prototype.ensureDestinationDirectory = function (destination) {
+        /** @todo: Privatize */
+        try {
+            var stat = _fs.statSync(destination);
+
+            if (!stat.isDirectory()) {
+                throw new Error('Destination path ' + destination + '" already exists and not a directory.');
+            }
+        } catch (error) {
+            if (error.code !== 'ENOENT') throw error;
+            this.makeDirectory(destination);
+        }
+    }
+
+    ZipExtractor.prototype.extractDirectory = function (entry, destination) {
+        /** @todo: Privatize */
+        if (!(entry instanceof ZipDirectoryEntry)) {
+            throw new Error('Param @entry must be a ZipDirectoryEntry instance');
+        }
+
+        this.ensureDestinationDirectory(destination);
+
+        // Files
+        for (var f in entry.files) {
+            var file = entry.files[f];
+            this.extractFile(file, destination);
+        }
+
+        // Child directories
         for (var c in entry.childs) {
-            if (entry.childs[c].name === part) {
-                index = c;
-                break;
-            }
+            var child = entry.childs[c];
+            var child_destination = _path.join(destination, child.name);
+            this.extractDirectory(child, child_destination);
         }
 
-        if (0 > index) {
-            child = new ZipDirectoryEntry(part, null);
-            index = entry.childs.push(child) - 1;
+        /** @todo: Apply directory date, time and attributes */
+    }
+
+    ZipExtractor.prototype.extractFile = function (entry, destination) {
+        /** @todo: Privatize */
+        if (!(entry instanceof ZipFileEntry)) {
+            throw new Error('Param @entry must be a ZipFileEntry instance');
         }
 
-        entry = entry.childs[index];
-    }
+        this.ensureDestinationDirectory(destination);
 
-    return entry;
-}
+        var filePath = _path.resolve(_path.join(destination, entry.name)),
+            offset = entry.meta._relativeOffset,
+            fileBuffer = this.read(ZipLocalFile.RECORD_SIZE, offset),
+            file = new ZipLocalFile(fileBuffer);
 
-/**
- * Map a file to directory path
- * 
- * @param {Object} meta ZipCentralDirectoryFileHeader instance
- */
-ZipExtractor.prototype.mapFile = function(meta) {
-    /** @todo: Privatize */
-    var isDir = meta._fileName.lastIndexOf('/') === meta._fileName.length - 1,
-        dirParts = meta._fileName.split('/'),
-        fileName = dirParts[dirParts.length - 1];
-
-    dirParts = dirParts.slice(0, dirParts.length - 1);
-
-    var directoryEntry = this.ensureDirectoryEntry(dirParts);
-
-    if (isDir) {
-        directoryEntry.meta = meta;
-    } else {
-        directoryEntry.files.push(new ZipFileEntry(fileName, meta));
-    }
-}
-
-/**
- * Read a file content block
- * 
- * @param {number} length
- * @param {number} position
- * 
- * @return {Object} Content Buffer 
- */
-ZipExtractor.prototype.read = function(length, position) {
-    /** @todo: Privatize */
-    if (!Number.isInteger(length) || length < 1) {
-        throw new Error('Param @length must be a positive number');
-    }
-
-    if (!Number.isInteger(position) || position < 0) {
-        throw new Error('Param @position must be a integer number');
-    }
-
-    var buffer = new Buffer(length),
-        offset = 0,
-        read = 0;
-
-    while (read < length) {
-        read += _fs.readSync(this._handle, buffer, offset, length - read, position + read);
-        offset = read - 1;
-        if (offset < 0) offset = 0;
-    }
-
-    return buffer;
-}
-
-/**
- * End of central dir record from zip file 
- */
-ZipExtractor.prototype.readEndOfCentralDirectory = function() {
-    /** @todo: Privatize */
-    var eocd_pos = this._size - 4;
-
-    while (eocd_pos > 0) {
-        var magic = this.read(4, eocd_pos).readZipDWord(0);
-        if (magic == ZipEndOfCentralDirectory.MAGIC_SIGNATURE) break;
-        --eocd_pos;
-    }
-
-    if (eocd_pos === 0) {
-        throw new Error('Invalid ZIP file. End of central directory record not found.');
-    }
-
-    var buffer = this.read(ZipEndOfCentralDirectory.RECORD_SIZE, eocd_pos);
-    var eocd = new ZipEndOfCentralDirectory(buffer);
-
-    if (eocd._commentLength > 0) {
-        var buffer_comment = this.read(eocd._commentLength, eocd_pos + ZipEndOfCentralDirectory.RECORD_SIZE);
-        eocd._comment = buffer_comment.toString();
-    } else {
-        eocd._comment = '';
-    }
-
-    /** @todo: Implement support multiple disks (files) */
-    if (eocd._diskNumber !== eocd._distStartNumber ||
-        eocd._diskNumber !== 0 ||
-        eocd._totalEntries !== eocd._totalAllEntries) {
-        throw new Error('TODO: Support multiple disks (files) not implemented.');
-    }
-
-    if (eocd_pos !== eocd._offset + eocd._size) {
-        throw new Error('ZIP file corrupted. End of central directory record not found.');
-    }
-
-    this._eocd = eocd;
-}
-
-/**
- * Read a file header list from central directory structure of ZIP file
- */
-ZipExtractor.prototype.readCentralDirectoryFiles = function() {
-    /** @todo: Privatize */
-    if (!(this._eocd instanceof ZipEndOfCentralDirectory)) {
-        throw new Error('Invalid EOCD instance.');
-    }
-
-    var pos = this._eocd._offset;
-
-    while (this._files.length < this._eocd._totalEntries) {
-        var buffer = this.read(ZipCentralDirectoryFileHeader.RECORD_SIZE, pos);
-        var file = new ZipCentralDirectoryFileHeader(buffer);
-        pos += ZipCentralDirectoryFileHeader.RECORD_SIZE;
+        offset += ZipLocalFile.RECORD_SIZE;
 
         // filename
         if (file._fileNameLength > 0) {
-            file._fileName = this.read(file._fileNameLength, pos).toString();
-            pos += file._fileNameLength;
+            file._fileName = this.read(file._fileNameLength, offset).toString();
+            offset += file._fileNameLength;
         } else {
             file._fileName = '';
         }
 
-        // extra fiel
+        // extra field
         if (file._extraFieldLength > 0) {
-            file._extraField = this.read(file._extraFieldLength, pos);
-            pos += file._extraFieldLength;
+            file._extraField = this.read(file._extraFieldLength, offset);
+            offset += file._extraFieldLength;
         } else {
             file._extraField = null;
         }
 
-        // file comment
-        if (file._commentLength > 0) {
-            file._comment = this.read(file._commentLength, pos).toString();
-            pos += file._commentLength;
+        // file data
+        /**
+         * @note: Using entry.meta._compressedSize x file._compressedSize because general flag big
+         * */
+        if (entry.meta._compressedSize > 0) {
+            file._fileData = this.read(entry.meta._compressedSize, offset);
+            offset += entry.meta._compressedSize;
+        }
+
+        // Data descriptor
+        if (file._generalFlag & ZipLocalFile.DATA_DESCRIPTOR_FLAG === ZipLocalFile.DATA_DESCRIPTOR_FLAG) {
+            var dataDescriptorBuffer = this.read(ZipLocalDataDescriptor.RECORD_SIZE, offset),
+                dataDescriptor = new ZipLocalDataDescriptor(dataDescriptorBuffer);
+
+            file._crc32 = dataDescriptor._crc32;
+            file._compressedSize = dataDescriptor._compressedSize;
+            file._uncompressedSize = dataDescriptor._uncompressedSize;
+        }
+
+        file.checkIntegrity(entry.meta);
+
+        if (file._compressionMethod === 0) {
+            _fs.writeFileSync(filePath, file._fileData);
         } else {
-            file._comment = '';
+            _fs.writeFileSync(filePath, _zlib.inflateRawSync(file._fileData));
         }
 
-        var index = this._files.push(file) - 1;
-        this.mapFile(this._files[index]);
-    }
-}
-
-/**
- * Make a directory path
- * 
- * @param {string} path
- */
-ZipExtractor.prototype.makeDirectory = function(path) {
-    /** @todo: Privatize */
-    var stat;
-    try {
-        stat = _fs.statSync(path);
-        if (stat.isDirectory()) return;
-        throw new Error('Path "' + path + '" already exists and not a directory.');
-    } catch (error) {
-        if (error.code !== 'ENOENT') throw error;
-        try {
-            _fs.mkdirSync(path);
-        } catch (error_into) {
-            if (error_into.code !== 'ENOENT') throw error_into;
-            var dirname = _path.dirname(path);
-            if (dirname === path) {
-                throw new Error('Undefined error for path "' + path + '".');
-            }
-            this.makeDirectory(dirname);
-            _fs.mkdirSync(path);
-        }
-    }
-}
-
-/**
- * Return a path string of directory without slash trailing
- * 
- * @param {string} path
- * @param {string} sep - Optional. Default _path.sep.
- * 
- * @return {string}
- */
-ZipExtractor.prototype.pathWithoutSlashTrailing = function(path, sep) {
-    var withoutTrailing = path.substr(path.length - 1, 1) === (sep || _path.sep)
-        ? path.substr(0, path.length - 1)
-        : path;
-
-    return withoutTrailing;
-}
-
-/**
- * Get a entry on directory structure from path
- * 
- * @param {string} path
- * 
- * @return {Object}
- */
-ZipExtractor.prototype.getEntryFromPath = function(path) {
-    path = path.replace(_path.sep, '/');
-
-    var entry = this._rootDirectory,
-        parts = path.split('/');
-
-    for (var pidx = 0; pidx < parts.length; pidx++) {
-        var part = parts[pidx].trim(),
-            found = false;
-
-        if (part === '') break;
-        if (pidx == 0 && (part === '.' || part === './')) continue;
-
-        for (var c in entry.childs) {
-            var child = entry.childs[c];
-            if (child.name === part) {
-                found = true;
-                entry = child;
-                break;
-            }
-        }
-
-        if (!found && pidx === parts.length - 1) {
-            for (var f in entry.files) {
-                var file = entry.files[f];
-                if (file.name === part) {
-                    found = true;
-                    entry = file;
-                    break;
-                }
-            }
-        }
-
-        if (!found) return null;
+        /** @todo: Apply file date, time and attributes */
     }
 
-    return entry;
-}
-
-ZipExtractor.prototype.ensureDestinationDirectory = function(destination) {
-    /** @todo: Privatize */
-    try {
-        var stat = _fs.statSync(destination);
-
-        if (!stat.isDirectory()) {
-            throw new Error('Destination path ' + destination + '" already exists and not a directory.');
-        }
-    } catch (error) {
-        if (error.code !== 'ENOENT') throw error;
-        this.makeDirectory(destination);
-    }
-}
-
-ZipExtractor.prototype.extractDirectory = function(entry, destination) {
-    /** @todo: Privatize */
-    if (!(entry instanceof ZipDirectoryEntry)) {
-        throw new Error('Param @entry must be a ZipDirectoryEntry instance');
-    }
-
-    this.ensureDestinationDirectory(destination);
-
-    // Files
-    for (var f in entry.files) {
-        var file = entry.files[f];
-        this.extractFile(file, destination);
-    }
-
-    // Child directories
-    for (var c in entry.childs) {
-        var child = entry.childs[c];
-        var child_destination = _path.join(destination, child.name);
-        this.extractDirectory(child, child_destination);
-    }
-
-    /** @todo: Apply directory date, time and attributes */
-}
-
-ZipExtractor.prototype.extractFile = function(entry, destination) {
-    /** @todo: Privatize */
-    if (!(entry instanceof ZipFileEntry)) {
-        throw new Error('Param @entry must be a ZipFileEntry instance');
-    }
-
-    this.ensureDestinationDirectory(destination);
-
-    var filePath = _path.resolve(_path.join(destination, entry.name)),
-        offset = entry.meta._relativeOffset,
-        fileBuffer = this.read(ZipLocalFile.RECORD_SIZE, offset),
-        file = new ZipLocalFile(fileBuffer);
-
-    offset += ZipLocalFile.RECORD_SIZE;
-
-    // filename
-    if (file._fileNameLength > 0) {
-        file._fileName = this.read(file._fileNameLength, offset).toString();
-        offset += file._fileNameLength;
-    } else {
-        file._fileName = '';
-    }
-
-    // extra field
-    if (file._extraFieldLength > 0) {
-        file._extraField = this.read(file._extraFieldLength, offset);
-        offset += file._extraFieldLength;
-    } else {
-        file._extraField = null;
-    }
-
-    // file data
     /**
-     * @note: Using entry.meta._compressedSize x file._compressedSize because general flag big
-     * */
-    if (entry.meta._compressedSize > 0) {
-        file._fileData = this.read(entry.meta._compressedSize, offset);
-        offset += entry.meta._compressedSize;
+     * Extract a path to a destination
+     * 
+     * @param {string} path
+     * @param {string} destination
+     */
+    ZipExtractor.prototype.extractTo = function (path, destination) {
+        /** @todo: Privatize */
+        if (typeof (path) !== 'string') throw new TypeError('Param @path must be a string');
+        if (typeof (destination) !== 'string') throw new TypeError('Param @destination must be a string');
+
+        if (1 > path.trim().length) throw new Error('Parameter @path can not be empty');
+        if (1 > destination.trim().length) throw new Error('Parameter @destination can not be empty');
+
+        var entry = this.getEntryFromPath(path);
+
+        if (!entry) throw new Error('Path "' + path + '" not found on ZIP file');
+
+        if (entry instanceof ZipDirectoryEntry) {
+            this.extractDirectory(entry, destination);
+            return;
+        }
+
+        if (entry instanceof ZipFileEntry) {
+            this.extractFile(entry, destination);
+            return;
+        }
+
+        throw new Error('ZIP file entry corrupted from path "' + path + '"');
     }
 
-    // Data descriptor
-    if (file._generalFlag & ZipLocalFile.DATA_DESCRIPTOR_FLAG === ZipLocalFile.DATA_DESCRIPTOR_FLAG) {
-        var dataDescriptorBuffer = this.read(ZipLocalDataDescriptor.RECORD_SIZE, offset),
-            dataDescriptor = new ZipLocalDataDescriptor(dataDescriptorBuffer);
+    /* DEVCODE-BEGIN */
+    module.exports.ZipExtractor = ZipExtractor;
 
-        file._crc32 = dataDescriptor._crc32;
-        file._compressedSize = dataDescriptor._compressedSize;
-        file._uncompressedSize = dataDescriptor._uncompressedSize;
+    if (!module.parent && module.filename === __filename && process.argv.indexOf('-devmode') >= 0) {
     }
 
-    file.checkIntegrity(entry.meta);
-
-    if (file._compressionMethod === 0) {
-        _fs.writeFileSync(filePath, file._fileData);
-    } else {
-        _fs.writeFileSync(filePath, _zlib.inflateRawSync(file._fileData));
-    }
-
-    /** @todo: Apply file date, time and attributes */
-}
-
-/**
- * Extract a path to a destination
- * 
- * @param {string} path
- * @param {string} destination
- */
-ZipExtractor.prototype.extractTo = function(path, destination) {
-    /** @todo: Privatize */
-    if (typeof (path) !== 'string') throw new TypeError('Param @path must be a string');
-    if (typeof (destination) !== 'string') throw new TypeError('Param @destination must be a string');
-
-    if (1 > path.trim().length) throw new Error('Parameter @path can not be empty');
-    if (1 > destination.trim().length) throw new Error('Parameter @destination can not be empty');
-
-    var entry = this.getEntryFromPath(path);
-
-    if (!entry) throw new Error('Path "' + path + '" not found on ZIP file');
-
-    if (entry instanceof ZipDirectoryEntry) {
-        this.extractDirectory(entry, destination);
-        return;
-    }
-
-    if (entry instanceof ZipFileEntry) {
-        this.extractFile(entry, destination);
-        return;
-    }
-
-    throw new Error('ZIP file entry corrupted from path "' + path + '"');
-}
-
-/* DEVCODE-BEGIN */
-module.exports.ZipExtractor = ZipExtractor;
+})();
 /* DEVCODE-END */
