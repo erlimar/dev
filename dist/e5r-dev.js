@@ -2295,7 +2295,7 @@
              * 
              * @return {object}
              */
-            require(uri) {
+            async require(uri) {
                 let cachedFile = lib.loadCachedObjectResource(uri);
 
                 if (!cachedFile) {
@@ -2493,7 +2493,7 @@
 
             // 4> InstalL binary
             lib.logger.debug('Loading DEVCOM registry...');
-            let registry = lib.require('cmd://registry');
+            let registry = await lib.require('cmd://registry');
 
             lib.logger.debug('Calling DEVCOM registry get-binaries...');
             registry.run(devTool, parseArgOptions([
@@ -2705,7 +2705,7 @@
                     return;
                 }
 
-                let devcom = this.builtin[this._cmd] || lib.require('cmd://' + this._cmd);
+                let devcom = this.builtin[this._cmd] || await lib.require('cmd://' + this._cmd);
 
                 if (!devcom) {
                     throw createError('DEVCOM [' + this._cmd + '] not found!');

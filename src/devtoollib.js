@@ -998,7 +998,7 @@
              * 
              * @return {object}
              */
-            require(uri) {
+            async require(uri) {
                 let cachedFile = lib.loadCachedObjectResource(uri);
 
                 if (!cachedFile) {

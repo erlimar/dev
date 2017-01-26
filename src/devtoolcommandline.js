@@ -143,7 +143,7 @@
                     return;
                 }
 
-                let devcom = this.builtin[this._cmd] || lib.require('cmd://' + this._cmd);
+                let devcom = this.builtin[this._cmd] || await lib.require('cmd://' + this._cmd);
 
                 if (!devcom) {
                     throw createError('DEVCOM [' + this._cmd + '] not found!');

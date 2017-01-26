@@ -75,7 +75,7 @@
 
             // 4> InstalL binary
             lib.logger.debug('Loading DEVCOM registry...');
-            let registry = lib.require('cmd://registry');
+            let registry = await lib.require('cmd://registry');
 
             lib.logger.debug('Calling DEVCOM registry get-binaries...');
             registry.run(devTool, parseArgOptions([
