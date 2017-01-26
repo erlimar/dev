@@ -2496,7 +2496,7 @@
             let registry = await lib.require('cmd://registry');
 
             lib.logger.debug('Calling DEVCOM registry get-binaries...');
-            registry.run(devTool, parseArgOptions([
+            await registry.run(devTool, parseArgOptions([
                 'get-binaries'
             ]));
 
