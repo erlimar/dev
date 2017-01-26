@@ -1136,6 +1136,9 @@
      * @param {Object} shellOptions
      */
     function setUserEnvironmentUnix(varName, value, shellOptions) {
+        /** @todo: Implements */
+        
+        /*
         getUserProfilePaths().map((path) => {
             let lines = [],
                 lineBegin = shellOptions.resolver(varName, value, true);
@@ -1154,6 +1157,7 @@
                 _fs.writeFileSync(path, lines.join(_os.EOL), 'utf8');
             }
         });
+        */
     }
 
     /**
