@@ -117,7 +117,7 @@
             Setup,
         ]);
 
-        new Setup().run(lib.devToolDefaultInstance, {});
+        new Setup().run(lib.devToolDefaultInstance, lib.devToolDefaultInstance._options);
     }
 
 })();

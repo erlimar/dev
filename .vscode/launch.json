@@ -169,6 +169,7 @@
 			"program": "${workspaceRoot}/src/setup.js",
 			"stopOnEntry": false,
 			"args": [
+				"setup"
 				"-devmode"
 			],
 			"cwd": "${workspaceRoot}",
