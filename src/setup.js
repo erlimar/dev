@@ -42,6 +42,12 @@
         async run(devTool, options) {
             lib.printf('Set-up E5R Tools for Development Team...');
 
+            // Update the e5r-dev.js lib
+            if (options.args[0] === 'update') {
+                let libPath = _path.join(lib.devHome.lib, 'node_modules', 'e5r-dev.js');
+                await lib.downloadAsync(TOOL_DEVE5R_LIB_URL, libPath);
+            }
+
             // 1> Make directory structure
             [
                 lib.devHome.root,

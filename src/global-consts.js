@@ -18,6 +18,8 @@
     /** @constant {string} */
     const TOOL_DEVFOLDER = '.' + TOOL_NAME;
 
+    const TOOL_DEVE5R_LIB_URL = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/e5r-dev.js';
+
     /** @constant {string} */
     const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/devcom/';
 
@@ -79,6 +81,7 @@
         TOOL_VERSION: TOOL_VERSION,
         TOOL_COPYRIGHT: TOOL_COPYRIGHT,
         TOOL_DEVFOLDER: TOOL_DEVFOLDER,
+        TOOL_DEVE5R_LIB_URL: TOOL_DEVE5R_LIB_URL,
         TOOL_DEFAULT_REGISTRY_URL: TOOL_DEFAULT_REGISTRY_URL,
         TOOL_REGISTRY_FILE: TOOL_REGISTRY_FILE,
         TOOL_CONFIGURATION_FILE: TOOL_CONFIGURATION_FILE,

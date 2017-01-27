@@ -26,6 +26,8 @@
     /** @constant {string} */
     const TOOL_DEVFOLDER = '.' + TOOL_NAME;
 
+    const TOOL_DEVE5R_LIB_URL = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/e5r-dev.js';
+
     /** @constant {string} */
     const TOOL_DEFAULT_REGISTRY_URL = 'https://raw.githubusercontent.com/e5r/dev/develop/dist/devcom/';
 
@@ -2459,6 +2461,12 @@
          */
         async run(devTool, options) {
             lib.printf('Set-up E5R Tools for Development Team...');
+
+            // Update the e5r-dev.js lib
+            if (options.args[0] === 'update') {
+                let libPath = _path.join(lib.devHome.lib, 'node_modules', 'e5r-dev.js');
+                await lib.downloadAsync(TOOL_DEVE5R_LIB_URL, libPath);
+            }
 
             // 1> Make directory structure
             [
