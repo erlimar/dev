@@ -195,7 +195,7 @@ _dev_add_dev_to_path()
             source ${post_file}
         fi
         echo Append file ${post_file} to "${HOME}/.bash_profile"
-        cat ${post_file} >> "${HOME}/.bash_profile"
+        #cat ${post_file} >> "${HOME}/.bash_profile"
     fi
 }
 
