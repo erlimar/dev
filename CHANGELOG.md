@@ -3,6 +3,8 @@ CHANGELOG
 
 ## dev
 
+Summary...
+
 * __New features:__
   - ...
 
@@ -16,8 +18,6 @@ CHANGELOG
   - ...
 
 ## v0.14.0
-
-Summary...
 
 * __New features:__
   - Updated to NodeJS 7.4.0
