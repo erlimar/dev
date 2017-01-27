@@ -20,6 +20,7 @@
     var _childProcess = require('child_process');
     var _zlib = require('zlib');
     var _crypto = require('crypto');
+    var _readline = require('readline');
     var _rootPath = _path.resolve(_os.homedir(), TOOL_DEVFOLDER);
     var _devPaths = {
         root: _rootPath,

@@ -1042,20 +1042,18 @@
              * @param {string} message - Prompt message
              * @return {string} User input
              */
-            prompt(message) {
-                let buffer = new Buffer(1),
-                    /** @todo: Use Buffer */
-                    input = '';
+            async prompt(message) {
+                return new Promise((resolve, reject) => {
+                    let rli = require('readline').createInterface({
+                        input: process.stdin,
+                        output: process.stdout
+                    });
 
-                _fs.writeSync(process.stdout.fd, message, 0, 'utf-8');
-                while (true) {
-                    let r = _fs.readSync(process.stdin.fd, buffer, 0, 1, 0);
-                    if (1 > r || buffer[0] === 13) break;
-                    if (buffer[0] === 10) continue;
-                    input += buffer.toString();
-                }
-
-                return input;
+                    rli.question(message, answer => {
+                        resolve(answer);
+                        rli.close();
+                    });
+                });
             }
 
             /**
@@ -1141,6 +1139,9 @@
         _assert(lib.DevCom === DevCom, 'Invalid lib.DevCom reference');
         _assert(lib.logger === lib._logger, 'Invalid lib.logger instance');
         _assert(lib._logger instanceof Logger, 'Invalid lib._logger instance');
+
+        let input = await lib.prompt('Enter you name:');
+        console.log('Yout name is ' + (input || '').toUpperCase());
     }
 
 })();

@@ -66,7 +66,8 @@
 				"NODE_ENV": "development",
 				"NODE_DEBUG": "E5RDEV"
 			},
-			"console": "internalConsole",
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "openOnSessionStart",
 			"sourceMaps": false,
 			"outFiles": []
 		},
