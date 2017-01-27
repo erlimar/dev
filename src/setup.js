@@ -40,7 +40,7 @@
          * @param {object} options - Options for argument list
          */
         async run(devTool, options) {
-            lib.printf('Set-up E5R Tools for Development Team...');
+            lib.printf('E5R Tools for Development Team Setup...');
 
             // Update the e5r-dev.js lib
             if (options.args[0] === 'update') {
