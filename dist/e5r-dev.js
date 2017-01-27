@@ -2646,7 +2646,7 @@
             ];
 
             lib.printf(lines.join(_os.EOL));
-            this.usage();
+            this.usage(true);
 
             lib.printf('\nDevCom:');
 
@@ -2667,6 +2667,8 @@
             lib.printf([
                 '',
                 'Options:',
+                getNameDescription('--help', 'Show this help text'),
+                getNameDescription('--version', 'Show version number'),
                 getNameDescription('--shell=[name]', 'Set the shell name'),
                 getNameDescription('--workdir=[path]', 'Set the work directory. Default is ${cwd}'),
                 getNameDescription('-devmode', 'Starts the development mode')
@@ -2676,8 +2678,24 @@
         /**
          * Show usage text
          */
-        usage() {
+        usage(hideTitle) {
+            let lines = [
+                TOOL_TITLE,
+                '',
+                '    Version: ' + TOOL_VERSION,
+            ];
+            if (!hideTitle) {
+                lib.printf(lines.join(_os.EOL));
+                lib.printf();
+            }
             lib.printf('usage: ' + this.name + ' [devcom] [options]');
+        }
+
+        /**
+         * Show version number
+         */
+        showVersion() {
+            lib.printf(TOOL_VERSION);
         }
 
         /**
@@ -2692,16 +2710,19 @@
          */
         async run() {
             try {
-                /** @todo: Auto DevCom Help; global help; usage;  */
+                if (Object.getOwnPropertyDescriptor(this._options, 'help') || this._cmd === 'help') {
+                    this.help();
+                    return;
+                }
+
+                if (Object.getOwnPropertyDescriptor(this._options, 'version') || this._cmd === 'version') {
+                    this.showVersion();
+                    return;
+                }
 
                 if (!this._cmd || /^[-]{1}.+$/.test(this._cmd)) {
                     this.usage();
                     this.exitCode = ERROR_CODE_DEVCOM_NOTINFORMED;
-                    return;
-                }
-
-                if (this._cmd === 'help') {
-                    this.help();
                     return;
                 }
 
