@@ -44,6 +44,7 @@
 
             // Update the e5r-dev.js lib
             if (options.args[0] === 'update') {
+                lib.printf('  Updating e5r-dev lib...');
                 let libPath = _path.join(lib.devHome.lib, 'node_modules', 'e5r-dev.js');
                 await lib.downloadAsync(TOOL_DEVE5R_LIB_URL, libPath);
             }
