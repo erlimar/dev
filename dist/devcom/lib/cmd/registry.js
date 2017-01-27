@@ -334,7 +334,7 @@
             }
 
             let _crypto = require('crypto'),
-            /** @todo: Usar lib.generateTempFileName() */
+                /** @todo: Use lib.generateTempFileName() */
                 tmpFilePath = _path.resolve(_os.tmpdir(), 'tmp-registry-' + _crypto.randomBytes(10).readUInt32LE(0) + '.json');
 
             if (_fs.existsSync(tmpFilePath)) {
@@ -406,7 +406,9 @@
                 return;
             }
 
-            binaryBuffer.map((binary) => {
+            for (let b in binaryBuffer) {
+                let binary = binaryBuffer[b];
+
                 if (binary.path.startsWith('bin/')) {
                     binary.path = binary.path.substring('/bin'.length);
                 }
@@ -421,7 +423,7 @@
 
                 // Set executable flag for *nix
                 if (_os.platform() !== 'win32') _fs.chmodSync(binary.path, CHMOD_EXECUTABLE);
-            });
+            };
 
             _dev.printf('%d binary successfully installed.', binaryBuffer.length);
         }
