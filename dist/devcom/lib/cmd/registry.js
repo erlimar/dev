@@ -28,6 +28,9 @@
     /** @constant {string} */
     const REGISTRY_LOCAL_LOCKFILE = 'registry.' + MAGIC_REGISTRY_LOCKNAME + '.lock.json';
 
+    /** @constant {string} */
+    const CHMOD_EXECUTABLE = '100750';
+
     /**
      * Write the registry file
      * 
@@ -162,7 +165,7 @@
                 throw _dev.createError('Unknown action "' + actionName + '" for registry DevCom.');
             }
 
-            actionFn(options);
+            await actionFn(options);
         }
 
         /**
@@ -189,7 +192,7 @@
          * 
          * @param {object} options - Command options
          */
-        listAction(options) {
+        async listAction(options) {
             let registry = _dev.getRegistry(),
                 entries = [];
 
@@ -212,7 +215,7 @@
          * 
          * @param {object} options - Command options
          */
-        showAction(options) {
+        async showAction(options) {
             if (1 > options.args.length) {
                 throw _dev.createError('Registry show usage: dev registry show [entry]');
             }
@@ -285,7 +288,7 @@
          * 
          * @param {object} options - Command options
          */
-        removeAction(options) {
+        async removeAction(options) {
             if (1 > options.args.length) {
                 throw _dev.createError('Registry remove usage: dev registry remove [entry]');
             }
@@ -317,7 +320,7 @@
          * 
          * @param {object} options - Command options
          */
-        addAction(options) {
+        async addAction(options) {
             if (1 > options.args.length) {
                 throw _dev.createError('Registry add usage: dev registry add [url]');
             }
@@ -331,13 +334,14 @@
             }
 
             let _crypto = require('crypto'),
+            /** @todo: Usar lib.generateTempFileName() */
                 tmpFilePath = _path.resolve(_os.tmpdir(), 'tmp-registry-' + _crypto.randomBytes(10).readUInt32LE(0) + '.json');
 
             if (_fs.existsSync(tmpFilePath)) {
                 _fs.unlinkSync(tmpFilePath);
             }
 
-            _dev.downloadSync(url.href, tmpFilePath);
+            await _dev.downloadAsync(url.href, tmpFilePath);
 
             if (!_fs.existsSync(tmpFilePath)) {
                 throw _dev.createError('Registry "' + url.href + '" not found.');
@@ -372,7 +376,7 @@
          * 
          * @param {object} options - Command options
          */
-        getBinariesAction(options) {
+        async getBinariesAction(options) {
             let registry = _dev.getRegistry(),
                 scopes = Object.getOwnPropertyNames(registry),
                 binaryBuffer = [];
@@ -382,7 +386,7 @@
                     scope = registry[scopeName];
 
                 if (!options.scope || options.scope === scopeName) {
-                    let lock = _dev.getRegistryLock(scopeName),
+                    let lock = await _dev.getRegistryLock(scopeName),
                         lockBinary = getBinaryLockFiles(lock),
                         scopeUrl = _dev.makeRegistryUrl(scope);
 
@@ -413,10 +417,10 @@
                 let extIdx = binary.path.lastIndexOf('.sh');
                 if (-1 < extIdx) binary.path = binary.path.slice(0, extIdx);
 
-                _dev.downloadSync(binary.url, binary.path);
+                await _dev.downloadAsync(binary.url, binary.path);
 
                 // Set executable flag for *nix
-                if (_os.platform() !== 'win32') _fs.chmodSync(binary.path, '750');
+                if (_os.platform() !== 'win32') _fs.chmodSync(binary.path, CHMOD_EXECUTABLE);
             });
 
             _dev.printf('%d binary successfully installed.', binaryBuffer.length);
@@ -427,9 +431,9 @@
          *
          * @param {object} options - Command options 
          */
-        lockUpdateAction(options) {
+        async lockUpdateAction(options) {
             for (let property in _dev.getRegistry()) {
-                let registry = _dev.getRegistryLock(property, true, { quiet: true }),
+                let registry = await _dev.getRegistryLock(property, true, { quiet: true }),
                     path = _dev.makeRegistryLockFilePath(property);
 
                 _dev.printf('*', _path.basename(path), '[UPDATED]');
@@ -445,9 +449,9 @@
          * 
          * @param {object} options - Command options
          */
-        lockCleanAction(options) {
+        async lockCleanAction(options) {
             for (let property in _dev.getRegistry()) {
-                let registry = _dev.getRegistryLock(property, true, { quiet: true }),
+                let registry = await _dev.getRegistryLock(property, true, { quiet: true }),
                     path = _dev.makeRegistryLockFilePath(property);
 
                 // Removing lock file
