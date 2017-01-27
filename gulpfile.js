@@ -23,6 +23,8 @@ gulp.task('clean', function () {
     return del(['dist/devcom/**/*', 'dist/**/*']);
 });
 
+gulp.task('test', function () { });
+
 gulp.task('devcom-registry', function () {
     return glob('devcom/**/*.{js,cmd,ps1,sh}', {
         cwd: 'src'
