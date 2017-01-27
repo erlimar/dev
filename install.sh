@@ -191,11 +191,10 @@ _dev_add_dev_to_path()
 {
     if [ -f ${post_file} ]; then
         if _dev_has "source"; then
-            echo source ${post_file}
             source ${post_file}
         fi
-        echo Append file ${post_file} to "${HOME}/.bash_profile"
-        #cat ${post_file} >> "${HOME}/.bash_profile"
+        echo "Type source ${post_file}"
+        echo "Add  ${dev_bin} to \$PATH"
     fi
 }
 

@@ -3,10 +3,26 @@ CHANGELOG
 
 ## dev
 
+* __New features:__
+  - ...
+
+* __Added methods on API:__
+  - ...
+
+* __Changed methods on API:__
+  - ...
+
+* __Bug fixes and improvements:__
+  - ...
+
+## v0.14.0
+
 Summary...
 
 * __New features:__
-  - ...
+  - Updated to NodeJS 7.4.0
+  - Added asynchronous support with `--harmony-async-await` flag
+  - DEVCOM moved to `dev/src/devcom` folder project
 
 * __Added methods on API:__
   - `generateTempFileName(prefix, suffix):` Generate a temporary file name
@@ -20,10 +36,12 @@ Summary...
     - `@return:` A `Promise` to a `WriteStream` saved (and closed) file.
 
 * __Changed methods on API:__
-  - ...
+  - `prompt(message):` Changed to async
 
 * __Bug fixes and improvements:__
-  - ...
+  - Completed help and usage messages
+  - DevCom's added name and short documentation support
+  - Setup now accept `update` option `$ dev setup update` to replace `e5r-lib.js` file
 
 ## v0.13.0
 
