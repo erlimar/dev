@@ -67,7 +67,6 @@
 				"NODE_DEBUG": "E5RDEV"
 			},
 			"console": "integratedTerminal",
-			"internalConsoleOptions": "openOnSessionStart",
 			"sourceMaps": false,
 			"outFiles": []
 		},
@@ -170,7 +169,7 @@
 			"program": "${workspaceRoot}/src/setup.js",
 			"stopOnEntry": false,
 			"args": [
-				"setup"
+				"setup",
 				"-devmode"
 			],
 			"cwd": "${workspaceRoot}",
@@ -265,7 +264,8 @@
 			"program": "${workspaceRoot}/src/devcom/lib/cmd/init.js",
 			"stopOnEntry": false,
 			"args": [
-				"-devmode"
+				"-devmode",
+				"--workdir=~/project-init-test"
 			],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,
@@ -277,7 +277,7 @@
 				"NODE_ENV": "development",
 				"NODE_DEBUG": "E5RDEV"
 			},
-			"console": "internalConsole",
+			"console": "integratedTerminal",
 			"sourceMaps": false,
 			"outFiles": []
 		},

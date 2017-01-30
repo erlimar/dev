@@ -441,7 +441,7 @@
              */
             setUserEnvironment(varName, value, shellOptions) {
                 this.__setUserEnvironment(varName, value, shellOptions);
-                //appendUpdateEnvironmentFile(varName, value, shellOptions);
+                appendUpdateEnvironmentFile(varName, value, shellOptions);
             }
 
             /**
@@ -1139,9 +1139,6 @@
         _assert(lib.DevCom === DevCom, 'Invalid lib.DevCom reference');
         _assert(lib.logger === lib._logger, 'Invalid lib.logger instance');
         _assert(lib._logger instanceof Logger, 'Invalid lib._logger instance');
-
-        let input = await lib.prompt('Enter you name:');
-        console.log('Yout name is ' + (input || '').toUpperCase());
     }
 
 })();

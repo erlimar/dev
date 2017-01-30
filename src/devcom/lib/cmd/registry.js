@@ -487,7 +487,7 @@
     module.exports = new Registry();
 
     // Run Registry DevCom on developer instance
-    if (!module.parent && module.filename === __filename) {
+    if (!module.parent && module.filename === __filename && process.argv.indexOf('-devmode') >= 0) {
         let _devTool = _dev.devToolDefaultInstance,
             _devCom = module.exports,
             _options = _devTool._options;

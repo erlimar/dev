@@ -44,13 +44,13 @@
                 throw _dev.createError('Init should be performed only via DEV command.');
             }
 
-            if (options && Array.isArray(options.args) && options.args.length === 0) {
-                options.args.push(TEMPLATE_DEFAULT);
-            }
-
             if (options.hasOwnProperty('help') || options.hasOwnProperty('h')) {
                 this.help(devTool);
                 return;
+            }
+
+            if (options && Array.isArray(options.args) && options.args.length === 0) {
+                options.args.push(TEMPLATE_DEFAULT);
             }
 
             // Check parameter [0] format. githubuser/repository@version
@@ -99,10 +99,10 @@
                 _dev.mkdir(tmpPath);
             }
 
-            _dev.downloadSync(urlGitHub, zipFilePath, { quiet: true });
+            await _dev.downloadAsync(urlGitHub, zipFilePath, { quiet: true });
             _dev.extractFile(zipFilePath, tmpPath);
 
-            let context = this.loadContext(wizardFilePath, workdir, options);
+            let context = await this.loadContext(wizardFilePath, workdir, options, template[0]);
 
             this.expandFiles(context);
             this.copyFiles(context);
@@ -204,8 +204,8 @@
          * Print success message
          */
         showSuccess(context, options) {
-            _dev.printf('New project started in "{0}".'.replace('{0}', context.builtin.workdir));
-            _dev.printf(JSON.stringify(context.wizard, null, 2));
+            _dev.printf('Created new project in ' + options.workdir + '.');
+            _dev.printf('Based on ' + context.defWizard.name + '.');
         }
 
         /**
@@ -214,9 +214,10 @@
          * @param {object} wizard - Wizard object
          * @param {string} workdir - Work directory
          * @param {object} options - Options for arguments of command
+         * @param {string} templateName - Name of template
          * @return {object}
          */
-        loadContext(wizardFilePath, workdir, options) {
+        async loadContext(wizardFilePath, workdir, options, templateName) {
             let wizard;
 
             if (!_dev.fileExists(wizardFilePath)) {
@@ -229,6 +230,8 @@
             } catch (_) {
                 throw _dev.createError('Invalid wizard file [' + WIZARD_FILE + '] format.');
             }
+
+            wizard.name = wizard.name || templateName;
 
             if (!this.validateWizard(wizard)) {
                 throw _dev.createError('Invalid wizard object format.');
@@ -257,7 +260,7 @@
             context.builtin.month = 2 > context.builtin.month.length ? '0' + context.builtin.month : context.builtin.month;
             context.builtin.day = 2 > context.builtin.day.length ? '0' + context.builtin.day : context.builtin.day;
 
-            this.runWizard(context, options);
+            await this.runWizard(context, options);
 
             return context;
         }
@@ -297,11 +300,12 @@
          * @param {object} context - Object context
          * @param {object} options - Options for arguments of command
          */
-        runWizard(context, options) {
-            if (!options.devmode) {
+        async runWizard(context, options) {
+            if (!options.d && !Object.getOwnPropertyDescriptor(options, 'default')) {
                 this.showWelcomeMessage(context.defWizard, options);
             }
-            this.addProperties(context, options);
+
+            await this.addProperties(context, options);
 
             context.filesToExpand = this.searchFiles(context.tempContainer, context.defWizard.expandExcludes);
             context.filesToCopy = this.searchFiles(context.tempContainer, context.defWizard.copyExcludes);
@@ -329,15 +333,17 @@
          * @param {object} context - Object context
          * @param {object} toolOptions - Options for arguments of command
          */
-        addProperties(context, toolOptions) {
-            context.defWizard.properties.map((p, idx) => {
+        async addProperties(context, toolOptions) {
+            for (let idx in context.defWizard.properties) {
+                let p = context.defWizard.properties[idx];
+
                 let name = p.name,
                     title = this.expandString(p.title || p.name).value,
                     defaultValue = this.expandString(p.default || '', context).value,
                     value = defaultValue;
 
-                if (!toolOptions.devmode) {
-
+                // !--default | -D | -default
+                if (!toolOptions.d && !Object.getOwnPropertyDescriptor(toolOptions, 'default')) {
                     let options = (p.options || []),
                         optionsText = options.length > 0
                             ? ' ({0})'.replace('{0}', options.join(', '))
@@ -349,21 +355,21 @@
                             .replace('{title}', title)
                             .replace('{options}', optionsText)
                             .replace('{default}', defaultText);
-                    value = _dev.prompt(lineText) || defaultValue;
+                    value = await _dev.prompt(lineText) || defaultValue;
+                }
 
-                    if (typeof p.match === 'string' && !(new RegExp(p.match).test(value))) {
-                        _dev.printf('#WARNING: Invalid value. Assuming default value. [' + defaultValue + ']');
-                        value = defaultValue;
-                    }
+                if (typeof p.match === 'string' && !(new RegExp(p.match).test(value))) {
+                    _dev.printf('#WARNING: Invalid value. Assuming default value. [' + defaultValue + ']');
+                    value = defaultValue;
+                }
 
-                    if (Array.isArray(p.options) && 0 > p.options.indexOf(value)) {
-                        _dev.printf('#WARNING: Invalid value. Assuming default value. [' + defaultValue + ']');
-                        value = defaultValue;
-                    }
+                if (Array.isArray(p.options) && 0 > p.options.indexOf(value)) {
+                    _dev.printf('#WARNING: Invalid value. Assuming default value. [' + defaultValue + ']');
+                    value = defaultValue;
                 }
 
                 context.wizard[name] = value;
-            });
+            };
         }
 
         /**
@@ -517,13 +523,13 @@
     module.exports = new Init();
 
     // Run Init DevCom on developer instance
-    if (!module.parent && module.filename === __filename) {
+    if (!module.parent && module.filename === __filename && process.argv.indexOf('-devmode') >= 0) {
         let _devTool = _dev.devToolDefaultInstance,
             _devCom = module.exports,
             _options = _devTool._options;
 
         try {
-            _devCom.run(_devTool, _options);
+            await _devCom.run(_devTool, _options);
         } catch (error) {
             _dev.logger.error(error);
             _devTool.exitCode = error.code || 1;

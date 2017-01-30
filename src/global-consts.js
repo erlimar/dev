@@ -29,6 +29,12 @@
     /** @constant {string} */
     const TOOL_CONFIGURATION_FILE = 'config.json';
 
+    /** @constant {string} */
+    const TOOL_APPEND_PATH_FILE = 'append_path.txt';
+
+    /** @constant {string} */
+    const TOOL_EXPORT_ENV_FILE = 'export_env.txt';
+
     /** @constant {object} */
     const TOOL_DEFAULT_CONFIGURATION = {};
 
@@ -85,6 +91,8 @@
         TOOL_DEFAULT_REGISTRY_URL: TOOL_DEFAULT_REGISTRY_URL,
         TOOL_REGISTRY_FILE: TOOL_REGISTRY_FILE,
         TOOL_CONFIGURATION_FILE: TOOL_CONFIGURATION_FILE,
+        TOOL_APPEND_PATH_FILE:TOOL_APPEND_PATH_FILE,
+        TOOL_EXPORT_ENV_FILE:TOOL_EXPORT_ENV_FILE,
         TOOL_DEFAULT_CONFIGURATION: TOOL_DEFAULT_CONFIGURATION,
         REQUIRE_URI_REGEX: REQUIRE_URI_REGEX,
         PARAM_KEYVALUE_REGEX1: PARAM_KEYVALUE_REGEX1,

@@ -153,6 +153,16 @@
             _options[value] = null;
         });
 
+        // --workdir ~/ to --workdir $HOME/
+        if (typeof _options.workdir === 'string' && ['~/', '~\\'].indexOf(_options.workdir.substr(0, 2)) >= 0) {
+            _options.workdir = (
+                process.env.HOME ||
+                process.env.HOMEPATH ||
+                process.env.HOMEDIR ||
+                process.cwd()
+            ) + _options.workdir.substr(1);
+        }
+
         return _options;
     }
 
@@ -215,19 +225,15 @@
      * @return {Object} Array os paths
      */
     function getAllUserProfilePathsAvailable() {
-        let profiles = [],
-            homedir = _os.homedir();
+        let homedir = _os.homedir();
 
-        [
-            '.bash_profile',
-            '.bashrc',
-            '.profile',
-            '.zshrc'
-        ].map(file => {
-            profiles.push(_path.join(homedir, file));
-        });
-
-        return profiles;
+        /** @todo: Check `makeShellScriptExportEnv()` and `makeShellScriptAppendEnvPath()` to use [.bashrc, .profile, .zshrc] */
+        return [
+            '.bash_profile'
+            //'.bashrc',
+            //'.profile',
+            //'.zshrc'
+        ].map(file => _path.join(homedir, file));
     }
 
     /**
@@ -253,28 +259,65 @@
      * @param {Object} shellOptions
      */
     function setUserEnvironmentUnix(varName, value, shellOptions) {
-        /** @todo: Implements */
+        let envFilePath = _path.join(lib.devHome.tools, TOOL_EXPORT_ENV_FILE),
+            lines = [],
+            lineBegin = shellOptions.resolver(varName, value, true);
 
-        /*
-        getUserProfilePaths().map((path) => {
-            let lines = [],
-                lineBegin = shellOptions.resolver(varName, value, true);
+        (lib.fileExists(envFilePath) ? _fs.readFileSync(envFilePath, 'utf8') || '' : '')
+            .split(_os.EOL)
+            .map((lineValue) => {
+                if (!lineValue.startsWith(lineBegin)) {
+                    lines.push(lineValue);
+                }
+            });
 
-            (_fs.readFileSync(path, 'utf8') || '')
-                .split(_os.EOL)
-                .map((lineValue) => {
-                    if (!lineValue.startsWith(lineBegin)) {
-                        lines.push(lineValue);
-                    }
-                });
+        lines.push(shellOptions.resolver(varName, value));
 
-            lines.push(shellOptions.resolver(varName, value));
+        if (0 < lines.length) {
+            _fs.writeFileSync(envFilePath, lines.join(_os.EOL), 'utf8');
+        }
+    }
 
-            if (0 < lines.length) {
-                _fs.writeFileSync(path, lines.join(_os.EOL), 'utf8');
-            }
-        });
-        */
+    /**
+     * Make a script text to export E5R environment variables
+     * 
+     * @return {string} Shell script text
+     */
+    function makeShellScriptExportEnv() {
+        let exportEnvFilePath = _path.join(lib.devHome.tools, TOOL_EXPORT_ENV_FILE),
+            lines = [
+                '',
+                '# Export E5R environment variables',
+                'if [ -f "' + exportEnvFilePath + '" ]; then',
+                'while IFS=\'\' read -r line || [[ -n "${line}" ]]; do',
+                '  eval "export ${line}"',
+                'done < "' + exportEnvFilePath + '"',
+                'fi',
+                ''
+            ];
+
+        return lines.join(_os.EOL);
+    }
+
+    /**
+     * Make a script text to append $E5R_PATH to system $PATH variable
+     * 
+     * @return {string} Shell script text
+     */
+    function makeShellScriptAppendEnvPath() {
+        let appendEnvPathFilePath = _path.join(lib.devHome.tools, TOOL_APPEND_PATH_FILE),
+            lines = [
+                '',
+                '# Append $E5R_PATH to $PATH variable',
+                'if [ -f "' + appendEnvPathFilePath + '" ]; then',
+                'while IFS=\'\' read -r line || [[ -n "${line}" ]]; do',
+                '  eval "export PATH=\\$${line}:\\$PATH"',
+                'done < "' + appendEnvPathFilePath + '"',
+                'fi',
+                ''
+            ];
+
+        return lines.join(_os.EOL);
     }
 
     /**
@@ -297,6 +340,21 @@
             throw createError('Options.resolver must be a function.')
         }
 
+        if (_os.platform() !== 'win32') {
+            if (lib.fileExists(options.path)) {
+                return;
+            }
+
+            let scriptText = ""
+                + makeShellScriptExportEnv()
+                + makeShellScriptAppendEnvPath();
+
+            _fs.writeFileSync(options.path, scriptText, 'utf8');
+
+            return;
+        }
+
+        // Only Windows
         let lines = [],
             lineBegin = options.resolver(varName, value, true),
             fileExists = false;

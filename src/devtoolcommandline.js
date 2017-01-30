@@ -224,7 +224,7 @@
                 options = {
                     path: _path.resolve(lib.devHome.tools, TOOL_ENVVARS_SH),
                     resolver: (name, value, onlyPrefix) => {
-                        let prefix = 'export ' + name + '=';
+                        let prefix = name + '=';
 
                         if (onlyPrefix) {
                             return prefix;
@@ -286,15 +286,25 @@
     module.exports.DevToolCommandLine = DevToolCommandLine;
 
     if (!module.parent && module.filename === __filename && process.argv.indexOf('-devmode') >= 0) {
-        var cmd = new DevToolCommandLine([Wget, Setup]);
+        _rootPath = _path.resolve(_os.homedir(), '.dev');
+        _devPaths = {
+            root: _rootPath,
+            tools: _path.join(_rootPath, 'tools'),
+            bin: _path.join(_rootPath, 'bin'),
+            lib: _path.join(_rootPath, 'lib'),
+            cmd: _path.join(_rootPath, 'lib', 'cmd'),
+            doc: _path.join(_rootPath, 'doc')
+        };
+
+        process.argv.push('--shell=sh');
+
+        var devTool = new DevToolCommandLine([Wget, Setup]);
 
         // Asserts
-        _assert(cmd.name === 'dev', 'Invalid tool name');
-        _assert(typeof cmd.builtin === 'object', 'Invalid builtins');
-        _assert(cmd.builtin['wget'] instanceof Wget, 'Invalid wget builtin');
-        _assert(cmd.builtin['setup'] instanceof Setup, 'Invalid setup builtin');
-
-        await cmd.run();
+        _assert(devTool.name === 'dev', 'Invalid tool name');
+        _assert(typeof devTool.builtin === 'object', 'Invalid builtins');
+        _assert(devTool.builtin['wget'] instanceof Wget, 'Invalid wget builtin');
+        _assert(devTool.builtin['setup'] instanceof Setup, 'Invalid setup builtin');
     }
 
 })();
