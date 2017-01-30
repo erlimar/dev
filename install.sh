@@ -192,7 +192,7 @@ _dev_add_dev_to_path()
     if [ -f ${post_file} ]; then
         if _dev_has "source"; then
             source ${post_file}
-        elif
+        else
             echo "--> Type source \"${post_file}\" to use the dev command in this session."
             echo ""
         fi
@@ -201,7 +201,7 @@ _dev_add_dev_to_path()
             echo "--> Manually add the line below to at the end of the \"${HOME}/.bash_profile\" file."
             echo "    export PATH=\"${dev_bin}\""
             echo ""
-        elif
+        else
             # TODO: Check if shell script is already in file.
             cat ${post_file} >> "${HOME}/.bash_profile"
         fi
