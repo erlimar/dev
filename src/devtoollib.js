@@ -48,9 +48,11 @@
                 if (_os.platform() === 'win32') {
                     this.__getUserEnvironment = getUserEnvironmentWin32;
                     this.__setUserEnvironment = setUserEnvironmentWin32;
+                    this.__appendUserEnvironmentPath = appendUserEnvironmentVarToPathWin32;
                 } else {
                     this.__getUserEnvironment = getUserEnvironmentUnix;
                     this.__setUserEnvironment = setUserEnvironmentUnix;
+                    this.__appendUserEnvironmentPath = appendUserEnvironmentVarToPathUnix;
                 }
             }
 
@@ -441,6 +443,13 @@
              */
             setUserEnvironment(varName, value, shellOptions) {
                 this.__setUserEnvironment(varName, value, shellOptions);
+            }
+
+            /**
+             * Add varName to system PATH variable
+             */
+            appendUserEnvironmentPath(varName) {
+                this.__appendUserEnvironmentPath();
             }
 
             /**

@@ -46,6 +46,9 @@
     /** @constant {string} */
     const TOOL_UPDATE_ENVVARS_SH = 'update-envvars.sh';
 
+    /** @constant {string} */
+    const TOOL_PATH_ENVNAME = 'E5R_PATH';
+
     /** @constant {object} */
     const TOOL_DEFAULT_CONFIGURATION = {};
 
@@ -1159,7 +1162,7 @@
     }
 
     /**
-     * Append var name to file TOOL_APPEND_PATH_FILE
+     * Append var name to file TOOL_APPEND_PATH_FILE on Unix systems
      * 
      * @param {string} varName - Name of variable
      */
@@ -1180,6 +1183,15 @@
         if (0 < lines.length) {
             _fs.writeFileSync(appendFilePath, lines.join(_os.EOL), 'utf8');
         }
+    }
+
+    /**
+     * Append var name to %PATH% on Windows systems
+     * 
+     * @param {string} varName - Name of variable
+     */
+    function appendUserEnvironmentVarToPathWin32(varName) {
+        throw lib.createError('appendUserEnvironmentVarToPathWin32() not implemented!');
     }
 
     /**
@@ -1455,9 +1467,11 @@
                 if (_os.platform() === 'win32') {
                     this.__getUserEnvironment = getUserEnvironmentWin32;
                     this.__setUserEnvironment = setUserEnvironmentWin32;
+                    this.__appendUserEnvironmentPath = appendUserEnvironmentVarToPathWin32;
                 } else {
                     this.__getUserEnvironment = getUserEnvironmentUnix;
                     this.__setUserEnvironment = setUserEnvironmentUnix;
+                    this.__appendUserEnvironmentPath = appendUserEnvironmentVarToPathUnix;
                 }
             }
 
@@ -1848,6 +1862,13 @@
              */
             setUserEnvironment(varName, value, shellOptions) {
                 this.__setUserEnvironment(varName, value, shellOptions);
+            }
+
+            /**
+             * Add varName to system PATH variable
+             */
+            appendUserEnvironmentPath(varName) {
+                this.__appendUserEnvironmentPath();
             }
 
             /**
@@ -2603,17 +2624,9 @@
             await lib.downloadAsync(urlRegistryFile, pathRegistryFile);
 
             // 3> Add /bin to PATH
-            /** @todo: Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%. */
-            /** @todo: Ver FLAG de tipo de sessão (PS1, CMD, SH) */
-            /** @todo: Move 'E5R_PATH' to constant */
-            lib.setUserEnvironment('E5R_PATH', lib.devHome.bin, devTool.shellOptions);
+            lib.setUserEnvironment(TOOL_PATH_ENVNAME, lib.devHome.bin, devTool.shellOptions);
 
-            if (_os.platform() === 'win32') {
-                throw lib.createError('global.appendUserEnvironmentVarToPathWindows() not implemented!');
-            } else {
-                /** @todo: Implements lib.appendUserEnvironmentVarToPath() */
-                appendUserEnvironmentVarToPathUnix('E5R_PATH');
-            }
+            lib.appendUserEnvironmentPath(TOOL_PATH_ENVNAME);
 
             // 4> Install Shell Script on Profile
             installShellScriptProfile();

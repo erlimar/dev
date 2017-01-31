@@ -75,17 +75,9 @@
             await lib.downloadAsync(urlRegistryFile, pathRegistryFile);
 
             // 3> Add /bin to PATH
-            /** @todo: Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%. */
-            /** @todo: Ver FLAG de tipo de sessão (PS1, CMD, SH) */
-            /** @todo: Move 'E5R_PATH' to constant */
-            lib.setUserEnvironment('E5R_PATH', lib.devHome.bin, devTool.shellOptions);
+            lib.setUserEnvironment(TOOL_PATH_ENVNAME, lib.devHome.bin, devTool.shellOptions);
 
-            if (_os.platform() === 'win32') {
-                throw lib.createError('global.appendUserEnvironmentVarToPathWindows() not implemented!');
-            } else {
-                /** @todo: Implements lib.appendUserEnvironmentVarToPath() */
-                appendUserEnvironmentVarToPathUnix('E5R_PATH');
-            }
+            lib.appendUserEnvironmentPath(TOOL_PATH_ENVNAME);
 
             // 4> Install Shell Script on Profile
             installShellScriptProfile();

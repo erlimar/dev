@@ -264,7 +264,7 @@
     }
 
     /**
-     * Append var name to file TOOL_APPEND_PATH_FILE
+     * Append var name to file TOOL_APPEND_PATH_FILE on Unix systems
      * 
      * @param {string} varName - Name of variable
      */
@@ -285,6 +285,15 @@
         if (0 < lines.length) {
             _fs.writeFileSync(appendFilePath, lines.join(_os.EOL), 'utf8');
         }
+    }
+
+    /**
+     * Append var name to %PATH% on Windows systems
+     * 
+     * @param {string} varName - Name of variable
+     */
+    function appendUserEnvironmentVarToPathWin32(varName) {
+        throw lib.createError('appendUserEnvironmentVarToPathWin32() not implemented!');
     }
 
     /**
@@ -461,6 +470,7 @@
         getAllUserProfilePathsAvailable: getAllUserProfilePathsAvailable,
         setUserEnvironmentUnix: setUserEnvironmentUnix,
         appendUserEnvironmentVarToPathUnix: appendUserEnvironmentVarToPathUnix,
+        appendUserEnvironmentVarToPathWin32: appendUserEnvironmentVarToPathWin32,
         appendUpdateEnvironmentFile: appendUpdateEnvironmentFile,
         getGlobalConfiguration: getGlobalConfiguration,
         setGlobalConfiguration: setGlobalConfiguration,
