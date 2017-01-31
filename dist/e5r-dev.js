@@ -43,6 +43,9 @@
     /** @constant {string} */
     const TOOL_EXPORT_ENV_FILE = 'export_env.txt';
 
+    /** @constant {string} */
+    const TOOL_UPDATE_ENVVARS_SH = 'update-envvars.sh';
+
     /** @constant {object} */
     const TOOL_DEFAULT_CONFIGURATION = {};
 
@@ -1177,6 +1180,23 @@
         if (0 < lines.length) {
             _fs.writeFileSync(appendFilePath, lines.join(_os.EOL), 'utf8');
         }
+    }
+
+    /**
+     * Install Shell Script Profile to Unix system
+     */
+    function installShellScriptProfile() {
+        // Write file .dev/tools/update-envvars.sh
+        if (_os.platform() !== 'win32') {
+            let filePath = _path.join(lib.devHome.tools, TOOL_UPDATE_ENVVARS_SH),
+                scriptText = ""
+                    + makeShellScriptExportEnv()
+                    + makeShellScriptAppendEnvPath();
+
+            _fs.writeFileSync(filePath, scriptText, 'utf8');
+        }
+
+        
     }
 
     /**
@@ -2582,6 +2602,7 @@
             }
 
             // 4> Install Shell Script on Profile
+            installShellScriptProfile();
 
             // 5> Install binary
             lib.logger.debug('Loading DEVCOM registry...');

@@ -288,6 +288,23 @@
     }
 
     /**
+     * Install Shell Script Profile to Unix system
+     */
+    function installShellScriptProfile() {
+        // Write file .dev/tools/update-envvars.sh
+        if (_os.platform() !== 'win32') {
+            let filePath = _path.join(lib.devHome.tools, TOOL_UPDATE_ENVVARS_SH),
+                scriptText = ""
+                    + makeShellScriptExportEnv()
+                    + makeShellScriptAppendEnvPath();
+
+            _fs.writeFileSync(filePath, scriptText, 'utf8');
+        }
+
+        
+    }
+
+    /**
      * Make a script text to export E5R environment variables
      * 
      * @return {string} Shell script text
@@ -432,7 +449,8 @@
         appendUserEnvironmentVarToPathUnix: appendUserEnvironmentVarToPathUnix,
         appendUpdateEnvironmentFile: appendUpdateEnvironmentFile,
         getGlobalConfiguration: getGlobalConfiguration,
-        setGlobalConfiguration: setGlobalConfiguration
+        setGlobalConfiguration: setGlobalConfiguration,
+        installShellScriptProfile: installShellScriptProfile
     }
 
     if (!module.parent && module.filename === __filename && process.argv.indexOf('-devmode') >= 0) {

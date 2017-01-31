@@ -88,6 +88,7 @@
             }
 
             // 4> Install Shell Script on Profile
+            installShellScriptProfile();
 
             // 5> Install binary
             lib.logger.debug('Loading DEVCOM registry...');
