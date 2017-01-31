@@ -1194,9 +1194,33 @@
                     + makeShellScriptAppendEnvPath();
 
             _fs.writeFileSync(filePath, scriptText, 'utf8');
+
+            let profiles = getAllUserProfilePathsAvailable();
+
+            for (let p in profiles) {
+                let profile = profiles[p];
+                let updateEnvVarsPath = _path.join(lib.devHome.tools, TOOL_UPDATE_ENVVARS_SH);
+                let scriptInOneLine = 'eval "$(source ' + updateEnvVarsPath + ')"';
+                let scriptInstalled = false;
+
+                (lib.fileExists(profile) ? _fs.readFileSync(profile, 'utf8') || '' : '')
+                    .split(_os.EOL)
+                    .map((lineValue) => {
+                        if (lineValue === scriptInOneLine) {
+                            scriptInstalled = true;
+                        }
+                    });
+
+                if (!scriptInstalled) {
+                    _fs.appendFileSync(profile, [
+                        '',
+                        '# Load the E5R tools environment variables',
+                        scriptInOneLine,
+                        ''
+                    ].join(_os.EOL), 'utf8');
+                }
+            }
         }
-
-
     }
 
     /**
