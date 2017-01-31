@@ -103,15 +103,6 @@ jsdev_url="https://raw.githubusercontent.com/e5r/dev/${git_branch}/dist/e5r-dev.
 temp_dir=`mktemp -duq`".e5rinstall"
 temp_dir_unziped=${temp_dir}"/unziped"
 
-_dev_find_installation()
-{
-    if [ ! -d ${dev_home} ]; then
-        return 1
-    fi
-
-    return 0
-}
-
 _dev_get_webfile() {
     local origin="${1}"
     local destination="${2}"
@@ -156,24 +147,31 @@ _dev_install() {
     mkdir -p "${temp_dir}"
     mkdir -p "${temp_dir_unziped}"
 
-    # Download NODEJS binary package
-    if ! _dev_get_webfile "${node_pkg_url}" "${temp_dir}/${node_pkg_file}"; then
-        _dev_show_error "On download NODEJS binary package"
-        return 1
-    fi
+    if [ ! -f "${bin_jsengine}" ]; then
+        # Download NODEJS binary package
+        if ! _dev_get_webfile "${node_pkg_url}" "${temp_dir}/${node_pkg_file}"; then
+            _dev_show_error "On download NODEJS binary package"
+            return 1
+        fi
 
-    # Extract JSENGINE
-    if ! tar -xf "${temp_dir}/${node_pkg_file}" -C "${temp_dir_unziped}"; then
-        _dev_show_error "On extract JSENGINE"
-        return 1
-    fi
+        # Extract JSENGINE
+        if ! tar -xf "${temp_dir}/${node_pkg_file}" -C "${temp_dir_unziped}"; then
+            _dev_show_error "On extract JSENGINE"
+            return 1
+        fi
 
-    cp "${temp_dir_unziped}/${node_pkg}/bin/node" "${bin_jsengine}"
-    chmod a+=x "${bin_jsengine}"
-    rm -rf "${temp_dir}"
+        cp "${temp_dir_unziped}/${node_pkg}/bin/node" "${bin_jsengine}"
+        chmod a+=x "${bin_jsengine}"
+        rm -rf "${temp_dir}"
+    fi
 
     # Download "e5r-dev.js" script
-    if ! _dev_get_webfile "${jsdev_url}" "${bin_jsdev}"; then
+    if [ "$DEVENV" = "1" ] && [ -f "./dist/e5r-dev.js" ]; then
+        if ! cp "./dist/e5r-dev.js" "${bin_jsdev}"; then
+            _dev_show_error "On [dev] copy e5r-dev.js script"
+            return 1
+        fi
+    elif ! _dev_get_webfile "${jsdev_url}" "${bin_jsdev}"; then
         _dev_show_error "On download e5r-dev.js script"
         return 1
     fi
@@ -189,38 +187,12 @@ _dev_install() {
 
 _dev_add_dev_to_path()
 {
-    if [ -f ${post_file} ]; then
-        if _dev_has "source"; then
-            source ${post_file}
-        else
-            echo "--> Type source \"${post_file}\" to use the dev command in this session."
-            echo ""
-        fi
-        
-        if [ -f "${HOME}/.bash_profile" ] && [ ! -w "${HOME}/.bash_profile" ]; then
-            echo "--> Manually add the line below to at the end of the \"${HOME}/.bash_profile\" file."
-            echo "    export PATH=\"${dev_bin}\""
-            echo ""
-        else
-            # TODO: Check if shell script is already in file.
-            cat ${post_file} >> "${HOME}/.bash_profile"
-        fi
-    fi
+    echo "--> Type source \"${post_file}\" to use the dev command in this session."
+    echo ""
 }
 
-_dev_start()
+_dev_setup()
 {
-    local found=false
-
-    if _dev_find_installation; then
-        found=true
-    fi
-
-    if "${found}" = true; then
-        echo "Cleaning old installation..."
-        _dev_clear
-    fi
-
     if ! _dev_install; then
         _dev_clear
     fi
@@ -228,7 +200,7 @@ _dev_start()
     return 0
 }
 
-_dev_start
+_dev_setup
 
 exit $?
 

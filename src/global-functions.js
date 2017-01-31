@@ -266,7 +266,7 @@
         (lib.fileExists(envFilePath) ? _fs.readFileSync(envFilePath, 'utf8') || '' : '')
             .split(_os.EOL)
             .map((lineValue) => {
-                if (!lineValue.startsWith(lineBegin)) {
+                if ((lineValue || "").trim() !== "" && !lineValue.startsWith(lineBegin)) {
                     lines.push(lineValue);
                 }
             });

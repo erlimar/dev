@@ -441,7 +441,6 @@
              */
             setUserEnvironment(varName, value, shellOptions) {
                 this.__setUserEnvironment(varName, value, shellOptions);
-                appendUpdateEnvironmentFile(varName, value, shellOptions);
             }
 
             /**
@@ -545,7 +544,6 @@
                         .join(pathSep);
                     process.env[varName] = newPath;
 
-                    /** @todo: this really necessary? YES! Only here! */
                     appendUpdateEnvironmentFile(varName, newPath, devTool.shellOptions);
                 }
 
@@ -554,6 +552,10 @@
                     let newPath = [path]
                         .concat(userPath)
                         .join(pathSep);
+
+                    if (_os.platform() !== 'win32') {
+                        newPath = path + pathSep + lib.getEnvironmentVarToken(varName, devTool.shell);
+                    }
                     lib.setUserEnvironment(varName, newPath, devTool.shellOptions);
                 }
             }
