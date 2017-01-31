@@ -42,7 +42,7 @@ npm publish
 ## Install on Unix (_Linux and macOS_)
 
 ```
-curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh && source ~/.dev/tools/dev-envvars.sh
+curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh && eval "$(source $HOME/.dev/tools/update-envvars.sh)"
 ```
 
 ## Start usage

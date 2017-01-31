@@ -301,7 +301,7 @@
             _fs.writeFileSync(filePath, scriptText, 'utf8');
         }
 
-        
+
     }
 
     /**
@@ -354,6 +354,11 @@
      * @param {options} options
      */
     function appendUpdateEnvironmentFile(varName, value, options) {
+        // Only Windows
+        if (_os.platform() !== 'win32') {
+            return;
+        }
+
         if (!options) {
             throw createError('Options has required.');
         }
@@ -366,21 +371,6 @@
             throw createError('Options.resolver must be a function.')
         }
 
-        if (_os.platform() !== 'win32') {
-            if (lib.fileExists(options.path)) {
-                return;
-            }
-
-            let scriptText = ""
-                + makeShellScriptExportEnv()
-                + makeShellScriptAppendEnvPath();
-
-            _fs.writeFileSync(options.path, scriptText, 'utf8');
-
-            return;
-        }
-
-        // Only Windows
         let lines = [],
             lineBegin = options.resolver(varName, value, true),
             fileExists = false;
