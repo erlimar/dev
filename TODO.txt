@@ -3,6 +3,7 @@
   - Refatorar Instalador
   - Refatorar prompt
   - Revisar e refatorar todos os demais métodos
+* Testar instalador novamente no Windows (CMD e PowerShell)
 * Implementar minificação para distribuição
 * Atualização da variável PATH em Windows e Unix
 * Revisar uso de PowerShell no Unix

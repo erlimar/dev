@@ -23,9 +23,9 @@ if(!(test-path "$jsengine")) {
     return
 }
 
-iex "& `"$jsengine`" --harmony-async-await `"$devscript`" $args --shell=powershell"
+Invoke-Expression "& `"$jsengine`" --harmony-async-await `"$devscript`" $args --shell=powershell"
 
 if(test-path $postfile){
-    iex "& $postfile"
+    Invoke-Expression "& $postfile"
     remove-item $postfile
 }
