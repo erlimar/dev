@@ -66,7 +66,7 @@
             let user = template[1],
                 repository = template[2],
                 version = template[4] || 'master',
-                workdir = options.workdir || process.cwd(),
+                workdir = options.workdir = options.workdir || process.cwd(),
                 zipFileName = TEMPLATE_ZIP_FILE_NAME.replace('{version}', version);
 
             // Create if --workdir not exists
