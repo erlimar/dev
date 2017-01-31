@@ -21,6 +21,6 @@ fi
 
 # Update environment from postfile
 if [ -f "${postfile}" ]; then
-    source "${postfile}"
+    # TODO: $ source "${postfile}"
     rm -f "${postfile}"
 fi
