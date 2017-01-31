@@ -9,3 +9,5 @@
 * Migrar build system para [dev builder]
 * Implementar verbosidade
 * Implementar testes unitários
+* ExporPathEnv deve gravar em append_path.txt ao invés de incluir PATH=
+  em export_vars.txt

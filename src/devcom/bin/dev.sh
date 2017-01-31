@@ -14,13 +14,4 @@ if [ ! -f ${jsengine} ]; then
     return 1
 fi
 
-# @HACK: Update environment after install
-if [ ! "${1}" = "update-devenvvars" ]; then
-    ${jsengine} --harmony-async-await "${devscript}" ${*} --shell=sh
-fi
-
-# Update environment from postfile
-if [ -f "${postfile}" ]; then
-    # TODO: $ source "${postfile}"
-    rm -f "${postfile}"
-fi
+${jsengine} --harmony-async-await "${devscript}" ${*} --shell=sh

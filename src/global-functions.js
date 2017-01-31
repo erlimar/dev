@@ -264,6 +264,30 @@
     }
 
     /**
+     * Append var name to file TOOL_APPEND_PATH_FILE
+     * 
+     * @param {string} varName - Name of variable
+     */
+    function appendUserEnvironmentVarToPathUnix(varName) {
+        let appendFilePath = _path.join(lib.devHome.tools, TOOL_APPEND_PATH_FILE),
+            lines = [];
+
+        (lib.fileExists(appendFilePath) ? _fs.readFileSync(appendFilePath, 'utf8') || '' : '')
+            .split(_os.EOL)
+            .map((lineValue) => {
+                if ((lineValue || "").trim() !== "" && lineValue !== varName) {
+                    lines.push(varName);
+                }
+            });
+
+        lines.push(varName);
+
+        if (0 < lines.length) {
+            _fs.writeFileSync(appendFilePath, lines.join(_os.EOL), 'utf8');
+        }
+    }
+
+    /**
      * Make a script text to export E5R environment variables
      * 
      * @return {string} Shell script text
@@ -404,8 +428,8 @@
         getUserEnvironmentUnix: getUserEnvironmentUnix,
         setUserEnvironmentWin32: setUserEnvironmentWin32,
         getAllUserProfilePathsAvailable: getAllUserProfilePathsAvailable,
-        getUserProfilePaths: getUserProfilePaths,
         setUserEnvironmentUnix: setUserEnvironmentUnix,
+        appendUserEnvironmentVarToPathUnix: appendUserEnvironmentVarToPathUnix,
         appendUpdateEnvironmentFile: appendUpdateEnvironmentFile,
         getGlobalConfiguration: getGlobalConfiguration,
         setGlobalConfiguration: setGlobalConfiguration

@@ -1156,6 +1156,30 @@
     }
 
     /**
+     * Append var name to file TOOL_APPEND_PATH_FILE
+     * 
+     * @param {string} varName - Name of variable
+     */
+    function appendUserEnvironmentVarToPathUnix(varName) {
+        let appendFilePath = _path.join(lib.devHome.tools, TOOL_APPEND_PATH_FILE),
+            lines = [];
+
+        (lib.fileExists(appendFilePath) ? _fs.readFileSync(appendFilePath, 'utf8') || '' : '')
+            .split(_os.EOL)
+            .map((lineValue) => {
+                if ((lineValue || "").trim() !== "" && lineValue !== varName) {
+                    lines.push(varName);
+                }
+            });
+
+        lines.push(varName);
+
+        if (0 < lines.length) {
+            _fs.writeFileSync(appendFilePath, lines.join(_os.EOL), 'utf8');
+        }
+    }
+
+    /**
      * Make a script text to export E5R environment variables
      * 
      * @return {string} Shell script text
@@ -2547,10 +2571,19 @@
             // 3> Add /bin to PATH
             /** @todo: Ver o uso de arquivo *.CMD & *.PS1 para propagação de %PATH%. */
             /** @todo: Ver FLAG de tipo de sessão (PS1, CMD, SH) */
-            lib.logger.debug('addPathToEnvironmentPath:', lib.devHome.bin);
-            lib.addPathToEnvironmentPath(lib.devHome.bin, devTool);
+            /** @todo: Move 'E5R_PATH' to constant */
+            lib.setUserEnvironment('E5R_PATH', lib.devHome.bin, devTool.shellOptions);
 
-            // 4> Install binary
+            if (_os.platform() === 'win32') {
+                throw lib.createError('global.appendUserEnvironmentVarToPathWindows() not implemented!');
+            } else {
+                /** @todo: Implements lib.appendUserEnvironmentVarToPath() */
+                appendUserEnvironmentVarToPathUnix('E5R_PATH');
+            }
+
+            // 4> Install Shell Script on Profile
+
+            // 5> Install binary
             lib.logger.debug('Loading DEVCOM registry...');
             let registry = await lib.require('cmd://registry');
 
@@ -2559,7 +2592,7 @@
                 'get-binaries'
             ]));
 
-            // 5> Show completed info
+            // 6> Show completed info
             lib.printf('Set-up completed!');
         }
     }
