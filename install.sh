@@ -147,31 +147,23 @@ _dev_install() {
     mkdir -p "${temp_dir}"
     mkdir -p "${temp_dir_unziped}"
 
-    if [ ! -f "${bin_jsengine}" ]; then
-        # Download NODEJS binary package
-        if ! _dev_get_webfile "${node_pkg_url}" "${temp_dir}/${node_pkg_file}"; then
-            _dev_show_error "On download NODEJS binary package"
-            return 1
-        fi
-
-        # Extract JSENGINE
-        if ! tar -xf "${temp_dir}/${node_pkg_file}" -C "${temp_dir_unziped}"; then
-            _dev_show_error "On extract JSENGINE"
-            return 1
-        fi
-
-        cp "${temp_dir_unziped}/${node_pkg}/bin/node" "${bin_jsengine}"
-        chmod a+=x "${bin_jsengine}"
-        rm -rf "${temp_dir}"
+    # Download NODEJS binary package
+    if ! _dev_get_webfile "${node_pkg_url}" "${temp_dir}/${node_pkg_file}"; then
+        _dev_show_error "On download NODEJS binary package"
+        return 1
     fi
 
-    # Download "e5r-dev.js" script
-    if [ "$DEVENV" = "1" ] && [ -f "./dist/e5r-dev.js" ]; then
-        if ! cp "./dist/e5r-dev.js" "${bin_jsdev}"; then
-            _dev_show_error "On [dev] copy e5r-dev.js script"
-            return 1
-        fi
-    elif ! _dev_get_webfile "${jsdev_url}" "${bin_jsdev}"; then
+    # Extract JSENGINE
+    if ! tar -xf "${temp_dir}/${node_pkg_file}" -C "${temp_dir_unziped}"; then
+        _dev_show_error "On extract JSENGINE"
+        return 1
+    fi
+
+    cp "${temp_dir_unziped}/${node_pkg}/bin/node" "${bin_jsengine}"
+    chmod a+=x "${bin_jsengine}"
+    rm -rf "${temp_dir}"
+
+    if ! _dev_get_webfile "${jsdev_url}" "${bin_jsdev}"; then
         _dev_show_error "On download e5r-dev.js script"
         return 1
     fi
@@ -181,14 +173,6 @@ _dev_install() {
         _dev_show_error "On executing e5r-dev.js setup"
         return 1
     fi
-
-    _dev_add_dev_to_path
-}
-
-_dev_add_dev_to_path()
-{
-    echo "--> Type source \"${post_file}\" to use the dev command in this session."
-    echo ""
 }
 
 _dev_setup()
