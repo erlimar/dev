@@ -201,6 +201,10 @@
          * Print success message
          */
         showSuccess(context, options) {
+            _dev.printf('#context:', JSON.stringify(context, null, 2));
+            _dev.printf('#options:', JSON.stringify(options, null, 2));
+            _dev.printf();
+
             _dev.printf('Created new project in ' + options.workdir + '.');
             _dev.printf('Based on ' + context.defWizard.name + '.');
         }
