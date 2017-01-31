@@ -107,9 +107,8 @@
                 'Options:',
                 getNameDescription('--help', 'Show this help text'),
                 getNameDescription('--version', 'Show version number'),
-                getNameDescription('--shell=[name]', 'Set the shell name'),
                 getNameDescription('--workdir=[path]', 'Set the work directory. Default is ${cwd}'),
-                getNameDescription('-devmode', 'Starts the development mode')
+                getNameDescription('-devmode', 'Run on development mode')
             ].join(_os.EOL));
         }
 
