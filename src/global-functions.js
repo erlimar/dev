@@ -237,21 +237,6 @@
     }
 
     /**
-     * Return a path list of user profile files
-     * 
-     * @return {Object} Array os paths
-     */
-    function getUserProfilePaths() {
-        let profiles = [];
-
-        getAllUserProfilePathsAvailable().map(pathProfile => {
-            if (lib.fileExists(pathProfile)) profiles.push(pathProfile);
-        })
-
-        return profiles;
-    }
-
-    /**
      * Set a user environment variable value for platforms ['linux', 'freebsd', 'darwin', 'sunos']
      * 
      * @param {string} varName - Variable name
@@ -290,7 +275,7 @@
                 '# Export E5R environment variables',
                 'if [ -f "' + exportEnvFilePath + '" ]; then',
                 'while IFS=\'\' read -r line || [[ -n "${line}" ]]; do',
-                '  eval "export ${line}"',
+                '  echo "export ${line}"',
                 'done < "' + exportEnvFilePath + '"',
                 'fi',
                 ''
@@ -311,7 +296,7 @@
                 '# Append $E5R_PATH to $PATH variable',
                 'if [ -f "' + appendEnvPathFilePath + '" ]; then',
                 'while IFS=\'\' read -r line || [[ -n "${line}" ]]; do',
-                '  eval "export PATH=\\$${line}:\\$PATH"',
+                '  echo "export PATH=\\$${line}:\\$PATH"',
                 'done < "' + appendEnvPathFilePath + '"',
                 'fi',
                 ''
