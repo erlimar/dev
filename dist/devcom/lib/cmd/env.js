@@ -245,19 +245,17 @@
     /**
      * Make a semver valid version string
      * 
-     * @param {string} requiredVersion - Partial version number
      * @param {object} versionInfo - All version available
      * @param {object} options - Options
      * @param {object} engine - The environment engine
      */
-    function getFullVersionNumber(requiredVersion, versionInfo, options, engine) {
+    function getFullVersionNumber(versionInfo, options, engine) {
         if (!Array.isArray(versionInfo.versions) || versionInfo.versions.length < 1) {
             return null;
         }
 
-        requiredVersion = requiredVersion === 'latest' ? null : requiredVersion;
-
-        let resultVersion = null,
+        let requiredVersion = options.version === 'latest' ? null : options.version,
+            resultVersion = null,
             requiredVersionParts = requiredVersion === null
                 ? []
                 : requiredVersion
@@ -495,6 +493,9 @@
                 return;
             }
 
+            // Version is --version option or next argument
+            let version = options.version = options.version || options.args.shift() || 'latest';
+
             let envEngine;
 
             if (options.devmode && (process.env['DEVCOM_MODE'] || '').toUpperCase() === 'DEVELOPMENT') {
@@ -606,12 +607,11 @@
             }
 
             // Find version info
-            let version = options.args[0] || 'latest',
-                fullVersion = getFullVersionNumber(version, versionCacheInfo, options, engine);
+            let fullVersion = getFullVersionNumber(versionCacheInfo, options, engine);
 
             if (!fullVersion) {
                 throw _dev.createError(engine.name.toUpperCase() + ' version "'
-                    + version + '" not found.');
+                    + options.version + '" not found.');
             }
 
             let installDirectoryPath = makeInstallDirectoryPath(fullVersion, engine.name);
@@ -732,8 +732,10 @@
          * Show usage information for DevCom
          */
         usage() {
-            /** @todo: See `php.js` ensuresVersion() */
-            _dev.printf('Usage: dev env <action> <name> [options]');
+            _dev.printf('Usage: dev env <action> <name> [<version> [options]]');
+            _dev.printf();
+            _dev.printf('<name>:          - Environment name');
+            _dev.printf('<version>:       - Version of environment, or --version option');
             _dev.printf();
             _dev.printf('Actions:');
 
@@ -745,7 +747,7 @@
 
             _dev.printf();
             _dev.printf('Options:');
-            _dev.printf('  --version    - Version of environment');
+            _dev.printf('  --version    - Version of environment. (Dafault=latest)');
             _dev.printf();
         }
     }
