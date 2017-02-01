@@ -2881,7 +2881,7 @@
          */
         async run() {
             try {
-                if (Object.getOwnPropertyDescriptor(this._options, 'help') || this._cmd === 'help') {
+                if (!this._cmd && (Object.getOwnPropertyDescriptor(this._options, 'help') || this._cmd === 'help')) {
                     this.help();
                     return;
                 }
