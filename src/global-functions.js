@@ -191,10 +191,40 @@
      * Get a user environment variable value for platforms ['linux', 'freebsd', 'darwin', 'sunos']
      * 
      * @param {string} varName - Variable name
+     * @param {Object} shellOptions
      * @return {string}
      */
-    function getUserEnvironmentUnix(varName) {
-        return process.env[varName];
+    function getUserEnvironmentUnix(varName, shellOptions) {
+        let envFilePath = _path.join(lib.devHome.tools, TOOL_EXPORT_ENV_FILE),
+            lines = [],
+            lineBegin = shellOptions.resolver(varName, null, true),
+            value = null;
+
+        if(!lib.fileExists(envFilePath)) {
+            return value;
+        }
+
+        (lib.fileExists(envFilePath) ? _fs.readFileSync(envFilePath, 'utf8') || '' : '')
+            .split(_os.EOL)
+            .map((lineValue) => {
+                if ((lineValue || "").trim() !== "" && lineValue.startsWith(lineBegin)) {
+                    value = lineValue;
+                }
+            });
+
+        if(typeof value === 'string' && value.indexOf('=') >= 0) {
+            value = value.substring(value.indexOf('=') + 1);
+
+            if(value.length > 0 && value.charAt(0) == '"') {
+                value = value.substring(1);
+            }
+
+            if(value.length > 0 && value.charAt(value.length - 1) == '"') {
+                value = value.substring(0, value.length - 1);
+            }
+        }
+
+        return value;
     }
 
     /**
@@ -259,6 +289,7 @@
         lines.push(shellOptions.resolver(varName, value));
 
         if (0 < lines.length) {
+            lib.mkdir(lib.devHome.tools);
             _fs.writeFileSync(envFilePath, lines.join(_os.EOL), 'utf8');
         }
     }

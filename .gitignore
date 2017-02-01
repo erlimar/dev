@@ -1,4 +1,13 @@
 npm-debug.log
 .DS_Store
 
+src/devcom/config.json
+dist/devcom/config.json
+
 node_modules/
+src/devcom/cache/
+src/devcom/env/
+src/devcom/tools/
+dist/devcom/cache/
+dist/devcom/env/
+dist/devcom/tools/

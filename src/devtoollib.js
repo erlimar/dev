@@ -428,10 +428,11 @@
              * Get a user environment variable value
              * 
              * @param {string} varName - Variable name
+             * @param {Object} shellOptions
              * @return {string}
              */
-            getUserEnvironment(varName) {
-                return this.__getUserEnvironment(varName);
+            getUserEnvironment(varName, shellOptions) {
+                return this.__getUserEnvironment(varName, shellOptions);
             }
 
             /**
@@ -449,7 +450,7 @@
              * Add varName to system PATH variable
              */
             appendUserEnvironmentPath(varName) {
-                this.__appendUserEnvironmentPath();
+                this.__appendUserEnvironmentPath(varName);
             }
 
             /**
@@ -833,7 +834,7 @@
                 if (fileExists && uriData.isJS) {
                     let file = require(uriData.path);
 
-                    if (uriData.type === 'cmd' && !(file instanceof lib.DevCom)) {
+                    if (uriData.type === 'cmd' && !(file instanceof lib.DevCom) && (process.env['DEVCOM_MODE'] || '').toUpperCase() !== 'DEVELOPMENT') {
                         throw createError('Invalid DevCom type inheritance.');
                     }
 
