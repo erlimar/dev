@@ -166,7 +166,7 @@ Function Install-Dev
         $ShellName = $DevShell
     }
     
-    iex "& `"$BinJSEngine`" `"$BinJSDev`" setup --shell=$ShellName"
+    Invoke-Expression "& `"$BinJSEngine`" `"$BinJSDev`" setup --shell=$ShellName"
 }
 
 <#
@@ -188,7 +188,7 @@ Function Start-Script
     
     # Update environment from postfile
     if(Test-Path $PostFile) {
-        iex (Get-Content $PostFile)
+        Invoke-Expression (Get-Content $PostFile)
     }
     
     if(Test-Path $PostFile) {
