@@ -504,7 +504,7 @@
                 let devModulePath = _path.join(process.cwd(), './src/devcom/lib/env/' + env);
                 envEngine = require(devModulePath);
             } else {
-                envEngine = _dev.require('lib://env/' + env);
+                envEngine = await _dev.require('lib://env/' + env);
             }
 
             if (envEngine.name !== env) {
