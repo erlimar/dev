@@ -16,6 +16,12 @@
     /** @constant {string} */
     const CACHE_FOLDER = 'cache';
 
+    /** @constant {string} */
+    const E5R_ROOT_PATH_ENVVAR = 'E5R_ENV_PATH';
+
+    /** @constant {string} */
+    const ENVVAR_TEMPLATE = 'E5R_ENV_{NAME}_PATH';
+
     /** @constant {object} */
     const ALIAS = {
         'boot': {
@@ -175,68 +181,6 @@
     }
 
     /**
-     * Remove a object propertie if exists
-     * 
-     * @todo: Move to env NODE
-     * 
-     * @param {object[]} objList - The object list
-     * @param {string[]} propList - The propertie name list
-     */
-    function removeProperty(objList, propList) {
-        if (!Array.isArray(objList) || !Array.isArray(propList)) {
-            return;
-        }
-
-        objList.map(obj => propList.map(prop => {
-            if (Object.getOwnPropertyDescriptor(obj, prop)) {
-                delete obj[prop];
-            }
-        }));
-    }
-
-    /**
-     * Prepare a platform and architecture object properties.
-     * 
-     * @todo: Move to env NODE
-     * 
-     * @param {object} objList - The object list
-     */
-    function preparePlatformArchitectureObject(objList) {
-        if (!Array.isArray(objList)) {
-            objList = [objList];
-        }
-
-        objList.map(obj => {
-            if (!Array.isArray(obj.files)) {
-                return;
-            }
-
-            if (typeof obj.platforms !== 'object') {
-                obj.platforms = {};
-            }
-
-            obj.files.map(file => {
-                let parts = new RegExp('^(\\w+)-(\\w+).*$', 'g').exec(file);
-
-                if (!Array.isArray(parts)) {
-                    return;
-                }
-
-                let platform = parts[1],
-                    arch = parts[2];
-
-                if (!Array.isArray(obj.platforms[platform])) {
-                    obj.platforms[platform] = [];
-                }
-
-                if (0 > obj.platforms[platform].indexOf(arch)) {
-                    obj.platforms[platform].push(arch);
-                }
-            });
-        });
-    }
-
-    /**
      * Short and validate version info
      * 
      * @param {object} versionInfo - Version information
@@ -256,8 +200,6 @@
         let finalVersions = [];
 
         // Sort by version number DESC
-        // Prepare platform and architecture information
-        // Remove unnecessary information. (e.g: files, openssl, npm, etc.)
         versionInfo.versions.sort((a, b) => {
             if (typeof a.version !== 'string' || typeof b.version !== 'string') {
                 throw _dev.createError(INVALID_MESSAGE);
@@ -266,24 +208,6 @@
             if ((a.files && !Array.isArray(a.files)) || (b.files && !Array.isArray(b.files))) {
                 throw _dev.createError(INVALID_MESSAGE);
             }
-
-            // Prepare platform and architecture information
-            /** @todo: Move to env NODE */
-            preparePlatformArchitectureObject([a, b]);
-
-            // Remove unnecessary information. (e.g: files, openssl, npm, etc.)
-            /** @todo: Move to env NODE */
-            removeProperty([a, b], [
-                'date',
-                'npm',
-                'v8',
-                'uv',
-                'zlib',
-                'openssl',
-                'modules',
-                'lts',
-                'files'
-            ]);
 
             // Sort by version number DESC
             let aParts = a.version.split('.').splice(0, 3),
@@ -450,7 +374,7 @@
      * @param {string} version - Version number
      * @param {string} installPath - Path of installation
      */
-    function installNewVersion(engine, version, installPath) {
+    async function installNewVersion(engine, version, installPath) {
         let tempDir = _dev.generateTempDir(),
             extractedDir = _path.join(tempDir, 'extracted');
 
@@ -485,7 +409,7 @@
                     filePath = _path.join(tempDir, fileName);
 
                 _dev.printf('  ->', fileName);
-                _dev.downloadSync(fileUrl, filePath);
+                await _dev.downloadAsync(fileUrl, filePath);
                 downloadedFiles.push(fileName);
             }
 
@@ -574,7 +498,7 @@
             let envEngine;
 
             if (options.devmode && (process.env['DEVCOM_MODE'] || '').toUpperCase() === 'DEVELOPMENT') {
-                let devModulePath = _path.join(process.cwd(), './src/lib/env/' + env);
+                let devModulePath = _path.join(process.cwd(), './src/devcom/lib/env/' + env);
                 envEngine = require(devModulePath);
             } else {
                 envEngine = _dev.require('lib://env/' + env);
@@ -595,11 +519,11 @@
             initFn.bind(envEngine)(devTool, options);
 
             if (ALIAS[action]) {
-                this.runEnvCommonEngine(envEngine, action, devTool, options);
+                await this.runEnvCommonEngine(envEngine, action, devTool, options);
                 return;
             }
 
-            this.runEnvEngine(envEngine, action, devTool, options);
+            await this.runEnvEngine(envEngine, action, devTool, options);
         }
 
         /**
@@ -610,7 +534,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for arguments of command
          */
-        runEnvCommonEngine(engine, actionName, devTool, options) {
+        async runEnvCommonEngine(engine, actionName, devTool, options) {
             let actionFn = this[actionName + 'CommonAction'];
 
             if (typeof (actionFn) != 'function') {
@@ -619,7 +543,7 @@
                     + actionName.toUpperCase() + ' common action.');
             }
 
-            actionFn.bind(this)(engine, devTool, options);
+            await actionFn.bind(this)(engine, devTool, options);
         }
 
         /**
@@ -630,7 +554,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for arguments of command
          */
-        runEnvEngine(engine, actionName, devTool, options) {
+        async runEnvEngine(engine, actionName, devTool, options) {
             let actionFn = engine[actionName + 'Action'];
 
             if (typeof (actionFn) != 'function') {
@@ -639,7 +563,7 @@
                     + actionName.toUpperCase() + ' action.');
             }
 
-            actionFn.bind(engine)();
+            await actionFn.bind(engine)();
         }
 
         /**
@@ -649,7 +573,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for arguments of command
          */
-        bootCommonAction(engine, devTool, options) {
+        async bootCommonAction(engine, devTool, options) {
             throw 'Not implemented [bootCommonAction]';
         }
 
@@ -660,7 +584,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for arguments of command
          */
-        installCommonAction(engine, devTool, options) {
+        async installCommonAction(engine, devTool, options) {
             // Load version info from cache
             let versionCacheInfo = loadVersionCacheInfo(engine.name);
 
@@ -673,7 +597,7 @@
                         + ' does not implements getVersions() method.');
                 }
 
-                versionCacheInfo = saveVersionCacheInfo(engine.name, getVersionsFn.bind(engine)());
+                versionCacheInfo = saveVersionCacheInfo(engine.name, await getVersionsFn.bind(engine)());
             }
 
             if (!versionCacheInfo) {
@@ -717,13 +641,26 @@
                 _dev.rmdir(installDirectoryPath);
             }
 
-            installNewVersion(engine, fullVersion, installDirectoryPath);
+            await installNewVersion(engine, fullVersion, installDirectoryPath);
 
+            // Create ENV_BIN_PATH variable if not exists
+            if (!_dev.getUserEnvironment(E5R_ROOT_PATH_ENVVAR, devTool.shellOptions)) {
+                _dev.setUserEnvironment(E5R_ROOT_PATH_ENVVAR, '', devTool.shellOptions);
+            }
+
+            // Ensure ENV_BIN_PATH is in the system PATH
+            _dev.appendUserEnvironmentPath(E5R_ROOT_PATH_ENVVAR);
+
+            // Create ENV variable and ensure is in the ENV_BIN_PATH
+            let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', engine.name.toUpperCase());
+
+            _dev.setUserEnvironment(envVarName, '', devTool.shellOptions);
+            this.appendVarToRootEvnVarPath(envVarName, devTool);
+
+            // Successfully!
             _dev.printf(engine.name.toUpperCase(),
                 'version "' + fullVersion + '" installed successfully!');
         }
-
-
 
         /**
          * Uninstall `env uninstall ...` common action
@@ -732,7 +669,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for arguments of command
          */
-        uninstallCommonAction(engine, devTool, options) {
+        async uninstallCommonAction(engine, devTool, options) {
             throw _dev.createError('Not implemented [uninstallCommonAction]');
         }
 
@@ -743,7 +680,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for arguments of command
          */
-        listCommonAction(engine, devTool, options) {
+        async listCommonAction(engine, devTool, options) {
             throw _dev.createError('Not implemented [listCommonAction]');
         }
 
@@ -754,8 +691,30 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for arguments of command
          */
-        selectCommonAction(engine, devTool, options) {
+        async selectCommonAction(engine, devTool, options) {
             throw _dev.createError('Not implemented [selectCommonAction]');
+        }
+
+        /**
+         * Append environment var to principal env path
+         * 
+         * @param {string} varName - The name of var
+         * @param {object} devTool - The instance of DevTool
+         */
+        appendVarToRootEvnVarPath(varName, devTool) {
+            let envPaths = _dev.getUserEnvironment(E5R_ROOT_PATH_ENVVAR, devTool.shellOptions);
+
+            if (!envPaths) {
+                envPaths = '';
+            }
+
+            let pathSep = _os.platform() === 'win32' ? ';' : ':',
+                varToken = _dev.getEnvironmentVarToken(varName, devTool.shell);
+
+            if (envPaths.split(pathSep).indexOf(varToken) < 0) {
+                let value = varToken + (envPaths !== '' ? pathSep : '') + envPaths;
+                _dev.setUserEnvironment(E5R_ROOT_PATH_ENVVAR, value, devTool.shellOptions);
+            }
         }
 
         /**
@@ -765,7 +724,7 @@
          * @param {object} devTool - Instance of DevToolCommandLine
          * @param {object} options - Options for arguments of command
          */
-        testCommonAction(engine, devTool, options) {
+        async testCommonAction(engine, devTool, options) {
             throw _dev.createError('Not implemented [testCommonAction]');
         }
 
@@ -795,12 +754,15 @@
 
     // Run Env DevCom on developer instance
     if (!module.parent && module.filename === __filename && process.argv.indexOf('-devmode') >= 0) {
+
+        _dev.devToolDefaultInstance._options.shell = _os.platform() === 'win32' ? 'cmd' : 'sh';
+
         let _devTool = _dev.devToolDefaultInstance,
             _devCom = module.exports,
             _options = _devTool._options;
 
         try {
-            _devCom.run(_devTool, _options);
+            await _devCom.run(_devTool, _options);
         } catch (error) {
             _dev.logger.error(error);
             _devTool.exitCode = error.code || 1;

@@ -59,6 +59,70 @@
     }
 
     /**
+     * Prepare a platform and architecture object properties.
+     * 
+     * @param {object} objList - The object list
+     */
+    function preparePlatformArchitectureObject(objList) {
+        if (!Array.isArray(objList)) {
+            objList = [objList];
+        }
+
+        objList.map(obj => {
+            if (!Array.isArray(obj.files)) {
+                return;
+            }
+
+            if (typeof obj.platforms !== 'object') {
+                obj.platforms = {};
+            }
+
+            obj.files.map(file => {
+                let parts = new RegExp('^(\\w+)-(\\w+).*$', 'g').exec(file);
+
+                if (!Array.isArray(parts)) {
+                    return;
+                }
+
+                let platform = parts[1],
+                    arch = parts[2];
+
+                if (!Array.isArray(obj.platforms[platform])) {
+                    obj.platforms[platform] = [];
+                }
+
+                if (0 > obj.platforms[platform].indexOf(arch)) {
+                    obj.platforms[platform].push(arch);
+                }
+            });
+        });
+    }
+
+    /**
+     * Remove a object propertie if exists
+     * 
+     * @todo: Move to env NODE
+     * 
+     * @param {object[]} objList - The object list
+     * @param {string[]} propList - The propertie name list
+     */
+    function removeProperty(objList, propList) {
+        if (!Array.isArray(objList)) {
+            objList = [objList];
+        }
+
+        if (!Array.isArray(propList)) {
+            return;
+        }
+
+        objList.map(obj => propList.map(prop => {
+            if (Object.getOwnPropertyDescriptor(obj, prop)) {
+                delete obj[prop];
+            }
+        }));
+    }
+
+    /**
      * Management NODE Environment
      * @class
      */
@@ -201,7 +265,7 @@
         }
 
         /** @required */
-        getVersions() {
+        async getVersions() {
             let tempDir = _dev.generateTempDir(),
                 tempFilePath = _path.join(tempDir, 'node-index.json'),
                 versionsInfo = {
@@ -214,7 +278,8 @@
                     _dev.mkdir(tempDir);
                 }
 
-                _dev.downloadSync(NODE_VERSION_INDEX_URL, tempFilePath);
+                /** @todo: Use async download */
+                await _dev.downloadAsync(NODE_VERSION_INDEX_URL, tempFilePath);
 
                 let nodeIndex = require(tempFilePath);
 
@@ -223,11 +288,28 @@
                 }
 
                 versionsInfo.versions = nodeIndex;
-
-                // Remove "v" from "v7.0.0" version number
+                
                 for (let idx in versionsInfo.versions) {
                     let version = versionsInfo.versions[idx];
+
+                    // Remove "v" from "v7.0.0" version number
                     version.version = version.version.substring(1);
+
+                    // Prepare platform and architecture information
+                    preparePlatformArchitectureObject(version);
+
+                    // Remove unnecessary information. (e.g: files, openssl, npm, etc.)
+                    removeProperty(version, [
+                        'date',
+                        'npm',
+                        'v8',
+                        'uv',
+                        'zlib',
+                        'openssl',
+                        'modules',
+                        'lts',
+                        'files'
+                    ]);
                 }
 
                 if (_dev.directoryExists(tempDir)) {
@@ -246,7 +328,7 @@
     }
 
     module.exports = new NodeEnvironment();
-
+    
     /* DEVCODE-BEGIN */
     // Assert
     /* DEVCODE-END */
