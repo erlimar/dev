@@ -163,6 +163,10 @@
             ) + _options.workdir.substr(1);
         }
 
+        for (let p in _options) {
+            _options[p] = _options[p] === null ? true : _options[p];
+        }
+
         return _options;
     }
 
@@ -200,7 +204,7 @@
             lineBegin = shellOptions.resolver(varName, null, true),
             value = null;
 
-        if(!lib.fileExists(envFilePath)) {
+        if (!lib.fileExists(envFilePath)) {
             return value;
         }
 
@@ -212,14 +216,14 @@
                 }
             });
 
-        if(typeof value === 'string' && value.indexOf('=') >= 0) {
+        if (typeof value === 'string' && value.indexOf('=') >= 0) {
             value = value.substring(value.indexOf('=') + 1);
 
-            if(value.length > 0 && value.charAt(0) == '"') {
+            if (value.length > 0 && value.charAt(0) == '"') {
                 value = value.substring(1);
             }
 
-            if(value.length > 0 && value.charAt(value.length - 1) == '"') {
+            if (value.length > 0 && value.charAt(value.length - 1) == '"') {
                 value = value.substring(0, value.length - 1);
             }
         }

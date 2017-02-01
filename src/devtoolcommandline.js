@@ -105,8 +105,8 @@
             lib.printf([
                 '',
                 'Options:',
-                getNameDescription('--help', 'Show this help text'),
-                getNameDescription('--version', 'Show version number'),
+                getNameDescription('--help|-h', 'Show this help text'),
+                getNameDescription('--version|-v', 'Show version number'),
                 getNameDescription('--workdir=[path]', 'Set the work directory. Default is ${cwd}'),
                 getNameDescription('-devmode', 'Run on development mode')
             ].join(_os.EOL));
@@ -147,12 +147,12 @@
          */
         async run() {
             try {
-                if (!this._cmd && (Object.getOwnPropertyDescriptor(this._options, 'help') || this._cmd === 'help')) {
+                if (!this._cmd && (this._options.help || this._options.h)) {
                     this.help();
                     return;
                 }
 
-                if (Object.getOwnPropertyDescriptor(this._options, 'version') || this._cmd === 'version') {
+                if (!this._cmd && (this._options.version || this._options.v)) {
                     this.showVersion();
                     return;
                 }

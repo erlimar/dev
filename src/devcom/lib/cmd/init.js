@@ -301,7 +301,7 @@
          * @param {object} options - Options for arguments of command
          */
         async runWizard(context, options) {
-            if (!options.d && !Object.getOwnPropertyDescriptor(options, 'default')) {
+            if (!options.d && !options.default) {
                 this.showWelcomeMessage(context.defWizard, options);
             }
 
@@ -343,7 +343,7 @@
                     value = defaultValue;
 
                 // !--default | -D | -default
-                if (!toolOptions.d && !Object.getOwnPropertyDescriptor(toolOptions, 'default')) {
+                if (!toolOptions.d && !toolOptions.default) {
                     let options = (p.options || []),
                         optionsText = options.length > 0
                             ? ' ({0})'.replace('{0}', options.join(', '))
