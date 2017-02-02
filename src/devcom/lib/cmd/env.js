@@ -766,39 +766,45 @@
         getInstalledVersionList(envName, devTool) {
             let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', envName.toUpperCase()),
                 envInstallPath = _path.join(_dev.devHome.root, 'env', envName),
-                list = _dev.ls(envInstallPath, _dev.const.LS_DIRECTORY)
-                    .map(v => v.name)
-                    /** @todo: Move to new method */
-                    .sort((a, b) => {
-                        let aParts = a.split('.').splice(0, 3),
-                            bParts = b.split('.').splice(0, 3);
+                list = [];
 
-                        aParts = aParts.concat(new Array(1 + 3 - aParts.length)
-                            .join('0').split(''))
-                            .map((v) => parseInt(v || '0', 10));
+            if (!_dev.directoryExists(envInstallPath)) {
+                return list;
+            }
 
-                        bParts = bParts.concat(new Array(1 + 3 - bParts.length)
-                            .join('0')
-                            .split('')).map((v) => parseInt(v || '0', 10));
+            list = _dev.ls(envInstallPath, _dev.const.LS_DIRECTORY)
+                .map(v => v.name)
+                /** @todo: Move to new method */
+                .sort((a, b) => {
+                    let aParts = a.split('.').splice(0, 3),
+                        bParts = b.split('.').splice(0, 3);
 
-                        let diff = 0, idx = 0;
+                    aParts = aParts.concat(new Array(1 + 3 - aParts.length)
+                        .join('0').split(''))
+                        .map((v) => parseInt(v || '0', 10));
 
-                        do {
-                            diff = bParts[idx] - aParts[idx];
-                            idx++;
-                        } while (diff === 0 && idx < 3);
+                    bParts = bParts.concat(new Array(1 + 3 - bParts.length)
+                        .join('0')
+                        .split('')).map((v) => parseInt(v || '0', 10));
 
-                        return diff;
-                    })
-                    .map(v => {
-                        let versionPath = _path.join(envInstallPath, v),
-                            activeEnvPath = _dev.getUserEnvironment(envVarName, devTool.shellOptions);
+                    let diff = 0, idx = 0;
 
-                        return {
-                            version: v,
-                            active: activeEnvPath === versionPath
-                        };
-                    });
+                    do {
+                        diff = bParts[idx] - aParts[idx];
+                        idx++;
+                    } while (diff === 0 && idx < 3);
+
+                    return diff;
+                })
+                .map(v => {
+                    let versionPath = _path.join(envInstallPath, v),
+                        activeEnvPath = _dev.getUserEnvironment(envVarName, devTool.shellOptions);
+
+                    return {
+                        version: v,
+                        active: activeEnvPath === versionPath
+                    };
+                });
 
             return list;
         }
