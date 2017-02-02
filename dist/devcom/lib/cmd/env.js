@@ -732,7 +732,7 @@
                 // macOS
                 /** @todo: Use global TOOL_UPDATE_ENVVARS_SH const */
                 let updateEnvVarsPath = _path.join(_dev.devHome.tools, 'update-envvars.sh'),
-                    scriptInOneLine = 'eval "$(source \\"' + updateEnvVarsPath + '\\")"';
+                    scriptInOneLine = 'eval "$(source ' + updateEnvVarsPath + ')"';
 
                 _dev.printf('To use in the current session run the following command:');
                 _dev.printf('$ ' + scriptInOneLine);
