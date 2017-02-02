@@ -253,8 +253,9 @@
 			"args": [
 				"-devmode",
 				"env",
-				"list",
-				"node"
+				"install",
+				"node",
+				"0.11"
 			],
 			"cwd": "${workspaceRoot}",
 			"runtimeExecutable": null,

@@ -1209,7 +1209,7 @@
             .split(_os.EOL)
             .map((lineValue) => {
                 if ((lineValue || "").trim() !== "" && lineValue !== varName) {
-                    lines.push(varName);
+                    lines.push(lineValue);
                 }
             });
 
@@ -2714,7 +2714,7 @@
 
             // 2> Download `registry.json`
             lib.logger.debug(
-                'downloadSync:',
+                'downloadAsync:',
                 _url.resolve(TOOL_DEFAULT_REGISTRY_URL, TOOL_REGISTRY_FILE),
                 _path.resolve(lib.devHome.root, TOOL_REGISTRY_FILE)
             );

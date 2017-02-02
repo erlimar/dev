@@ -311,7 +311,7 @@
             .split(_os.EOL)
             .map((lineValue) => {
                 if ((lineValue || "").trim() !== "" && lineValue !== varName) {
-                    lines.push(varName);
+                    lines.push(lineValue);
                 }
             });
 

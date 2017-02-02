@@ -640,7 +640,7 @@
             let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', engine.name.toUpperCase());
 
             _dev.setUserEnvironment(envVarName, '', devTool.shellOptions);
-            this.appendVarToRootEvnVarPath(envVarName, devTool);
+            this.appendVarToRootEnvVarPath(envVarName, devTool);
 
             // Successfully!
             _dev.printf(engine.name.toUpperCase(),
@@ -671,8 +671,8 @@
             if (!Array.isArray(installedVersionList) || 1 > installedVersionList.length) {
                 _dev.printf('No installed version of the ' + engine.name.toUpperCase() + ' environment.');
                 _dev.printf();
-                _dev.printf('Use: ' + devTool.name + ' ' + this.name
-                    + ' install ' + engine.name + ' to install latest version.');
+                _dev.printf('Use: "' + devTool.name + ' ' + this.name
+                    + ' install ' + engine.name + '" to install latest version.');
                 return;
             }
 
@@ -826,7 +826,7 @@
          * @param {string} varName - The name of var
          * @param {object} devTool - The instance of DevTool
          */
-        appendVarToRootEvnVarPath(varName, devTool) {
+        appendVarToRootEnvVarPath(varName, devTool) {
             let envPaths = _dev.getUserEnvironment(E5R_ROOT_PATH_ENVVAR, devTool.shellOptions);
 
             if (!envPaths) {
