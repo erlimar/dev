@@ -253,7 +253,7 @@
 			"args": [
 				"-devmode",
 				"env",
-				"install",
+				"select",
 				"node",
 				"0.11"
 			],

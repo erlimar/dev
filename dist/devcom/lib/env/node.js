@@ -261,6 +261,18 @@
             return true;
         }
 
+        /**
+         * Verify installation files
+         * 
+         * @param {string} version - Version number
+         * @param {string} installPath - Installation path
+         * 
+         * @return {boolean} True if OK, or False.
+         */
+        getBinPath(version, installPath) {
+            return _path.join(installPath, 'bin');
+        }
+
         /** @required */
         async getVersions() {
             let tempDir = _dev.generateTempDir(),
@@ -285,7 +297,7 @@
                 }
 
                 versionsInfo.versions = nodeIndex;
-                
+
                 for (let idx in versionsInfo.versions) {
                     let version = versionsInfo.versions[idx];
 
@@ -325,5 +337,5 @@
     }
 
     module.exports = new NodeEnvironment();
-    
+
 })();

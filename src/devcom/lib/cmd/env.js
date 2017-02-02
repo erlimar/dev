@@ -694,7 +694,52 @@
          * @param {object} options - Options for arguments of command
          */
         async selectCommonAction(engine, devTool, options) {
-            throw _dev.createError('Not implemented [selectCommonAction]');
+            this.ensureOptionVersion(options);
+
+            let versionCacheInfo = await this.ensureCacheInfo(engine),
+                fullVersion = this.ensureFullVersion(versionCacheInfo, options, engine),
+                installDirectoryPath = makeInstallDirectoryPath(fullVersion, engine.name);
+
+            if (!_dev.directoryExists(installDirectoryPath)) {
+                _dev.printf(engine.name.toUpperCase() + ' environment version ' + fullVersion + ' not installed.');
+                _dev.printf('Use: "' + devTool.name + ' ' + this.name
+                    + ' install ' + engine.name + ' ' + fullVersion + '" to install.');
+                return;
+            }
+
+            let getBinPathFn = engine['getBinPath'];
+
+            if (typeof (getBinPathFn) != 'function') {
+                throw _dev.createError('Environment '
+                    + engine.name.toUpperCase()
+                    + ' does not implements getBinPath() method.');
+            }
+
+            let binPath = getBinPathFn.bind(engine)(fullVersion, installDirectoryPath);
+
+            if (!_dev.directoryExists(binPath)) {
+                throw _dev.createError('Invalid binary path "' + binPath + '" to ' + engine.name.toUpperCase() + ' environment.');
+            }
+
+            // Create ENV variable and ensure is in the ENV_BIN_PATH
+            let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', engine.name.toUpperCase());
+
+            _dev.setUserEnvironment(envVarName, binPath, devTool.shellOptions);
+            this.appendVarToRootEnvVarPath(envVarName, devTool);
+
+            // Successfully!
+            _dev.printf(engine.name.toUpperCase(),
+                'version "' + fullVersion + '" selected successfully!');
+
+            if (_os.platform() !== 'win32') {
+                // macOS
+                /** @todo: Use global TOOL_UPDATE_ENVVARS_SH const */
+                let updateEnvVarsPath = _path.join(_dev.devHome.tools, 'update-envvars.sh'),
+                    scriptInOneLine = 'eval "$(source \\"' + updateEnvVarsPath + '\\")"';
+
+                _dev.printf('To use in the current session run the following command:');
+                _dev.printf('$ ' + scriptInOneLine);
+            }
         }
 
         /**
