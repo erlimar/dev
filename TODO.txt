@@ -1,3 +1,13 @@
+* Ordenar as variáveis de ambiente em `export_env.txt` de forma que
+  todas variáveis que constam em uma determinada outra variável possa
+  estar definida antes da que a usa.
+  
+  Ex: `E5R_ENV_NODE_PATH` é usada por `E5R_ENV_PATH`
+    E5R_ENV_PATH="$E5R_ENV_NODE_PATH"
+    E5R_ENV_NODE_PATH="/Users/erlimar/.dev/env/node/7.5.0/bin"
+
+    Portanto `E5R_ENV_NODE_PATH` deve ser definida antes de `E5R_ENV_PATH`
+
 * Migrar para modelo assíncrono
   - Refatorar Wget
   - Refatorar Instalador
