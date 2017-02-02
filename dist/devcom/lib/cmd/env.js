@@ -200,6 +200,7 @@
         let finalVersions = [];
 
         // Sort by version number DESC
+        /** @todo: Move to new method */
         versionInfo.versions.sort((a, b) => {
             if (typeof a.version !== 'string' || typeof b.version !== 'string') {
                 throw _dev.createError(INVALID_MESSAGE);
@@ -493,9 +494,6 @@
                 return;
             }
 
-            // Version is --version option or next argument
-            let version = options.version = options.version || options.args.shift() || 'latest';
-
             let envEngine;
 
             if (options.devmode && (process.env['DEVCOM_MODE'] || '').toUpperCase() === 'DEVELOPMENT') {
@@ -507,7 +505,7 @@
 
             if (envEngine.name !== env) {
                 throw _dev.createError(env.toUpperCase()
-                    + ' environment with invalid name.');
+                    + ' environment with invalid name (value: "' + envEngine.name + '", expected: "' + env + '").');
             }
 
             let initFn = envEngine['init'];
@@ -586,35 +584,11 @@
          * @param {object} options - Options for arguments of command
          */
         async installCommonAction(engine, devTool, options) {
-            // Load version info from cache
-            let versionCacheInfo = loadVersionCacheInfo(engine.name);
+            this.ensureOptionVersion(options);
 
-            if (!versionCacheInfo) {
-                let getVersionsFn = engine['getVersions'];
-
-                if (typeof (getVersionsFn) != 'function') {
-                    throw _dev.createError('Environment '
-                        + engine.name.toUpperCase()
-                        + ' does not implements getVersions() method.');
-                }
-
-                versionCacheInfo = saveVersionCacheInfo(engine.name, await getVersionsFn.bind(engine)());
-            }
-
-            if (!versionCacheInfo) {
-                throw _dev.createError('Error on retrieve '
-                    + engine.name.toUpperCase() + ' versions information.');
-            }
-
-            // Find version info
-            let fullVersion = getFullVersionNumber(versionCacheInfo, options, engine);
-
-            if (!fullVersion) {
-                throw _dev.createError(engine.name.toUpperCase() + ' version "'
-                    + options.version + '" not found.');
-            }
-
-            let installDirectoryPath = makeInstallDirectoryPath(fullVersion, engine.name);
+            let versionCacheInfo = await this.ensureCacheInfo(engine),
+                fullVersion = this.ensureFullVersion(versionCacheInfo, options, engine),
+                installDirectoryPath = makeInstallDirectoryPath(fullVersion, engine.name);
 
             // Clearing an incomplete installation directory if necessary
             if (!_dev.directoryIsEmpty(installDirectoryPath)) {
@@ -681,7 +655,21 @@
          * @param {object} options - Options for arguments of command
          */
         async listCommonAction(engine, devTool, options) {
-            throw _dev.createError('Not implemented [listCommonAction]');
+            let installedVersionList = this.getInstalledVersionList(engine.name, devTool);
+
+            if (!Array.isArray(installedVersionList) || 1 > installedVersionList.length) {
+                _dev.printf('No installed version of the ' + engine.name.toUpperCase() + ' environment.');
+                return;
+            }
+
+            _dev.printf('Installed versions of ' + engine.name.toUpperCase() + ' environment:');
+
+            for (let v in installedVersionList) {
+                let version = installedVersionList[v],
+                    suffix = version.active ? '*' : '';
+
+                _dev.printf('  ' + version.version + ' ' + suffix);
+            }
         }
 
         /**
@@ -693,6 +681,123 @@
          */
         async selectCommonAction(engine, devTool, options) {
             throw _dev.createError('Not implemented [selectCommonAction]');
+        }
+
+        /**
+         * Test `env test ...` common action
+         * 
+         * @param {object} engine - The environment engine
+         * @param {object} devTool - Instance of DevToolCommandLine
+         * @param {object} options - Options for arguments of command
+         */
+        async testCommonAction(engine, devTool, options) {
+            throw _dev.createError('Not implemented [testCommonAction]');
+        }
+
+        /**
+         * Get and validate cache information
+         * 
+         * @param {object} engine - The environment engine
+         * 
+         * @return {object} Version cache object
+         */
+        async ensureCacheInfo(engine) {
+            let versionCacheInfo = loadVersionCacheInfo(engine.name);
+
+            if (!versionCacheInfo) {
+                let getVersionsFn = engine['getVersions'];
+
+                if (typeof (getVersionsFn) != 'function') {
+                    throw _dev.createError('Environment '
+                        + engine.name.toUpperCase()
+                        + ' does not implements getVersions() method.');
+                }
+
+                versionCacheInfo = saveVersionCacheInfo(engine.name, await getVersionsFn.bind(engine)());
+            }
+
+            if (!versionCacheInfo) {
+                throw _dev.createError('Error on retrieve '
+                    + engine.name.toUpperCase() + ' versions information.');
+            }
+
+            return versionCacheInfo;
+        }
+
+        /**
+         * Get and validate full version number
+         * 
+         * @param {object} versionCacheInfo - Version cache information
+         * @param {object} engine - The environment engine
+         * @param {object} options - Options for arguments of command
+         */
+        ensureFullVersion(versionCacheInfo, options, engine) {
+            let fullVersion = getFullVersionNumber(versionCacheInfo, options, engine);
+
+            if (!fullVersion) {
+                throw _dev.createError(engine.name.toUpperCase() + ' version "'
+                    + options.version + '" not found.');
+            }
+
+            return fullVersion;
+        }
+
+        /**
+         * Ensure option.version value
+         * 
+         * @param {object} options - Options object
+         */
+        ensureOptionVersion(options) {
+            // Version is --version option or next argument
+            options.version = options.version || options.args.shift() || 'latest';
+        }
+
+        /**
+         * Get a list of installed versions
+         * 
+         * @param {string} envName - Name of environment
+         * @param {object} devTool - The instance of DevTool
+         * 
+         * @return {object} Array of {version:string, active:bool}
+         */
+        getInstalledVersionList(envName, devTool) {
+            let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', envName.toUpperCase()),
+                envInstallPath = _path.join(_dev.devHome.root, 'env', envName),
+                list = _dev.ls(envInstallPath, _dev.const.LS_DIRECTORY)
+                    .map(v => v.name)
+                    /** @todo: Move to new method */
+                    .sort((a, b) => {
+                        let aParts = a.split('.').splice(0, 3),
+                            bParts = b.split('.').splice(0, 3);
+
+                        aParts = aParts.concat(new Array(1 + 3 - aParts.length)
+                            .join('0').split(''))
+                            .map((v) => parseInt(v || '0', 10));
+
+                        bParts = bParts.concat(new Array(1 + 3 - bParts.length)
+                            .join('0')
+                            .split('')).map((v) => parseInt(v || '0', 10));
+
+                        let diff = 0, idx = 0;
+
+                        do {
+                            diff = bParts[idx] - aParts[idx];
+                            idx++;
+                        } while (diff === 0 && idx < 3);
+
+                        return diff;
+                    })
+                    .map(v => {
+                        let versionPath = _path.join(envInstallPath, v),
+                            activeEnvPath = _dev.getUserEnvironment(envVarName, devTool.shellOptions);
+
+                        return {
+                            version: v,
+                            active: activeEnvPath === versionPath
+                        };
+                    });
+
+            return list;
         }
 
         /**
@@ -715,17 +820,6 @@
                 let value = varToken + (envPaths !== '' ? pathSep : '') + envPaths;
                 _dev.setUserEnvironment(E5R_ROOT_PATH_ENVVAR, value, devTool.shellOptions);
             }
-        }
-
-        /**
-         * Test `env test ...` common action
-         * 
-         * @param {object} engine - The environment engine
-         * @param {object} devTool - Instance of DevToolCommandLine
-         * @param {object} options - Options for arguments of command
-         */
-        async testCommonAction(engine, devTool, options) {
-            throw _dev.createError('Not implemented [testCommonAction]');
         }
 
         /**

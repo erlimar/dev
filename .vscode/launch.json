@@ -253,7 +253,7 @@
 			"args": [
 				"-devmode",
 				"env",
-				"install",
+				"list",
 				"node"
 			],
 			"cwd": "${workspaceRoot}",

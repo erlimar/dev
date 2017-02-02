@@ -1579,6 +1579,68 @@
             }
 
             /**
+             * Constants
+             */
+            get const() {
+                return {
+                    LS_DIRECTORY: 0b001,
+                    LS_FILE: 0x010,
+                    LS_RECURSIVE: 0x100
+                }
+            }
+
+            /**
+             * List directory contents
+             * 
+             * @param {string} path - Directory path
+             * @param {int} flags - Bit flags (LS_DIRECTORY | LS_FILE | LS_RECURSIVE)
+             * 
+             * @return {object[]} Array of {name:string, type:'file|directory', childs:Array|undefined}
+             */
+            ls(path, flags) {
+                if (!_fs.statSync(path).isDirectory()) {
+                    throw createError('Path "' + path + '" is not a directory.');
+                }
+
+                /** @todo: Calculate bits from flags */
+                let listFiles = (flags & lib.const.LS_FILE) === lib.const.LS_FILE,
+                    listDirectories = (flags & lib.const.LS_DIRECTORY) === lib.const.LS_DIRECTORY,
+                    listRecursive = (flags & lib.const.LS_RECURSIVE) === lib.const.LS_RECURSIVE,
+                    result = [],
+                    list = _fs.readdirSync(path);
+
+                for (let i in list) {
+                    let child = list[i];
+                    let childPath = _path.join(path, child);
+                    let stat = _fs.statSync(childPath);
+
+                    if (childPath === "." || childPath === "..") continue;
+
+                    // Add files
+                    if (listFiles && stat.isFile() || stat.isSymbolicLink()) {
+                        result.push({ name: child, type: 'file' });
+
+                        continue;
+                    }
+
+                    // Add directories
+                    if (listDirectories && stat.isDirectory()) {
+                        let dir = { name: child, type: 'directory' };
+
+                        if (listRecursive) {
+                            dir.childs = this.ls(childPath, flags);
+                        }
+
+                        result.push(dir);
+
+                        continue;
+                    }
+                }
+
+                return result;
+            }
+
+            /**
              * Smart substitute for `rmdir()` native function
              * 
              * @param {string} path

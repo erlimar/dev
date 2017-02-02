@@ -4,6 +4,7 @@
 /* global process, __filename, __dirname */
 
 var gulp = require('gulp'),
+    gutil = require('gulp-util'),
     del = require('del'),
     fs = require('fs'),
     concat = require('gulp-concat-util'),
@@ -26,7 +27,7 @@ gulp.task('clean', function () {
 gulp.task('test', function () { });
 
 gulp.task('devcom-registry', function () {
-    return glob('devcom/**/*.{js,cmd,ps1,sh}', {
+    return glob('devcom/{bin/**,lib/**}/*.{js,cmd,ps1,sh}', {
         cwd: 'src'
     }, function (globError, files) {
         if (globError) throw globError;
@@ -46,14 +47,22 @@ gulp.task('devcom-registry', function () {
             encoding: 'utf8'
         }, function (writeError) {
             if (writeError) throw writeError;
-            console.log('registry.lock.json writed!');
+            gutil.log('registry.lock.json writed!');
         });
     });
 });
 
 gulp.task('dist', ['devcom-registry'], function () {
     // DEVCOM
-    gulp.src('src/devcom/**/*')
+    gulp.src(
+        [
+            'src/devcom/bin/**/*',
+            'src/devcom/lib/**/*',
+            'src/devcom/registry.json'
+        ],
+        {
+            base: 'src/devcom'
+        })
         .pipe(stripCode({
             start_comment: STRIPCODE_BEGIN,
             end_comment: STRIPCODE_END

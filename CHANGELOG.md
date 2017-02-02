@@ -6,10 +6,13 @@ CHANGELOG
 Summary...
 
 * __New features:__
-  - ...
+  - Added consts `var const = require('e5r-dev').const`:
+    - LS_DIRECTORY | LS_FILE | LS_RECURSIVE
 
 * __Added methods on API:__
-  - ...
+  - `ls(path, flags):` List directory contents
+    - `@path:` Path to directory
+    - `@flags:` Combine `const.LS_DIRECTORY | const.LS_FILE | const.LS_RECURSIVE` values.
 
 * __Changed methods on API:__
   - ...
