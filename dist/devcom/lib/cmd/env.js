@@ -470,6 +470,14 @@
      */
     class Environment extends _dev.DevCom {
 
+        get name() {
+            return 'env';
+        }
+
+        get shortDoc() {
+            return 'Manage dev environments for E5R Development Team';
+        }
+
         /**
          * Run the `env` devcom
          * 
@@ -659,6 +667,9 @@
 
             if (!Array.isArray(installedVersionList) || 1 > installedVersionList.length) {
                 _dev.printf('No installed version of the ' + engine.name.toUpperCase() + ' environment.');
+                _dev.printf();
+                _dev.printf('Use: ' + devTool.name + ' ' + this.name
+                    + ' install ' + engine.name + ' to install latest version.');
                 return;
             }
 

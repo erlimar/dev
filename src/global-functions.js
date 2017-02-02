@@ -294,7 +294,7 @@
 
         if (0 < lines.length) {
             lib.mkdir(lib.devHome.tools);
-            _fs.writeFileSync(envFilePath, lines.join(_os.EOL), 'utf8');
+            _fs.writeFileSync(envFilePath, lines.join(_os.EOL) + _os.EOL, 'utf8');
         }
     }
 
@@ -318,7 +318,7 @@
         lines.push(varName);
 
         if (0 < lines.length) {
-            _fs.writeFileSync(appendFilePath, lines.join(_os.EOL), 'utf8');
+            _fs.writeFileSync(appendFilePath, lines.join(_os.EOL) + _os.EOL, 'utf8');
         }
     }
 
@@ -349,7 +349,10 @@
             for (let p in profiles) {
                 let profile = profiles[p];
                 let updateEnvVarsPath = _path.join(lib.devHome.tools, TOOL_UPDATE_ENVVARS_SH);
+
+                // macOS
                 let scriptInOneLine = 'eval "$(source ' + updateEnvVarsPath + ')"';
+
                 let scriptInstalled = false;
 
                 (lib.fileExists(profile) ? _fs.readFileSync(profile, 'utf8') || '' : '')
@@ -456,7 +459,7 @@
         lines.push(options.resolver(varName, value));
 
         if (0 < lines.length) {
-            _fs.writeFileSync(options.path, lines.join(_os.EOL), 'utf8');
+            _fs.writeFileSync(options.path, lines.join(_os.EOL) + _os.EOL, 'utf8');
         }
     }
 
