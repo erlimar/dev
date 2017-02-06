@@ -273,7 +273,11 @@
          * @return {boolean} True if OK, or False.
          */
         getBinPath(version, installPath) {
-            return _path.join(installPath, 'bin');
+            let paths = [];
+            
+            paths.push(_path.join(installPath, 'bin'));
+
+            return paths;
         }
 
         /** @required */

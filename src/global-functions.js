@@ -270,6 +270,47 @@
         ].map(file => _path.join(homedir, file));
     }
 
+    function sortArrayEnvPathsUnix(array) {
+        // 1. Variáveis que não usam outras variávels
+        let rule1 = array.filter(value => 0 > value.indexOf('$'));
+
+        // 2. Variáveis que usam somente variáveis que não estão nesta lista
+        let rule2 = [];
+        // let rule2 = array.filter((value, index) => {
+        //     if (rule1.indexOf(value) >= 0) return false;
+
+        //     if (typeof value === 'string' && value.indexOf('=') >= 0) {
+        //         let varName = value.substring(0, value.indexOf('=')),
+        //             varValue = value.substring(value.indexOf('=') + 1);
+
+        //         if (varValue.length > 0 && varValue.charAt(0) == '"') {
+        //             varValue = varValue.substring(1);
+        //         }
+
+        //         if (varValue.length > 0 && varValue.charAt(varValue.length - 1) == '"') {
+        //             varValue = varValue.substring(0, varValue.length - 1);
+        //         }
+
+        //         let a = 'b';
+        //     }
+
+        //     return true;
+        // });
+
+        // 3. Variáveis que são usadas por outras variáveis dessa lista
+        let rule3 = [];
+
+        // 4. Todo o resto
+        let rule4 = array.filter(value => {
+            if (rule1.indexOf(value) >= 0) return false;
+            if (rule2.indexOf(value) >= 0) return false;
+            if (rule3.indexOf(value) >= 0) return false;
+            return true;
+        });
+
+        return rule1.concat(rule2).concat(rule3).concat(rule4);
+    }
+
     /**
      * Set a user environment variable value for platforms ['linux', 'freebsd', 'darwin', 'sunos']
      * 
@@ -291,6 +332,8 @@
             });
 
         lines.push(shellOptions.resolver(varName, value));
+
+        lines = sortArrayEnvPathsUnix(lines);
 
         if (0 < lines.length) {
             lib.mkdir(lib.devHome.tools);

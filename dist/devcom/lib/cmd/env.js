@@ -663,7 +663,7 @@
          * @param {object} options - Options for arguments of command
          */
         async listCommonAction(engine, devTool, options) {
-            let installedVersionList = this.getInstalledVersionList(engine.name, devTool);
+            let installedVersionList = this.getInstalledVersionList(engine, devTool);
 
             if (!Array.isArray(installedVersionList) || 1 > installedVersionList.length) {
                 _dev.printf('No installed version of the ' + engine.name.toUpperCase() + ' environment.');
@@ -714,14 +714,16 @@
 
             let binPath = getBinPathFn.bind(engine)(fullVersion, installDirectoryPath);
 
-            if (!_dev.directoryExists(binPath)) {
+            if (!Array.isArray(binPath)) {
                 throw _dev.createError('Invalid binary path "' + binPath + '" to ' + engine.name.toUpperCase() + ' environment.');
             }
 
             // Create ENV variable and ensure is in the ENV_BIN_PATH
-            let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', engine.name.toUpperCase());
+            let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', engine.name.toUpperCase()),
+                envVarSep = _os.platform() === 'win32' ? ';' : ':',
+                binPathsValue = binPath.join(envVarSep);
 
-            _dev.setUserEnvironment(envVarName, binPath, devTool.shellOptions);
+            _dev.setUserEnvironment(envVarName, binPathsValue, devTool.shellOptions);
             this.appendVarToRootEnvVarPath(envVarName, devTool);
 
             // Successfully!
@@ -811,19 +813,29 @@
         /**
          * Get a list of installed versions
          * 
-         * @param {string} envName - Name of environment
+         * @param {string} engine - The engine object
          * @param {object} devTool - The instance of DevTool
          * 
          * @return {object} Array of {version:string, active:bool}
          */
-        getInstalledVersionList(envName, devTool) {
-            let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', envName.toUpperCase()),
+        getInstalledVersionList(engine, devTool) {
+            let envName = engine.name,
+                envVarName = ENVVAR_TEMPLATE.replace('{NAME}', envName.toUpperCase()),
                 envInstallPath = _path.join(_dev.devHome.root, 'env', envName),
-                list = [];
+                list = [],
+                getBinPathFn = engine['getBinPath'];
+
+            if (typeof (getBinPathFn) != 'function') {
+                throw _dev.createError('Environment '
+                    + envName.toUpperCase()
+                    + ' does not implements getBinPath() method.');
+            }
 
             if (!_dev.directoryExists(envInstallPath)) {
                 return list;
             }
+
+            let activeEnvPath = _dev.getUserEnvironment(envVarName, devTool.shellOptions);
 
             list = _dev.ls(envInstallPath, _dev.const.LS_DIRECTORY)
                 .map(v => v.name)
@@ -851,11 +863,15 @@
                 })
                 .map(v => {
                     let versionPath = _path.join(envInstallPath, v),
-                        activeEnvPath = _dev.getUserEnvironment(envVarName, devTool.shellOptions);
+                        binPath = getBinPathFn.bind(engine)(v, versionPath);
+
+                    if (!Array.isArray(binPath)) {
+                        throw _dev.createError('Invalid binary path "' + binPath + '" to ' + envName.toUpperCase() + ' environment.');
+                    }
 
                     return {
                         version: v,
-                        active: activeEnvPath === versionPath
+                        active: binPath.indexOf(activeEnvPath) >= 0
                     };
                 });
 

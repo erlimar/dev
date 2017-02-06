@@ -285,16 +285,6 @@
     module.exports.DevToolCommandLine = DevToolCommandLine;
 
     if (!module.parent && module.filename === __filename && process.argv.indexOf('-devmode') >= 0) {
-        _rootPath = _path.resolve(_os.homedir(), '.dev');
-        _devPaths = {
-            root: _rootPath,
-            tools: _path.join(_rootPath, 'tools'),
-            bin: _path.join(_rootPath, 'bin'),
-            lib: _path.join(_rootPath, 'lib'),
-            cmd: _path.join(_rootPath, 'lib', 'cmd'),
-            doc: _path.join(_rootPath, 'doc')
-        };
-
         process.argv.push('--shell=sh');
 
         var devTool = new DevToolCommandLine([Wget, Setup]);

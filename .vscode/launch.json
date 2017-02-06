@@ -43,7 +43,8 @@
 			"env": {
 				"NODE_ENV": "development",
 				"NODE_DEBUG": "E5RDEV",
-				"DEVCOM_MODE": "development"
+				"DEVCOM_MODE": "development",
+				"DEVCOM_FORCE_USER_PATH": "1"
 			},
 			"console": "internalConsole",
 			"sourceMaps": false,
@@ -266,7 +267,8 @@
 			"env": {
 				"NODE_ENV": "development",
 				"NODE_DEBUG": "E5RDEV",
-				"DEVCOM_MODE": "development"
+				"DEVCOM_MODE": "development",
+				"DEVCOM_FORCE_USER_PATH": "1"
 			},
 			"console": "internalConsole",
 			"sourceMaps": false,

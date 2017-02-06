@@ -34,15 +34,17 @@
 
     /* DEVCODE-BEGIN */
     // Reconfigure to use local source code devcom
-    _rootPath = _path.join(_path.parse(module.filename).dir, 'devcom');
-    _devPaths = {
-        root: _rootPath,
-        tools: _path.join(_rootPath, 'tools'),
-        bin: _path.join(_rootPath, 'bin'),
-        lib: _path.join(_rootPath, 'lib'),
-        cmd: _path.join(_rootPath, 'lib', 'cmd'),
-        doc: _path.join(_rootPath, 'doc')
-    };
+    if (process.env.DEVCOM_MODE === 'development' && !process.env.DEVCOM_FORCE_USER_PATH) {
+        _rootPath = _path.join(_path.parse(module.filename).dir, 'devcom');
+        _devPaths = {
+            root: _rootPath,
+            tools: _path.join(_rootPath, 'tools'),
+            bin: _path.join(_rootPath, 'bin'),
+            lib: _path.join(_rootPath, 'lib'),
+            cmd: _path.join(_rootPath, 'lib', 'cmd'),
+            doc: _path.join(_rootPath, 'doc')
+        };
+    }
 
     module.exports = {
         _assert: _assert,
