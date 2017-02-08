@@ -8,6 +8,20 @@
 
     Portanto `E5R_ENV_NODE_PATH` deve ser definida antes de `E5R_ENV_PATH`
 
+* Instalar versões v0.8.5 e anteriores do NODE no macOS:
+  - Essas versões não contém o arquivo "node-v{VERSAO}-darwin-{ARCH}.tar.gz"
+  - Ao invés disso tem o arquivo "node-v0.8.6.pkg":
+    - Esse é só x64
+    - Extrair:
+         xar -xf node-v0.7.12.pkg -C ./node
+         pkgutil --expand node-v0.7.12.pkg ./node
+         tar -xzf ./node/local.pkg/Payload -C .
+         tar -xzf ./node/npm.pkg/Payload -C .
+
+* Ideia para evitar ter que recarregar as variáveis de sessão
+  ~/.dev/bin/node -> ~/.dev/env/node/7.5.0/bin/node
+  ~/.dev/bin/npm -> ~/.dev/env/node/7.5.0/bin/npm
+
 * Migrar para modelo assíncrono
   - Refatorar Wget
   - Refatorar Instalador
