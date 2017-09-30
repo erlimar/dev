@@ -166,7 +166,7 @@ Function Install-Dev
         $ShellName = $DevShell
     }
     
-    Invoke-Expression "& `"$BinJSEngine`" `"$BinJSDev`" setup --shell=$ShellName"
+    Invoke-Expression "& `"$BinJSEngine`" --harmony-async-await `"$BinJSDev`" setup --shell=$ShellName"
 }
 
 <#
