@@ -371,7 +371,7 @@
      * @param {string} varName - Name of variable
      */
     function appendUserEnvironmentVarToPathWin32(varName) {
-        throw lib.createError('appendUserEnvironmentVarToPathWin32() not implemented!');
+        //throw lib.createError('appendUserEnvironmentVarToPathWin32() not implemented!');
     }
 
     /**
