@@ -121,18 +121,21 @@
     }
 
     /**
+     * Ensures that all requirements are ok
+     */
+    function ensure() {
+        let platform = _os.platform();
+
+        if (0 > SUPPORTED_PLATFORMS.indexOf(platform)) {
+            throw _dev.createError('Environment NODE does not support the ' + platform.toUpperCase() + ' platform.');
+        }
+    }
+
+    /**
      * Management NODE Environment
      * @class
      */
     class NodeEnvironment {
-        constructor() {
-            let platform = _os.platform();
-
-            if (0 > SUPPORTED_PLATFORMS.indexOf(platform)) {
-                throw _dev.createError('Environment NODE does not support the ' + platform.toUpperCase() + ' platform.');
-            }
-        }
-
         get devTool() {
             return this._devTool;
         }

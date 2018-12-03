@@ -34,6 +34,17 @@
     ];
 
     /**
+     * Ensures that all requirements are ok
+     */
+    function ensure() {
+        let platform = _os.platform();
+
+        if (0 > SUPPORTED_PLATFORMS.indexOf(platform)) {
+            throw _dev.createError('Environment PHP does not support the ' + platform.toUpperCase() + ' platform.');
+        }
+    }
+
+    /**
      * A tool set for all or undefined platform
      * @class
      * 
@@ -539,14 +550,7 @@
      * $ dev env php [options]
      */
     class PhpEnvironment {
-
         constructor() {
-            let platform = _os.platform();
-
-            if (0 > SUPPORTED_PLATFORMS.indexOf(platform)) {
-                throw _dev.createError('Environment PHP does not support the ' + platform.toUpperCase() + ' platform.');
-            }
-
             // Configure tool set
             if (platform == 'win32') {
                 this._toolset = new PhpEnvironmentToolWin32();
@@ -561,6 +565,13 @@
             } else {
                 this._toolset = new PhpEnvironmentTool();
             }
+        }
+
+        /**
+         * Ensure requirements
+         */
+        get checked() {
+            ensure();
         }
 
         /**

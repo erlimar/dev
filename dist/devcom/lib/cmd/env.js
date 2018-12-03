@@ -512,7 +512,7 @@
                 envEngine = await _dev.require('lib://env/' + env);
             }
 
-            if (envEngine.name !== env) {
+            if (!envEngine.checked || envEngine.name !== env) {
                 throw _dev.createError(env.toUpperCase()
                     + ' environment with invalid name (value: "' + envEngine.name + '", expected: "' + env + '").');
             }
