@@ -575,6 +575,10 @@
             return true;
         }
 
+        get name() {
+            return 'php';
+        }
+
         /**
          * Get a tool set to current platform
          */
