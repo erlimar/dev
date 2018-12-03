@@ -145,6 +145,10 @@
         }
 
         /** @required */
+        get checked() {
+            ensure();
+        }
+
         get name() {
             return 'node';
         }
