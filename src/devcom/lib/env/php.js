@@ -16,8 +16,6 @@
         _url = require('url'),
         _path = require('path');
 
-    throw _dev.createError('ENV PHP not implemented!');
-
     /** @constant {string} */
     const ENVIRONMENT_DIRECTORY = 'environment';
 
@@ -553,7 +551,8 @@
      */
     class PhpEnvironment {
         constructor() {
-            // Configure tool set
+            let platform = _os.platform();
+
             if (platform == 'win32') {
                 this._toolset = new PhpEnvironmentToolWin32();
                 // } else if (platform == 'darwin') {
@@ -574,6 +573,8 @@
          */
         get checked() {
             ensure();
+
+            return true;
         }
 
         /**

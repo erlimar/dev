@@ -149,6 +149,8 @@
         /** @required */
         get checked() {
             ensure();
+
+            return true;
         }
 
         get name() {
