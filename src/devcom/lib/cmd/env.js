@@ -658,6 +658,7 @@
 
                 _dev.setUserEnvironment(envVarName, envVarValue, devTool.shellOptions);
                 this.appendVarToRootEnvVarPath(envVarName, devTool);
+                this.showUpdateShellSessionMessage();
             }
 
             // Successfully!
@@ -919,6 +920,26 @@
                 let value = varToken + (envPaths !== '' ? pathSep : '') + envPaths;
                 _dev.setUserEnvironment(E5R_ROOT_PATH_ENVVAR, value, devTool.shellOptions);
             }
+        }
+
+        /**
+         * Show message to update shell session
+         */
+        showUpdateShellSessionMessage() {
+            // Windows message
+            if (_os.platform() === 'win32') {
+                _dev.printf();
+                _dev.printf("TODO: Show update shell session message!");
+                _dev.printf();
+
+                return;
+            }
+
+            // Unix message
+            _dev.printf();
+            _dev.printf("To update current session environment's:");
+            _dev.printf("$ source ~/.profile");
+            _dev.printf();
         }
 
         /**

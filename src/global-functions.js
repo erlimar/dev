@@ -263,9 +263,9 @@
 
         /** @todo: Check `makeShellScriptExportEnv()` and `makeShellScriptAppendEnvPath()` to use [.bashrc, .profile, .zshrc] */
         return [
-            '.bash_profile'
+            '.profile'
             //'.bashrc',
-            //'.profile',
+            //'.bash_profile',
             //'.zshrc'
         ].map(file => _path.join(homedir, file));
     }
@@ -394,14 +394,14 @@
                 let updateEnvVarsPath = _path.join(lib.devHome.tools, TOOL_UPDATE_ENVVARS_SH);
 
                 // macOS
-                let scriptInOneLine = 'eval "$(source ' + updateEnvVarsPath + ')"';
-
+                // TODO: Linux and other Unix's
+                let scriptMagic = '# Load the E5R tools environment variables';
                 let scriptInstalled = false;
 
                 (lib.fileExists(profile) ? _fs.readFileSync(profile, 'utf8') || '' : '')
                     .split(_os.EOL)
                     .map((lineValue) => {
-                        if (lineValue === scriptInOneLine) {
+                        if (lineValue === scriptMagic) {
                             scriptInstalled = true;
                         }
                     });
@@ -409,9 +409,15 @@
                 if (!scriptInstalled) {
                     _fs.appendFileSync(profile, [
                         '',
-                        '# Load the E5R tools environment variables',
-                        scriptInOneLine,
-                        ''
+                        scriptMagic,
+                        'if [ -f "' + updateEnvVarsPath + '" ]; then',
+                        '    UPDATEENVVARSFILE=$(mktemp)',
+                        // TODO: Trocar `source` por outra opção aos sistemas que não
+                        //       tem essa opção. Ex: `. filePath`
+                        '    source "' + updateEnvVarsPath + '" > $UPDATEENVVARSFILE',
+                        '    source $UPDATEENVVARSFILE',
+                        '    rm -f $UPDATEENVVARSFILE',
+                        'fi'
                     ].join(_os.EOL), 'utf8');
                 }
             }

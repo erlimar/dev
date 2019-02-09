@@ -43,13 +43,13 @@ npm publish
 
 ### curl (eg: macOS)
 ```
-curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh && eval "$(source $HOME/.dev/tools/update-envvars.sh)"
+curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh
 ```
 
 ### wget (eg: Ubuntu)
 
 ```
-wget --no-check-certificate -O- https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh && eval "$(source $HOME/.dev/tools/update-envvars.sh)"
+wget --no-check-certificate -O- https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh
 ```
 
 ## Start usage
