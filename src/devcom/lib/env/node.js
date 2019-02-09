@@ -234,7 +234,8 @@
             // Set executable flag for *nix
             if (platform !== 'win') {
                 let nodeExePath = _path.join(binPath, 'node'),
-                    npmExePath = _path.join(installPath, 'bin', 'npm');
+                    npmExePath = _path.join(installPath, 'bin', 'npm'),
+                    npxExePath = _path.join(installPath, 'bin', 'npx');
 
                 if (_dev.fileExists(nodeExePath)) {
                     _fs.chmodSync(nodeExePath, CHMOD_EXECUTABLE);
@@ -242,6 +243,10 @@
 
                 if (_dev.fileExists(npmExePath)) {
                     _fs.chmodSync(npmExePath, CHMOD_EXECUTABLE);
+                }
+
+                if (_dev.fileExists(npxExePath)) {
+                    _fs.chmodSync(npxExePath, CHMOD_EXECUTABLE);
                 }
             }
 
