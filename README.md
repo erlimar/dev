@@ -43,13 +43,13 @@ npm publish
 
 ### curl (eg: macOS)
 ```
-curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh
+curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh && source ~/.profile
 ```
 
 ### wget (eg: Ubuntu)
 
 ```
-wget --no-check-certificate -O- https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh
+wget --no-check-certificate -O- https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh && . ~/.profile
 ```
 
 ## Start usage
