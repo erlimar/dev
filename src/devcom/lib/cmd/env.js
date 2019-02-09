@@ -639,7 +639,7 @@
             // Create ENV variable and ensure is in the ENV_BIN_PATH
             let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', engine.name.toUpperCase());
 
-            _dev.setUserEnvironment(envVarName, '', devTool.shellOptions);
+            _dev.setUserEnvironment(envVarName, installDirectoryPath, devTool.shellOptions);
             this.appendVarToRootEnvVarPath(envVarName, devTool);
 
             // Successfully!

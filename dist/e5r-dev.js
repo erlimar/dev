@@ -11,7 +11,6 @@
 // e5r-dev/global-consts.js
 // ========================================================================
 
-
     /** @constant {string} */
     const TOOL_NAME = 'dev';
 
@@ -100,7 +99,6 @@
 // e5r-dev/global-extensions.js
 // ========================================================================
 
-
     /**
      * Read a BYTE (8bits) from buffer
      * 
@@ -150,7 +148,6 @@
 // ========================================================================
 // e5r-dev/zipextractor.js
 // ========================================================================
-
 
     /**
      * Record structure for a directory
@@ -888,7 +885,6 @@
 // e5r-dev/global-vars.js
 // ========================================================================
 
-
     var _assert = require('assert');
     var _path = require('path');
     var _util = require('util');
@@ -914,7 +910,6 @@
 // ========================================================================
 // e5r-dev/global-functions.js
 // ========================================================================
-
 
     /**
      * Create a Error instance
@@ -1333,7 +1328,7 @@
                 '# Export E5R environment variables',
                 'if [ -f "' + exportEnvFilePath + '" ]; then',
                 'while IFS=\'\' read -r line || [[ -n "${line}" ]]; do',
-                '  echo "export ${line}"',
+                '  eval "export ${line}"',
                 'done < "' + exportEnvFilePath + '"',
                 'fi',
                 ''
@@ -1354,7 +1349,7 @@
                 '# Append $E5R_PATH to $PATH variable',
                 'if [ -f "' + appendEnvPathFilePath + '" ]; then',
                 'while IFS=\'\' read -r line || [[ -n "${line}" ]]; do',
-                '  echo "export PATH=\\$${line}:\\$PATH"',
+                '  eval "export PATH=\\$${line}:\\$PATH"',
                 'done < "' + appendEnvPathFilePath + '"',
                 'fi',
                 ''
@@ -1448,7 +1443,6 @@
 // e5r-dev/devcom.js
 // ========================================================================
 
-
     /**
      * Base type for DevCom's
      */
@@ -1476,7 +1470,6 @@
 // ========================================================================
 // e5r-dev/logger.js
 // ========================================================================
-
 
     /**
      * Logger dispatcher
@@ -1524,7 +1517,6 @@
 // ========================================================================
 // e5r-dev/devtoollib.js
 // ========================================================================
-
 
     /** @instance */
     var lib =
@@ -2718,7 +2710,6 @@
 // e5r-dev/setup.js
 // ========================================================================
 
-
     /**
      * Devcom `setup` command
      * @class
@@ -2803,7 +2794,6 @@
 // e5r-dev/wget.js
 // ========================================================================
 
-
     /**
      * DevCom `wget` command
      * @class
@@ -2873,7 +2863,6 @@
 // ========================================================================
 // e5r-dev/devtoolcommandline.js
 // ========================================================================
-
 
     /**
      * Command line runner for E5R Tools for Development Team.
@@ -3142,7 +3131,6 @@
 // ========================================================================
 // e5r-dev/main.js
 // ========================================================================
-
 
     /** @hack: No circular reference */
     lib.DevTool = DevToolCommandLine;
