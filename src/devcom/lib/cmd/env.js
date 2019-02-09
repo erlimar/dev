@@ -442,7 +442,7 @@
             // Creating installation directory
             _dev.mkdir(installPath);
 
-            installFilesFn.bind(engine)(tempDir, extractedDir, installPath, version);
+            let pathsToUpdate = installFilesFn.bind(engine)(tempDir, extractedDir, installPath, version);
 
             _dev.printf('Cleaning temporary files...');
 
@@ -450,6 +450,8 @@
             if (_dev.directoryExists(tempDir)) {
                 _dev.rmdir(tempDir);
             }
+
+            return pathsToUpdate;
         } catch (error) {
             // Cleaning directories
 
@@ -626,7 +628,7 @@
                 _dev.rmdir(installDirectoryPath);
             }
 
-            await installNewVersion(engine, fullVersion, installDirectoryPath);
+            let binPaths = await installNewVersion(engine, fullVersion, installDirectoryPath);
 
             // Create ENV_BIN_PATH variable if not exists
             if (!_dev.getUserEnvironment(E5R_ROOT_PATH_ENVVAR, devTool.shellOptions)) {
@@ -636,11 +638,27 @@
             // Ensure ENV_BIN_PATH is in the system PATH
             _dev.appendUserEnvironmentPath(E5R_ROOT_PATH_ENVVAR);
 
-            // Create ENV variable and ensure is in the ENV_BIN_PATH
-            let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', engine.name.toUpperCase());
+            if (binPaths) {
+                // Create ENV variable and ensure is in the ENV_BIN_PATH
+                let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', engine.name.toUpperCase());
+                let envVarValue = '';
 
-            _dev.setUserEnvironment(envVarName, installDirectoryPath, devTool.shellOptions);
-            this.appendVarToRootEnvVarPath(envVarName, devTool);
+                if (typeof (binPaths) === 'string') {
+                    envVarValue = binPaths;
+                } else if (Array.isArray(binPaths)) {
+                    binPaths.forEach((p) => {
+                        if (envVarValue.length) {
+                            envVarValue += _os.platform() === 'win32' ? ';' : ':';
+                        }
+                        envVarValue += p;
+                    });
+                } else {
+                    _dev.printf('The return of ' + engine.name.toUpperCase() + ' new installation is different of "string" and "array"');
+                }
+
+                _dev.setUserEnvironment(envVarName, envVarValue, devTool.shellOptions);
+                this.appendVarToRootEnvVarPath(envVarName, devTool);
+            }
 
             // Successfully!
             _dev.printf(engine.name.toUpperCase(),

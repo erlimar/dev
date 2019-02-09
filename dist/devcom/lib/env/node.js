@@ -226,9 +226,11 @@
 
             _dev.copyDirectory(_path.join(extractedPath, folderName), installPath);
 
+            let binPath = _path.join(installPath, 'bin');
+
             // Set executable flag for *nix
             if (platform !== 'win') {
-                let nodeExePath = _path.join(installPath, 'bin', 'node'),
+                let nodeExePath = _path.join(binPath, 'node'),
                     npmExePath = _path.join(installPath, 'bin', 'npm');
 
                 if (_dev.fileExists(nodeExePath)) {
@@ -239,6 +241,13 @@
                     _fs.chmodSync(npmExePath, CHMOD_EXECUTABLE);
                 }
             }
+
+            // Return BIN path to update environment
+            let updatePaths = [];
+
+            updatePaths.push(binPath);
+
+            return updatePaths;
         }
 
         /**
@@ -280,7 +289,7 @@
          */
         getBinPath(version, installPath) {
             let paths = [];
-            
+
             paths.push(_path.join(installPath, 'bin'));
 
             return paths;

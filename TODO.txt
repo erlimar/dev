@@ -18,21 +18,13 @@
          tar -xzf ./node/local.pkg/Payload -C .
          tar -xzf ./node/npm.pkg/Payload -C .
 
-* Ideia para evitar ter que recarregar as variáveis de sessão
-  ~/.dev/bin/node -> ~/.dev/env/node/7.5.0/bin/node
-  ~/.dev/bin/npm -> ~/.dev/env/node/7.5.0/bin/npm
-
-* Migrar para modelo assíncrono
-  - Refatorar Wget
-  - Refatorar Instalador
-  - Refatorar prompt
-  - Revisar e refatorar todos os demais métodos
-* Testar instalador novamente no Windows (CMD e PowerShell)
 * Implementar minificação para distribuição
 * Atualização da variável PATH em Windows e Unix
-* Revisar uso de PowerShell no Unix
-* Migrar build system para [dev builder]
+* Implementar build system para [dev builder]
 * Implementar verbosidade
 * Implementar testes unitários
-* ExporPathEnv deve gravar em append_path.txt ao invés de incluir PATH=
-  em export_vars.txt
+* Atualizar arquivo .profile no Unix
+* Após um install no Unix, informar para executar:
+  $ source envvars.sh > __;source __;rm __
+  ou abrir outra sessão do terminal para que as alterações
+  tenham efeito

@@ -1328,7 +1328,7 @@
                 '# Export E5R environment variables',
                 'if [ -f "' + exportEnvFilePath + '" ]; then',
                 'while IFS=\'\' read -r line || [[ -n "${line}" ]]; do',
-                '  eval "export ${line}"',
+                '  echo "export ${line}"',
                 'done < "' + exportEnvFilePath + '"',
                 'fi',
                 ''
@@ -1349,7 +1349,7 @@
                 '# Append $E5R_PATH to $PATH variable',
                 'if [ -f "' + appendEnvPathFilePath + '" ]; then',
                 'while IFS=\'\' read -r line || [[ -n "${line}" ]]; do',
-                '  eval "export PATH=\\$${line}:\\$PATH"',
+                '  echo "export PATH=\\$${line}:\\$PATH"',
                 'done < "' + appendEnvPathFilePath + '"',
                 'fi',
                 ''
