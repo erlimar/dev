@@ -6,7 +6,6 @@
     "use strict";
 
     let _dev;
-
     if (!_dev) _dev = require('e5r-dev');
 
     let _path = require('path'),
@@ -637,7 +636,7 @@
             // Create ENV variable and ensure is in the ENV_BIN_PATH
             let envVarName = ENVVAR_TEMPLATE.replace('{NAME}', engine.name.toUpperCase());
 
-            _dev.setUserEnvironment(envVarName, '', devTool.shellOptions);
+            _dev.setUserEnvironment(envVarName, installDirectoryPath, devTool.shellOptions);
             this.appendVarToRootEnvVarPath(envVarName, devTool);
 
             // Successfully!
@@ -945,6 +944,5 @@
 
         _devTool.exit();
     }
-
 
 })();
