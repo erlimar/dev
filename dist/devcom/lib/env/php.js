@@ -6,6 +6,7 @@
     "use strict";
 
     let _dev;
+
     if (!_dev) _dev = require('e5r-dev');
 
     let _os = require('os'),
@@ -664,5 +665,6 @@
     }
 
     module.exports = new PhpEnvironment();
+
 
 })();

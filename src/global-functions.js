@@ -371,7 +371,33 @@
      * @param {string} varName - Name of variable
      */
     function appendUserEnvironmentVarToPathWin32(varName) {
-        //throw lib.createError('appendUserEnvironmentVarToPathWin32() not implemented!');
+        let exec = _childProcess.spawnSync,
+            child = exec('powershell', [
+                '-NoProfile',
+                '-ExecutionPolicy',
+                'unrestricted',
+                '-Command',
+                '(Get-Item -Path "HKCU:\Environment").GetValue("Path", "", "DoNotExpandEnvironmentNames")'
+            ]);
+		
+		let formattedVarName = '%' + varName + '%';
+		let output = '';
+
+        if (child.status === 0 && child.output && child.output.length > 0) {
+            output = child.output[1].toString();
+        }
+		
+		let alreadyExists = false,
+			paths = (output || '')
+				.split(';')
+				.filter(v => v.trim().length);
+						
+		if(paths.filter(v => v === formattedVarName).length) {
+			return;
+		}
+		
+		paths.push(formattedVarName);
+		setUserEnvironmentWin32('Path', paths.join(';'));
     }
 
     /**

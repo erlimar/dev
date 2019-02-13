@@ -11,6 +11,7 @@
 // e5r-dev/global-consts.js
 // ========================================================================
 
+
     /** @constant {string} */
     const TOOL_NAME = 'dev';
 
@@ -99,6 +100,7 @@
 // e5r-dev/global-extensions.js
 // ========================================================================
 
+
     /**
      * Read a BYTE (8bits) from buffer
      * 
@@ -148,6 +150,7 @@
 // ========================================================================
 // e5r-dev/zipextractor.js
 // ========================================================================
+
 
     /**
      * Record structure for a directory
@@ -885,6 +888,7 @@
 // e5r-dev/global-vars.js
 // ========================================================================
 
+
     var _assert = require('assert');
     var _path = require('path');
     var _util = require('util');
@@ -910,6 +914,7 @@
 // ========================================================================
 // e5r-dev/global-functions.js
 // ========================================================================
+
 
     /**
      * Create a Error instance
@@ -1269,7 +1274,33 @@
      * @param {string} varName - Name of variable
      */
     function appendUserEnvironmentVarToPathWin32(varName) {
-        //throw lib.createError('appendUserEnvironmentVarToPathWin32() not implemented!');
+        let exec = _childProcess.spawnSync,
+            child = exec('powershell', [
+                '-NoProfile',
+                '-ExecutionPolicy',
+                'unrestricted',
+                '-Command',
+                '(Get-Item -Path "HKCU:\Environment").GetValue("Path", "", "DoNotExpandEnvironmentNames")'
+            ]);
+		
+		let formattedVarName = '%' + varName + '%';
+		let output = '';
+
+        if (child.status === 0 && child.output && child.output.length > 0) {
+            output = child.output[1].toString();
+        }
+		
+		let alreadyExists = false,
+			paths = (output || '')
+				.split(';')
+				.filter(v => v.trim().length);
+						
+		if(paths.filter(v => v === formattedVarName).length) {
+			return;
+		}
+		
+		paths.push(formattedVarName);
+		setUserEnvironmentWin32('Path', paths.join(';'));
     }
 
     /**
@@ -1449,6 +1480,7 @@
 // e5r-dev/devcom.js
 // ========================================================================
 
+
     /**
      * Base type for DevCom's
      */
@@ -1476,6 +1508,7 @@
 // ========================================================================
 // e5r-dev/logger.js
 // ========================================================================
+
 
     /**
      * Logger dispatcher
@@ -1523,6 +1556,7 @@
 // ========================================================================
 // e5r-dev/devtoollib.js
 // ========================================================================
+
 
     /** @instance */
     var lib =
@@ -2716,6 +2750,7 @@
 // e5r-dev/setup.js
 // ========================================================================
 
+
     /**
      * Devcom `setup` command
      * @class
@@ -2800,6 +2835,7 @@
 // e5r-dev/wget.js
 // ========================================================================
 
+
     /**
      * DevCom `wget` command
      * @class
@@ -2869,6 +2905,7 @@
 // ========================================================================
 // e5r-dev/devtoolcommandline.js
 // ========================================================================
+
 
     /**
      * Command line runner for E5R Tools for Development Team.
@@ -3137,6 +3174,7 @@
 // ========================================================================
 // e5r-dev/main.js
 // ========================================================================
+
 
     /** @hack: No circular reference */
     lib.DevTool = DevToolCommandLine;
