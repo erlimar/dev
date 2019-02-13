@@ -245,7 +245,7 @@
                 '-ExecutionPolicy',
                 'unrestricted',
                 '-Command',
-                '[environment]::SetEnvironmentVariable(\'' + varName + '\', \'' + value + '\', \'User\')'
+                '[Microsoft.Win32.Registry]::CurrentUser.OpenSubKey("Environment", $true).SetValue("' + varName + '", "' + value + '", "ExpandString")'
             ]);
 
         if (child.status !== 0) {

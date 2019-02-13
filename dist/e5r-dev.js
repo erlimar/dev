@@ -1148,7 +1148,7 @@
                 '-ExecutionPolicy',
                 'unrestricted',
                 '-Command',
-                '[environment]::SetEnvironmentVariable(\'' + varName + '\', \'' + value + '\', \'User\')'
+                '[Microsoft.Win32.Registry]::CurrentUser.OpenSubKey("Environment", $true).SetValue("' + varName + '", "' + value + '", "ExpandString")'
             ]);
 
         if (child.status !== 0) {
@@ -2743,6 +2743,26 @@
             removeConfiguration(key) {
                 lib.setConfiguration(key);
             }
+
+            /**
+             * Show update shell session message
+             */
+            showUpdateShellSessionMessage() {
+                lib.printf();
+                lib.printf("To update current session environment:");
+                lib.printf();
+
+                if (_os.platform() === 'win32') {
+                    // Windows message
+                    // TODO: Check if PowerShell or CMD
+                    lib.printf("    set PATH=%E5R_PATH%;%PATH%");
+                } else {
+                    // Unix message
+                    lib.printf("    source ~/.profile");
+                }
+
+                lib.printf();
+            }
         }
 
 
@@ -2827,6 +2847,7 @@
 
             // 6> Show completed info
             lib.printf('Set-up completed!');
+            lib.showUpdateShellSessionMessage();
         }
     }
 

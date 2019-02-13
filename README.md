@@ -31,7 +31,7 @@ npm publish
 ### CMD
 
 ```
-@powershell -NoProfile -ExecutionPolicy unrestricted -Command "&{$DevShell='cmd';$wc=New-Object System.Net.WebClient;$wc.Proxy=[System.Net.WebRequest]::DefaultWebProxy;$wc.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;Invoke-Expression ($wc.DownloadString('https://raw.githubusercontent.com/e5r/dev/develop/install.ps1'))}" && if exist %UserProfile%\.dev\bin\dev.cmd %UserProfile%\.dev\bin\dev.cmd update-devenvvars
+@powershell -NoProfile -ExecutionPolicy unrestricted -Command "&{$DevShell='cmd';$wc=New-Object System.Net.WebClient;$wc.Proxy=[System.Net.WebRequest]::DefaultWebProxy;$wc.Proxy.Credentials=[System.Net.CredentialCache]::DefaultNetworkCredentials;Invoke-Expression ($wc.DownloadString('https://raw.githubusercontent.com/e5r/dev/develop/install.ps1'))}"
 ```
 
 ### PowerShell
@@ -43,13 +43,13 @@ npm publish
 
 ### curl (eg: macOS)
 ```
-curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh && source ~/.profile
+curl -sSL https://raw.githubusercontent.com/e5r/dev/develop/install.sh
 ```
 
 ### wget (eg: Ubuntu)
 
 ```
-wget --no-check-certificate -O- https://raw.githubusercontent.com/e5r/dev/develop/install.sh | sh && . ~/.profile
+wget --no-check-certificate -O- https://raw.githubusercontent.com/e5r/dev/develop/install.sh
 ```
 
 ## Start usage

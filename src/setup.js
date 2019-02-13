@@ -93,6 +93,7 @@
 
             // 6> Show completed info
             lib.printf('Set-up completed!');
+            lib.showUpdateShellSessionMessage();
         }
     }
 
