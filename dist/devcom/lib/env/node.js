@@ -6,6 +6,7 @@
     "use strict";
 
     let _dev;
+
     if (!_dev) _dev = require('e5r-dev');
 
     let _path = require('path'),
@@ -364,5 +365,6 @@
     }
 
     module.exports = new NodeEnvironment();
+
 
 })();
