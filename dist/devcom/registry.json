@@ -1,9 +1,0 @@
-{
-    "e5r-devcom": {
-        "type": "GitHub",
-        "owner": "e5r",
-        "repository": "dev",
-        "branch": "develop",
-        "path": "dist/devcom"
-    }
-}
