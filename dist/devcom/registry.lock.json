@@ -1,0 +1,10 @@
+[
+    "bin/dev.cmd",
+    "bin/dev.ps1",
+    "bin/dev.sh",
+    "lib/cmd/env.js",
+    "lib/cmd/init.js",
+    "lib/cmd/registry.js",
+    "lib/env/node.js",
+    "lib/env/php.js"
+]
